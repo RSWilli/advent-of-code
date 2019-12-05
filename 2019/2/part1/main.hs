@@ -23,7 +23,7 @@ inputFile = do
     return modifiedMem
 
 main = do  
-    memory <- inputFile
+    memory <- testFile
     let finishedProg = C.runProgram $ C.createState memory
     case finishedProg of
         Nothing -> putStrLn "Error in Computation"
