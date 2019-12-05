@@ -6,23 +6,29 @@ module Computer
 where
 
 import qualified Data.Map.Strict               as M
+import Control.Monad 
+import Control.Monad.Trans.Maybe 
+import Control.Monad.Trans.Class 
 
 type Memory = M.Map Int Int
 
-type Machinestate = Maybe (Int, Memory)
+type Machinestate = (Int, Memory)
+
+liftMaybe :: (MonadPlus m) => Maybe a -> m a
+liftMaybe = maybe mzero return
 
 saveAt :: Int -> Int -> Memory -> Memory
 saveAt = M.insert
 
-getOpWithMode :: Int -> Memory -> Int -> Maybe Int
+getOpWithMode :: Monad r => Int -> Memory -> Int -> MaybeT r Int
 getOpWithMode addr memory mode = do
-    op <- M.lookup addr memory
+    op <- liftMaybe $ M.lookup addr memory
     if mode == 0 then
-        M.lookup op memory
+        liftMaybe $ M.lookup op memory
     else
         return op
 
-getOps3 :: Machinestate -> Int -> Int -> Int -> Maybe (Int, Int, Int)
+getOps3 :: Monad r => MaybeT r Machinestate -> Int -> Int -> Int -> MaybeT r (Int, Int, Int)
 getOps3 state mode1 mode2 mode3 = do
     (pc, memory) <- state
 
@@ -32,7 +38,7 @@ getOps3 state mode1 mode2 mode3 = do
 
     return (op1, op2, op3)
 
-getOps1 :: Machinestate -> Int -> Maybe Int
+getOps1 :: Monad r => MaybeT r Machinestate -> Int -> MaybeT r Int
 getOps1 state mode = do
     (pc, memory) <- state
 
@@ -50,10 +56,10 @@ parseInstruction instruction =
         mode3    = restmode `div` 10
     in  (opcode, mode1, mode2, mode3)
 
-runProgram :: Machinestate -> Machinestate
+runProgram :: MaybeT IO Machinestate -> MaybeT IO Machinestate
 runProgram state = do
     (pc, memory) <- state
-    instruction  <- M.lookup pc memory
+    instruction  <- liftMaybe $ M.lookup pc memory
 
     let (opcode, mode1, mode2, mode3) = parseInstruction instruction
 
@@ -66,8 +72,18 @@ runProgram state = do
             (op1, op2, res) <- getOps3 state mode1 mode2 1
             let newstate = return (pc + 4, saveAt res (op1 * op2) memory)
             runProgram newstate
+        3 -> do
+            res <- getOps1 state 1
+            input <- lift $ getLine
+            let newstate = return (pc+2, saveAt res (read input) memory)
+            runProgram newstate
+        4 -> do 
+            res <- getOps1 state 0
+            lift $ print res
+            let newstate = return (pc+2, memory)
+            runProgram newstate
         99 -> state
         x  -> error $ "undefined opcode: " ++ show x
 
-createState :: Memory -> Machinestate
+createState :: Memory -> MaybeT IO Machinestate
 createState mem = return (0, mem)
