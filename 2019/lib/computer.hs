@@ -117,7 +117,7 @@ runProgram state = do
             let saveValue = if op1 < op2 then 1 else 0
             let newstate = return (pc + 4, saveAt op3 saveValue memory)
             runProgram newstate
-        -- less-than
+        -- equal-to
         8 -> do
             (op1,op2, op3) <- getOps3 state mode1 mode2 1
             let saveValue = if op1 == op2 then 1 else 0
