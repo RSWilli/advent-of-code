@@ -1,5 +1,4 @@
 import System.IO
-import Data.List.Split
 import Data.List
 import qualified Data.Map.Strict as M
 
@@ -16,9 +15,7 @@ parseFile :: String -> IO C.Memory
 parseFile path = do 
     handle <- openFile path ReadMode  
     contents <- hGetContents handle
-    let opcodes = splitOn "," contents
-    let memory = M.fromList $ zipWith (\i op -> (i, read op :: Int)) [0..] opcodes
-    return memory
+    return $ C.parseIntcodeProgram contents
 
 testFile :: IO C.Memory
 testFile = parseFile "./test.txt"
