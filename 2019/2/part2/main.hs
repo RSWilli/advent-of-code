@@ -5,7 +5,14 @@ import qualified Data.Map.Strict as M
 
 import qualified Computer as C
 
-parseFile :: String -> IO (C.Memory)
+import Control.Monad 
+import Control.Monad.Trans.Maybe 
+import Control.Monad.Trans.Class 
+
+liftMaybe :: (MonadPlus m) => Maybe a -> m a
+liftMaybe = maybe mzero return
+
+parseFile :: String -> IO C.Memory
 parseFile path = do 
     handle <- openFile path ReadMode  
     contents <- hGetContents handle
@@ -13,23 +20,23 @@ parseFile path = do
     let memory = M.fromList $ zipWith (\i op -> (i, read op :: Int)) [0..] opcodes
     return memory
 
-testFile :: IO(C.Memory)
+testFile :: IO C.Memory
 testFile = parseFile "./test.txt"
 
-inputFile :: IO(C.Memory)
+inputFile :: IO C.Memory
 inputFile = parseFile "../input.txt"
 
 changeInputs :: C.Memory -> Int -> Int -> C.Memory
 changeInputs memory p1 p2 = M.insert 1 p1 $ M.insert 2 p2 memory
 
-bruteForce :: [(Int, Int)] -> C.Memory -> Int -> Maybe (Int, Int)
+bruteForce :: [(Int, Int)] -> C.Memory -> Int -> MaybeT IO (Int, Int)
 bruteForce parameterList mem desiredResult = case parameterList of
-    [] -> Nothing
+    [] -> liftMaybe Nothing
     current:next -> do
         let (p1, p2) = current
         let modifiedMem = changeInputs mem p1 p2
         resultMem <- C.runProgram $ C.createState modifiedMem 
-        result <- M.lookup 0 $ snd resultMem
+        result <- liftMaybe $ M.lookup 0 $ snd resultMem
         
         if result == desiredResult then
             return current
@@ -44,7 +51,7 @@ main = do
         y <- parameterRange
         return (x,y)
     putStrLn $ show paramterCombinations
-    let neededParams = bruteForce paramterCombinations memory 19690720
+    neededParams <- runMaybeT $ bruteForce paramterCombinations memory 19690720
     case neededParams of
         Nothing -> putStrLn "Error in Computation"
         Just (p1, p2) -> do 

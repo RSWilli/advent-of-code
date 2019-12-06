@@ -2,8 +2,10 @@ import System.IO
 import Data.List.Split
 import Data.List
 import qualified Data.Map.Strict as M
+import Control.Monad.Trans.Maybe 
 
 import qualified Computer as C
+
 
 parseFile :: String -> IO (C.Memory)
 parseFile path = do 
@@ -13,10 +15,10 @@ parseFile path = do
     let memory = M.fromList $ zipWith (\i op -> (i, read op :: Int)) [0..] opcodes
     return memory
 
-testFile :: IO(C.Memory)
+testFile :: IO C.Memory
 testFile = parseFile "./test.txt"
 
-inputFile :: IO(C.Memory)
+inputFile :: IO C.Memory
 inputFile = do
     memory <- parseFile "../input.txt"
     let modifiedMem = M.insert 1 12 $ M.insert 2 2 memory
@@ -24,7 +26,7 @@ inputFile = do
 
 main = do  
     memory <- testFile
-    let finishedProg = C.runProgram $ C.createState memory
+    finishedProg <- runMaybeT $ C.runProgram $ C.createState memory
     case finishedProg of
         Nothing -> putStrLn "Error in Computation"
         Just (_, mem) -> do 
