@@ -30,7 +30,7 @@ countOrbits orbits key count =
             (+) <$> count <*> childrenSum
 
 main = do
-        handle <- openFile "./input.txt" ReadMode  
+        handle <- openFile "../input.txt" ReadMode  
         contents <- hGetContents handle
         let orbits = parseInput contents
         print orbits
