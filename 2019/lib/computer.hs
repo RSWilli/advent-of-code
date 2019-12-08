@@ -88,7 +88,7 @@ runProgram state = do
         -- input
         3 -> do
             res <- getOps1 state 1
-            lift $ putStrLn "Awaiting input:"
+            -- lift $ putStrLn "Awaiting input:"
             input <- lift getLine
             --lift $ putStrLn $ "read " ++ show input ++ " saving at " ++ show res ++ "next step:" ++ show (pc+2) ++ "operand:" ++ show (M.lookup (pc+1) memory)
             let newstate = return (pc+2, saveAt res (read input) memory)
