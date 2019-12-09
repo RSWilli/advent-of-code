@@ -6,7 +6,7 @@ import Control.Monad.Trans.Maybe
 import qualified Computer as C
 
 
-parseFile :: String -> IO (C.Memory)
+parseFile :: String -> IO (M.Map Int Int)
 parseFile path = do 
     handle <- openFile path ReadMode  
     contents <- hGetContents handle
@@ -14,7 +14,8 @@ parseFile path = do
 
 main = do  
     memory <- parseFile "./input.txt"
-    finishedProg <- runMaybeT $ C.runProgram $ C.createState memory
-    case finishedProg of
-        Nothing -> putStrLn "Error in Computation"
-        Just (_, mem) -> putStrLn "Computation Successful"
+    let running = C.run $ C.machine memory
+    let part1 = last $ C.effectToList running [1]
+    let part2 = last $ C.effectToList running [5]
+    print $ "Part1: " ++ show part1
+    print $ "Part2: " ++ show part2

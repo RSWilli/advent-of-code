@@ -3,7 +3,7 @@ module Computer
     Machine( Machine ), (!), machine, set, memory, 
   
     -- * Effects
-    Effect( Halt, Input, Output), run
+    Effect( Halt, Input, Output), run, effectToList
 
     , parseIntcodeProgram
     )
@@ -26,6 +26,13 @@ machine mem = Machine {memory = mem, pc = 0}
 data Effect = Halt Machine
              | Input (Int -> Effect)
              | Output Int Effect
+
+effectToList :: Effect -> [Int] -> [Int]
+effectToList effect inputs = case effect of
+  Input f | x:xs <- inputs -> effectToList (f x) xs
+          | otherwise      -> error "Not enough inputs"
+  Output v machine' -> v: effectToList machine' inputs
+  Halt _ -> []
 
 run :: Machine -> Effect
 run machine = 
@@ -112,7 +119,7 @@ decode machine =
       opcode = arg 0 `mod` 100
 
       -- get the operand mode for operand i
-      mode i = digit i (arg 0)
+      mode i = digit (i+1) (arg 0)
 
       -- get the parameter for parameter i
       param i = case mode i of
