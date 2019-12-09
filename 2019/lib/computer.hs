@@ -1,7 +1,11 @@
 module Computer
-    ( Memory
-    , runProgram
-    , createState
+    ( -- * Machine state
+    Machine( Machine ), (!), machine, set, memory, 
+  
+    -- * Effects
+    Effect( Halt, Input, Output), run
+
+    -- constructor
     , parseIntcodeProgram
     )
 where
@@ -17,7 +21,10 @@ data Machine = Machine
   , memory  :: M.Map Int Int
   }
 
-data Effect = Halt
+machine :: Memory -> Machine
+machine mem = Machine {memory = mem, pc = 0}
+
+data Effect = Halt Machine
              | Input (Int -> Effect)
              | Output Int Effect
 
@@ -27,7 +34,7 @@ run machine =
     Step machine' -> run machine'
     StepIn f -> Input (run . f)
     StepOut val machine' -> Output val (run machine')
-    StepHalt _ -> Halt 
+    StepHalt m -> Halt m
 
 data Step = Step Machine
           | StepIn (Int -> Machine)
@@ -37,7 +44,7 @@ data Step = Step Machine
 step :: Machine -> Step
 step machine = result machine
   where
-    val (Pos i) = machine ! (pc machine)
+    val (Pos i) = machine ! i
     val (Imm i) = i
 
     save (Pos i) = set i
@@ -112,6 +119,7 @@ decode machine =
       param i = case mode i of
         0 -> Pos (arg i)
         1 -> Imm (arg i)
+        x -> error $ "bad parameter mode: " ++ show x
 
       in
         case opcode of
