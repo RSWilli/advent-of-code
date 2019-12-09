@@ -1,7 +1,6 @@
 import System.IO
 import Data.List
 import qualified Data.Map as M
-import Control.Monad.Trans.Maybe 
 
 import qualified Computer as C
 

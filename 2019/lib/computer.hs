@@ -6,6 +6,8 @@ module Computer
     Effect( Halt, Input, Output), run, effectToList
 
     , parseIntcodeProgram
+    , runIntcodeToList
+    , Memory
     )
 where
 
@@ -17,7 +19,7 @@ type Memory = M.Map Int Int
 
 data Machine = Machine
   { pc      :: Int
-  , memory  :: M.Map Int Int
+  , memory  :: Memory
   }
 
 machine :: Memory -> Machine
@@ -26,6 +28,9 @@ machine mem = Machine {memory = mem, pc = 0}
 data Effect = Halt Machine
              | Input (Int -> Effect)
              | Output Int Effect
+
+runIntcodeToList :: Memory -> [Int] -> [Int]
+runIntcodeToList mem = effectToList (run $ machine mem )
 
 effectToList :: Effect -> [Int] -> [Int]
 effectToList effect inputs = case effect of
