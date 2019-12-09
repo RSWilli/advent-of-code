@@ -7,131 +7,129 @@ module Computer
 where
 
 import qualified Data.Map.Strict               as M
-import Control.Monad 
-import Control.Monad.Trans.Maybe 
-import Control.Monad.Trans.Class
 import Data.List.Split
+import Data.Bool (bool)
 
 type Memory = M.Map Int Int
 
-type Machinestate = (Int, Memory)
+data Machine = Machine
+  { pc      :: Int
+  , memory  :: M.Map Int Int
+  }
 
-liftMaybe :: (MonadPlus m) => Maybe a -> m a
-liftMaybe = maybe mzero return
+data Effect = Halt
+             | Input (Int -> Effect)
+             | Output Int Effect
 
-saveAt :: Int -> Int -> Memory -> Memory
-saveAt = M.insert
+run :: Machine -> Effect
+run machine = 
+  case step machine of
+    Step machine' -> run machine'
+    StepIn f -> Input (run . f)
+    StepOut val machine' -> Output val (run machine')
+    StepHalt _ -> Halt 
 
-getOpWithMode :: Monad r => Int -> Memory -> Int -> MaybeT r Int
-getOpWithMode addr memory mode = do
-    op <- liftMaybe $ M.lookup addr memory
-    if mode == 0 then
-        liftMaybe $ M.lookup op memory
-    else
-        return op
+data Step = Step Machine
+          | StepIn (Int -> Machine)
+          | StepOut Int Machine
+          | StepHalt Machine
 
-getOps3 :: Monad r => MaybeT r Machinestate -> Int -> Int -> Int -> MaybeT r (Int, Int, Int)
-getOps3 state mode1 mode2 mode3 = do
-    (pc, memory) <- state
+step :: Machine -> Step
+step machine = result machine
+  where
+    val (Pos i) = machine ! (pc machine)
+    val (Imm i) = i
 
-    op1          <- getOpWithMode (pc+1) memory mode1
-    op2          <- getOpWithMode (pc+2) memory mode2
-    op3          <- getOpWithMode (pc+3) memory mode3
+    save (Pos i) = set i
+    save (Imm _) = error "immediate saving not allowed"
 
-    return (op1, op2, op3)
-
-getOps2 :: Monad r => MaybeT r Machinestate -> Int -> Int -> MaybeT r (Int, Int)
-getOps2 state mode1 mode2 = do
-    (pc, memory) <- state
-
-    op1          <- getOpWithMode (pc+1) memory mode1
-    op2          <- getOpWithMode (pc+2) memory mode2
-
-    return (op1, op2)
-
-getOps1 :: Monad r => MaybeT r Machinestate -> Int -> MaybeT r Int
-getOps1 state mode = do
-    (pc, memory) <- state
-
-    getOpWithMode (pc+1) memory mode
-
-parseInstruction :: Int -> (Int, Int, Int, Int)
-parseInstruction instruction =
-    let opcode   = instruction `mod` 100
-        rest1    = instruction `div` 100
-
-        mode1    = rest1 `mod` 10
-        restmode = rest1 `div` 10
-
-        mode2    = restmode `mod` 10
-        mode3    = restmode `div` 10
-    in  (opcode, mode1, mode2, mode3)
-
-runProgram :: MaybeT IO Machinestate -> MaybeT IO Machinestate
-runProgram state = do
-    (pc, memory) <- state
-    instruction  <- liftMaybe $ M.lookup pc memory
-
-    let (opcode, mode1, mode2, mode3) = parseInstruction instruction
-
-    case opcode of
-        -- add
-        1 -> do
-            (op1, op2, res) <- getOps3 state mode1 mode2 1
-            let newstate = return (pc + 4, saveAt res (op1 + op2) memory)
-            runProgram newstate
-        -- multiply
-        2 -> do
-            (op1, op2, res) <- getOps3 state mode1 mode2 1
-            let newstate = return (pc + 4, saveAt res (op1 * op2) memory)
-            runProgram newstate
-        -- input
-        3 -> do
-            res <- getOps1 state 1
-            -- lift $ putStrLn "Awaiting input:"
-            input <- lift getLine
-            --lift $ putStrLn $ "read " ++ show input ++ " saving at " ++ show res ++ "next step:" ++ show (pc+2) ++ "operand:" ++ show (M.lookup (pc+1) memory)
-            let newstate = return (pc+2, saveAt res (read input) memory)
-            runProgram newstate
-        -- output
-        4 -> do 
-            res <- getOps1 state 0
-            lift $ print res
-            let newstate = return (pc+2, memory)
-            runProgram newstate
-        -- jump-if-true
-        5 -> do
-            (op1,op2) <- getOps2 state mode1 mode2
-            let newpc = if op1 /= 0 then op2 else pc+3
-            let newstate = return (newpc, memory)
-            runProgram newstate
-        -- jump-if-false
-        6 -> do
-            (op1,op2) <- getOps2 state mode1 mode2
-            let newpc = if op1 == 0 then op2 else pc+3
-            let newstate = return (newpc, memory)
-            runProgram newstate
-        -- less-than
-        7 -> do
-            (op1,op2, op3) <- getOps3 state mode1 mode2 1
-            let saveValue = if op1 < op2 then 1 else 0
-            let newstate = return (pc + 4, saveAt op3 saveValue memory)
-            runProgram newstate
-        -- equal-to
-        8 -> do
-            (op1,op2, op3) <- getOps3 state mode1 mode2 1
-            let saveValue = if op1 == op2 then 1 else 0
-            let newstate = return (pc + 4, saveAt op3 saveValue memory)
-            runProgram newstate
-        99 -> state
-        x  -> error $ "undefined opcode: " ++ show x ++ " parsed from " ++ show instruction
-
-createState :: Memory -> MaybeT IO Machinestate
-createState mem = return (0, mem)
+    result = case decode machine of
+        Add a b c -> Step . adv 4 . save c (val a + val b)
+        Mul a b c -> Step . adv 4 . save c (val a * val b)
+        In a      -> \m -> StepIn (\input -> adv 2 ( save a input m))
+        Out a     -> StepOut (val a) . adv 2
+        Jnz a b   | (val a /= 0) -> Step . jmp (val b)
+                  | otherwise -> Step . adv 3
+        Jz a b    | (val a == 0) -> Step . jmp (val b)
+                  | otherwise -> Step . adv 3
+        Lt a b c  -> Step . adv 4 . save c (bool 0 1 (val a <  val b))
+        Eq a b c  -> Step . adv 4 . save c (bool 0 1 (val a == val b))
+        Hlt      -> StepHalt
 
 parseIntcodeProgram :: String -> Memory
 parseIntcodeProgram program = M.fromList $
-    zipWith 
-        (\i op -> (i, read op :: Int)) 
-        [0..] 
-        (splitOn "," program)
+  zipWith 
+    (\i op -> (i, read op :: Int)) 
+    [0..] 
+    (splitOn "," program)
+
+-- advance pc
+adv :: Int -> Machine -> Machine
+adv i m = m { pc = pc m + i }
+
+-- jump to pc
+jmp :: Int -> Machine -> Machine
+jmp addr m = m { pc = addr }
+
+set :: Int -> Int -> Machine -> Machine
+set pos value m = m {memory = M.insert pos value (memory m)}
+
+-- get
+(!) :: Machine -> Int -> Int
+m ! i = case M.lookup i (memory m) of
+  Just x -> x
+  Nothing -> error "no index found"
+
+-- get the digit at position i
+digit :: Int {- ^ position -} -> Int {- ^ number -} -> Int {- ^ digit -}
+digit i x = x `div` (10^i) `mod` 10
+
+data Param = Pos Int
+           | Imm Int
+
+data Opcode = Add Param Param Param
+            | Mul Param Param Param
+            | In Param
+            | Out Param
+            | Jnz Param Param
+            | Jz Param Param
+            | Lt Param Param Param
+            | Eq Param Param Param
+            | Hlt
+
+decode :: Machine -> Opcode
+decode machine = 
+    let 
+      arg i = machine ! (pc machine + i)
+      
+      -- opcode are the last 2 digits
+      opcode = arg 0 `mod` 100
+
+      -- get the operand mode for operand i
+      mode i = digit i (arg 0)
+
+      -- get the parameter for parameter i
+      param i = case mode i of
+        0 -> Pos (arg i)
+        1 -> Imm (arg i)
+
+      in
+        case opcode of
+            -- add
+          1 -> Add (param 1) (param 2) (param 3)
+          -- multiply
+          2 -> Mul (param 1) (param 2) (param 3)
+          -- input
+          3 -> In (param 1)
+          -- output
+          4 -> Out (param 1)
+          -- jump-if-true
+          5 -> Jnz (param 1) (param 2)
+          -- jump-if-false
+          6 -> Jz (param 1) (param 2)
+          -- less-than
+          7 -> Lt (param 1) (param 2) (param 3)
+          -- equal-to
+          8 -> Eq (param 1) (param 2) (param 3)
+          99 -> Hlt
+          x  -> error $ "undefined opcode: " ++ show opcode ++ " parsed from " ++ show (arg 0)
