@@ -5,7 +5,6 @@ module Computer
     -- * Effects
     Effect( Halt, Input, Output), run
 
-    -- constructor
     , parseIntcodeProgram
     )
 where
