@@ -67,6 +67,7 @@ step machine = result machine
   val (Rel i) = machine ! (relativeBase machine + i)
 
   save (Pos i) = set i
+  save (Rel i) = set (relativeBase machine + i)
   save (Imm _) = error "immediate saving not allowed"
 
   result = case decode machine of
@@ -80,7 +81,7 @@ step machine = result machine
            | otherwise  -> Step . adv 3
     Lt a b c -> Step . adv 4 . save c (bool 0 1 (val a < val b))
     Eq a b c -> Step . adv 4 . save c (bool 0 1 (val a == val b))
-    AdjRel a -> Step . adv 4 . adjustBase (val a)
+    AdjRel a -> Step . adv 2 . adjustBase (val a)
     Hlt      -> StepHalt
 
 parseIntcodeProgram :: String -> Memory
