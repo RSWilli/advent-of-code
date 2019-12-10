@@ -22,24 +22,25 @@ import           Data.List.Split
 import           Data.Bool                      ( bool )
 import           Data.Maybe                     ( fromMaybe )
 
-type Memory = M.Map Int Int
+type Memory = M.Map Integer Integer
 
 data Machine = Machine
-  { pc      :: Int
+  { pc      :: Integer
   , memory  :: Memory
+  , relativeBase :: Integer
   }
 
 machine :: Memory -> Machine
-machine mem = Machine { memory = mem, pc = 0 }
+machine mem = Machine { memory = mem, pc = 0, relativeBase = 0 }
 
 data Effect = Halt Machine
-             | Input (Int -> Effect)
-             | Output Int Effect
+             | Input (Integer -> Effect)
+             | Output Integer Effect
 
-runIntcodeToList :: Memory -> [Int] -> [Int]
+runIntcodeToList :: Memory -> [Integer] -> [Integer]
 runIntcodeToList mem = effectToList (run $ machine mem)
 
-effectToList :: Effect -> [Int] -> [Int]
+effectToList :: Effect -> [Integer] -> [Integer]
 effectToList effect inputs = case effect of
   Input f | x : xs <- inputs -> effectToList (f x) xs
           | otherwise        -> error "Not enough inputs"
@@ -54,8 +55,8 @@ run machine = case step machine of
   StepHalt m           -> Halt m
 
 data Step = Step Machine
-          | StepIn (Int -> Machine)
-          | StepOut Int Machine
+          | StepIn (Integer -> Machine)
+          | StepOut Integer Machine
           | StepHalt Machine
 
 step :: Machine -> Step
@@ -63,6 +64,7 @@ step machine = result machine
  where
   val (Pos i) = machine ! i
   val (Imm i) = i
+  val (Rel i) = machine ! (relativeBase machine + i)
 
   save (Pos i) = set i
   save (Imm _) = error "immediate saving not allowed"
@@ -78,36 +80,43 @@ step machine = result machine
            | otherwise  -> Step . adv 3
     Lt a b c -> Step . adv 4 . save c (bool 0 1 (val a < val b))
     Eq a b c -> Step . adv 4 . save c (bool 0 1 (val a == val b))
+    AdjRel a -> Step . adv 4 . adjustBase (val a)
     Hlt      -> StepHalt
 
 parseIntcodeProgram :: String -> Memory
 parseIntcodeProgram program = M.fromList
-  $ zipWith (\i op -> (i, read op :: Int)) [0 ..] (splitOn "," program)
+  $ zipWith (\i op -> (i, read op)) [0 ..] (splitOn "," program)
 
 -- advance pc
-adv :: Int -> Machine -> Machine
+adv :: Integer -> Machine -> Machine
 adv i m = m { pc = pc m + i }
 
 -- jump to pc
-jmp :: Int -> Machine -> Machine
+jmp :: Integer -> Machine -> Machine
 jmp addr m = m { pc = addr }
 
-set :: Int -> Int -> Machine -> Machine
-set pos value m = m { memory = M.insert pos value (memory m) }
+adjustBase :: Integer -> Machine -> Machine
+adjustBase change m = m { relativeBase = relativeBase m + change }
 
--- get
-(!) :: Machine -> Int -> Int
-m !i = fromMaybe (error "no index found") $ M.lookup i (memory m)
+set :: Integer -> Integer -> Machine -> Machine
+set pos value m = if pos < 0 then error "write to negative index"
+  else m { memory = M.insert pos value (memory m) }
+
+-- get, no negative index, defaults to 0
+(!) :: Machine -> Integer -> Integer
+m !i = if i < 0 then error "access at negative index"
+  else fromMaybe (0) $ M.lookup i (memory m)
 
 -- get the digit at position i
 digit
-  :: Int {- ^ position -}
-  -> Int {- ^ number -}
-  -> Int {- ^ digit -}
+  :: Integer {- ^ position -}
+  -> Integer {- ^ number -}
+  -> Integer {- ^ digit -}
 digit i x = x `div` (10 ^ i) `mod` 10
 
-data Param = Pos Int
-           | Imm Int
+data Param = Pos Integer
+           | Imm Integer
+           | Rel Integer
 
 data Opcode = Add Param Param Param
             | Mul Param Param Param
@@ -117,6 +126,7 @@ data Opcode = Add Param Param Param
             | Jz Param Param
             | Lt Param Param Param
             | Eq Param Param Param
+            | AdjRel Param
             | Hlt
 
 decode :: Machine -> Opcode
@@ -134,6 +144,7 @@ decode machine =
     param i = case mode i of
       0 -> Pos (arg i)
       1 -> Imm (arg i)
+      2 -> Rel (arg i)
       x -> error $ "bad parameter mode: " ++ show x
   in
     case opcode of
@@ -153,6 +164,8 @@ decode machine =
       7  -> Lt (param 1) (param 2) (param 3)
       -- equal-to
       8  -> Eq (param 1) (param 2) (param 3)
+      -- adjust relative base
+      9 -> AdjRel (param 1)
       99 -> Hlt
       x ->
         error $ "undefined opcode: " ++ show opcode ++ " parsed from " ++ show
