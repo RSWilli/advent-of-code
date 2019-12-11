@@ -1,5 +1,4 @@
 import System.IO
-import System.Process
 import Data.List
 import Control.Monad
 import Data.Function (fix)
@@ -44,5 +43,5 @@ composeLR = foldl (flip (.)) id
 
 
 -- feed: 
-(<<) :: (ListFn) -> Int -> ListFn
+(<<) :: ListFn -> Int -> ListFn
 (f << x) xs = f (x:xs)
