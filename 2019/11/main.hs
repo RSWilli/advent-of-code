@@ -115,13 +115,13 @@ getBoundingBox xs = foldl
   (head xs, head xs)
   xs
 
-generateImage :: Hull -> M.Map Position String
+generateImage :: Hull -> String
 generateImage hull =
   let ((minx, miny),(maxx, maxy)) = getBoundingBox $ M.keys hull
-      pixels       = [ (x, y) | x <- [minx .. maxx], y <- [miny, maxy] ]
+      pixels       = [ (x, y) | y <- [miny .. maxy], x <- [minx .. maxx] ]
 
       color pix = colorToChar $ fromMaybe Black (M.lookup pix hull)
-  in  foldr (\pix map -> M.insert pix (color pix) map) M.empty pixels
+  in  reverse $ unlines $ map reverse $ sequences (maxx-minx + 1) $ foldl (\str pix -> str ++ color pix) "" pixels
 
 main = do
   h    <- openFile "./input.txt" ReadMode
@@ -135,13 +135,13 @@ main = do
 
   print $ M.size $ hull part1
 
+  print $ getBoundingBox $ M.keys $ hull part2
+
   let image = generateImage $ hull part2
 
-  print $ map (fromIntegral (M.size image) /) [1..10]
+  print $ length image
 
-  let plate = M.foldl (++) "" image
-
-  putStrLn $ unlines $ map (unlines . (`sequences` plate)) [10..20]
+  putStrLn image
 
 
 sequences c l =
