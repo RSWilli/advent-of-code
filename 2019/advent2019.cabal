@@ -1,27 +1,32 @@
-cabal-version:       2.4
+cabal-version:       2.2
+
 name:                advent2019
 version:             0.1.0.0
-synopsis:            Advent of Code 2019 Solutions
-description:         These are my for Advent of Code <https://adventofcode.com>
-license:             ISC
-license-file:        LICENSE
-author:              Wilhelm Bartel
-maintainer:          me@w-bartel.de
-copyright:           2019 Wilhelm Bartel
+author:              RSWilli
+maintainer:          bartel.wilhelm@gmail.com
+-- copyright:
+-- category:
 build-type:          Simple
 
+common shared-properties
+  default-language: Haskell2010
+  build-depends:
+    base >=4.12 && <4.13
+  ghc-options:
+    -Wall
+
 library
-  exposed-modules:
-    Computer
+  import: shared-properties
+  exposed-modules: Computer
+  -- other-modules:
+  -- other-extensions:
+  build-depends:        containers
+  hs-source-dirs:       lib
 
-  build-depends:       base        ^>= 4.13,
-                       containers  ^>= 0.6
-
-  hs-source-dirs:      lib
-  default-language:    Haskell2010
-
-executable Day01p1
+executable Day01P1
+  import: shared-properties
   main-is:             part1.hs
-  build-depends:       advent2019, base,
+  -- other-modules:
+  -- other-extensions:
+  build-depends:       base >=4.12 && <4.13
   hs-source-dirs:      1/part1
-  default-language:    Haskell2010
