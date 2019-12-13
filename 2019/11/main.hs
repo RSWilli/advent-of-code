@@ -121,7 +121,7 @@ generateImage hull =
       pixels       = [ (x, y) | y <- [miny .. maxy], x <- [minx .. maxx] ]
 
       color pix = colorToChar $ fromMaybe Black (M.lookup pix hull)
-  in  reverse $ unlines $ map reverse $ sequences (maxx-minx + 1) $ foldl (\str pix -> str ++ color pix) "" pixels
+  in  unlines $ reverse $ sequences (maxx-minx + 1) $ foldl (\str pix -> str ++ color pix) "" pixels
 
 main = do
   h    <- openFile "./input.txt" ReadMode
