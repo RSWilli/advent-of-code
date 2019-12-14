@@ -1,8 +1,9 @@
+{-# Language DeriveTraversable, OverloadedStrings #-}
 module Computer
   ( -- * Machine state
     Machine(Machine)
   , (!)
-  , machine
+  , new
   , set
   , memory
   ,
@@ -11,36 +12,41 @@ module Computer
     Effect(Halt, Input, Output)
   , run
   , effectToList
-  , parseIntcodeProgram
+  , memoryParser
   , runIntcodeToList
-  , Memory
+  , Datatype
   )
 where
 
 import qualified Data.Map.Strict               as M
-import           Data.List.Split
-import           Data.Bool                      ( bool )
-import           Data.Maybe                     ( fromMaybe )
+import           InputParser                   (Parser, number, sepBy)
 
-type Memory = M.Map Integer Integer
+type Datatype = Integer
+
+type Program = [Datatype]
+
+type Memory = M.Map Datatype Datatype
 
 data Machine = Machine
-  { pc      :: Integer
+  { pc      :: Datatype
   , memory  :: Memory
-  , relativeBase :: Integer
+  , relativeBase :: Datatype
   }
 
-machine :: Memory -> Machine
-machine mem = Machine { memory = mem, pc = 0, relativeBase = 0 }
+new :: Program -> Machine
+new pgr = 
+  let mem = M.fromList $ zip [0..] pgr
+  in
+    Machine { memory = mem, pc = 0, relativeBase = 0 }
 
 data Effect = Halt Machine
-             | Input (Integer -> Effect)
-             | Output Integer Effect
+             | Input (Datatype -> Effect)
+             | Output Datatype Effect
 
-runIntcodeToList :: Memory -> [Integer] -> [Integer]
-runIntcodeToList mem = effectToList (run $ machine mem)
+runIntcodeToList :: Program -> [Datatype] -> [Datatype]
+runIntcodeToList mem = effectToList (run $ new mem)
 
-effectToList :: Effect -> [Integer] -> [Integer]
+effectToList :: Effect -> [Datatype] -> [Datatype]
 effectToList effect inputs = case effect of
   Input f | x : xs <- inputs -> effectToList (f x) xs
           | otherwise        -> error "Not enough inputs"
@@ -55,8 +61,8 @@ run machine = case step machine of
   StepHalt m           -> Halt m
 
 data Step = Step Machine
-          | StepIn (Integer -> Machine)
-          | StepOut Integer Machine
+          | StepIn (Datatype -> Machine)
+          | StepOut Datatype Machine
           | StepHalt Machine
 
 step :: Machine -> Step
@@ -79,45 +85,44 @@ step machine = result machine
             | otherwise  -> Step . adv 3
     Jz a b | val a == 0 -> Step . jmp (val b)
            | otherwise  -> Step . adv 3
-    Lt a b c -> Step . adv 4 . save c (bool 0 1 (val a < val b))
-    Eq a b c -> Step . adv 4 . save c (bool 0 1 (val a == val b))
+    Lt a b c -> Step . adv 4 . save c (if val a < val b then 1 else 0)
+    Eq a b c -> Step . adv 4 . save c (if val a == val b then 1 else 0)
     AdjRel a -> Step . adv 2 . adjustBase (val a)
     Hlt      -> StepHalt
 
-parseIntcodeProgram :: String -> Memory
-parseIntcodeProgram program = M.fromList
-  $ zipWith (\i op -> (i, read op)) [0 ..] (splitOn "," program)
+memoryParser :: Parser [Datatype]
+memoryParser = number `sepBy` ","
 
 -- advance pc
-adv :: Integer -> Machine -> Machine
+adv :: Datatype -> Machine -> Machine
 adv i m = m { pc = pc m + i }
 
 -- jump to pc
-jmp :: Integer -> Machine -> Machine
+jmp :: Datatype -> Machine -> Machine
 jmp addr m = m { pc = addr }
 
-adjustBase :: Integer -> Machine -> Machine
+adjustBase :: Datatype -> Machine -> Machine
 adjustBase change m = m { relativeBase = relativeBase m + change }
 
-set :: Integer -> Integer -> Machine -> Machine
+set :: Datatype -> Datatype -> Machine -> Machine
 set pos value m = if pos < 0 then error "write to negative index"
   else m { memory = M.insert pos value (memory m) }
 
 -- get, no negative index, defaults to 0
-(!) :: Machine -> Integer -> Integer
+(!) :: Machine -> Datatype -> Datatype
 m !i = if i < 0 then error "access at negative index"
-  else fromMaybe (0) $ M.lookup i (memory m)
+  else M.findWithDefault 0 i (memory m)
 
 -- get the digit at position i
 digit
-  :: Integer {- ^ position -}
-  -> Integer {- ^ number -}
-  -> Integer {- ^ digit -}
+  :: Datatype {- ^ position -}
+  -> Datatype {- ^ number -}
+  -> Datatype {- ^ digit -}
 digit i x = x `div` (10 ^ i) `mod` 10
 
-data Param = Pos Integer
-           | Imm Integer
-           | Rel Integer
+data Param = Pos Datatype
+           | Imm Datatype
+           | Rel Datatype
 
 data Opcode = Add Param Param Param
             | Mul Param Param Param
@@ -169,5 +174,5 @@ decode machine =
       9 -> AdjRel (param 1)
       99 -> Hlt
       x ->
-        error $ "undefined opcode: " ++ show opcode ++ " parsed from " ++ show
+        error $ "undefined opcode: " ++ show x ++ " parsed from " ++ show
           (arg 0)

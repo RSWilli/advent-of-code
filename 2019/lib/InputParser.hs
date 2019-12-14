@@ -1,4 +1,7 @@
-module InputParser where
+module InputParser 
+( module InputParser
+, satisfy, anySingle, sepBy, manyTill
+) where
 
 import Text.Megaparsec (setInput, anySingle, satisfy, parse, Parsec, eof, sepBy, manyTill)
 import Text.Megaparsec.Char (newline)
