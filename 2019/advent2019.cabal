@@ -1,17 +1,13 @@
-cabal-version:       2.2
+cabal-version:       2.4
 
 name:                advent2019
 version:             0.1.0.0
 author:              RSWilli
 maintainer:          bartel.wilhelm@gmail.com
--- copyright:
--- category:
 build-type:          Simple
 
 common shared-properties
   default-language: Haskell2010
-  build-depends:
-    base >=4.12 && <4.13
   ghc-options:
     -Wall
 
@@ -20,7 +16,7 @@ library
   exposed-modules: Computer
   -- other-modules:
   -- other-extensions:
-  build-depends:        containers
+  build-depends:        base >=4.12 && <4.13, containers, split
   hs-source-dirs:       lib
 
 executable Day01P1
@@ -30,3 +26,11 @@ executable Day01P1
   -- other-extensions:
   build-depends:       base >=4.12 && <4.13
   hs-source-dirs:      1/part1
+
+executable Day13
+  import: shared-properties
+  main-is:             main.hs
+  -- other-modules:
+  -- other-extensions:
+  build-depends:       base >=4.12 && <4.13, containers, advent2019
+  hs-source-dirs:      13
