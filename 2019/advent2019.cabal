@@ -1,5 +1,4 @@
 cabal-version:       2.4
-
 name:                advent2019
 version:             0.1.0.0
 author:              RSWilli
@@ -13,24 +12,25 @@ common shared-properties
 
 library
   import: shared-properties
-  exposed-modules: Computer
-  -- other-modules:
-  -- other-extensions:
-  build-depends:        base >=4.12 && <4.13, containers, split
+  exposed-modules: 
+    --Computer,
+    InputParser
+
+  build-depends:        
+    base >=4.12 && <4.13,
+    containers,
+    megaparsec  ^>= 8.0
+
   hs-source-dirs:       lib
 
-executable Day01P1
+executable Day01
   import: shared-properties
-  main-is:             part1.hs
-  -- other-modules:
-  -- other-extensions:
-  build-depends:       base >=4.12 && <4.13
-  hs-source-dirs:      1/part1
+  main-is:             day01.hs
+  build-depends:       base >=4.12 && <4.13, advent2019
+  hs-source-dirs:      days
 
 executable Day13
   import: shared-properties
   main-is:             main.hs
-  -- other-modules:
-  -- other-extensions:
   build-depends:       base >=4.12 && <4.13, containers, advent2019
   hs-source-dirs:      13
