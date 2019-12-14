@@ -74,16 +74,10 @@ autoPlay ball paddle score eff = case eff of
     | otherwise -> autoPlay ball paddle score eff'
 
   -- joystick control:
-  C.Input f -> let direction = sign $ ball - paddle
+  C.Input f -> let direction = signum $ ball - paddle
                in
                 autoPlay ball paddle score (f direction)
   -- game over:
   C.Halt _ -> score
 
   _ -> error "invalid output, it should come in triples"
-
-sign :: (Ord a, Num a, Num p) => a -> p
-sign x = case compare x 0 of
-  EQ -> 0
-  LT -> -1
-  GT -> 1
