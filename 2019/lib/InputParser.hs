@@ -1,11 +1,11 @@
 module InputParser 
 ( module InputParser
-, satisfy, anySingle, sepBy, manyTill
+, satisfy, anySingle, sepBy, manyTill, space
 ) where
 
 import Text.Megaparsec (setInput, anySingle, satisfy, parse, Parsec, eof, sepBy, manyTill)
 import Text.Megaparsec.Char (newline)
-import Text.Megaparsec.Char.Lexer (decimal, signed)
+import Text.Megaparsec.Char.Lexer (decimal, signed, space)
 import Text.Megaparsec.Error (errorBundlePretty)
 import Data.Void
 import Text.Printf

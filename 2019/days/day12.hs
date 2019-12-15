@@ -1,5 +1,8 @@
+{-# Language OverloadedStrings #-}
 import           Data.Ord                       ( comparing )
 import qualified Data.Map                      as M
+import InputParser
+import Util
 
 data Vector = Vector {x :: Int, y :: Int, z :: Int}
 
@@ -100,24 +103,13 @@ simulateStep moons =
           )
           $ getSim moons
 
-test2:: Simulation
-test2 = newSim $ M.fromList $ zip
-  [0 ..]
-  [newMoon (-8) (-10) 0, newMoon 5 5 10, newMoon 2 (-7) 3, newMoon 9 (-8) (-3)]
-
-test :: Simulation
-test = newSim $ M.fromList $ zip
-  [0 ..]
-  [newMoon (-1) 0 2, newMoon 2 (-10) (-7), newMoon 4 (-8) 8, newMoon 3 5 (-1)]
-
-input :: Simulation
-input = newSim $ M.fromList $ zip
-  [0 ..]
-  [newMoon 14 2 8, newMoon 7 4 10, newMoon 1 17 16, newMoon (-4) (-1) 1]
+moonParser :: Parser Moon
+moonParser = newMoon <$> ("<x=" *> number) <*> (", " *> "y=" *> number) <*> (", " *> "z=" *> number <* ">")
 
 main :: IO ()
 main = do
-  let simulation = input
+  moons <- getParsedLines 12 moonParser
+  let simulation = newSim $ M.fromList $ index moons
   -- putStr $ unlines $ map (\(step, sim) -> "After " ++ show step ++ " steps:\n" ++ show sim ) $ zip [0..] $ take 11 $ iterate simulateStep simulation
   let thousendSteps = last $ take 1001 $ iterate simulateStep simulation
   print thousendSteps
