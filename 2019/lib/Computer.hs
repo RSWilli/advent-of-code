@@ -1,4 +1,4 @@
-{-# Language DeriveTraversable, OverloadedStrings #-}
+{-# Language OverloadedStrings #-}
 module Computer
   ( -- * Machine state
     Machine(Machine)
