@@ -1,34 +1,22 @@
-import           Data.List.Split
-import           System.IO
-import           Data.List
+{-# Language OverloadedStrings #-}
+import           InputParser
+import Data.List (group, sort, minimumBy)
+import Control.Applicative ((<|>),many)
+import Util
 import qualified Data.Map                      as M
-import           Data.Maybe                     ( fromMaybe )
 
-sequences c l =
-  let (x, xs) = splitAt c l in if null xs then [x] else x : sequences c xs
-
-parse :: String -> [String]
-parse str = tail $ splitOn "" str
+parsePixel :: Parser String
+parsePixel = "0" <|> "1" <|> "2"
 
 createLayers :: [String] -> Int -> Int -> [[[String]]]
 createLayers list height width =
-  map (sequences height) $ sequences (width * height) list
+  map (chunks height) $ chunks (width * height) list
 
 combineLayers :: [[[String]]] -> [M.Map String Int]
-combineLayers =
-  map (M.fromList . (\v -> (head v, length v)) . group . sort . concat)
+combineLayers = map (foldr (\color m -> M.insertWith (+) color 1 m) M.empty . concat)
 
 getLayerWithMinZeros :: [M.Map String Int] -> M.Map String Int
-getLayerWithMinZeros list = snd $ foldl
-  (\(min, minmap) map ->
-    let zerocount = fromMaybe 10000 (M.lookup "0" map)
-    in  case compare min zerocount of
-          GT -> (zerocount, map)
-          LT -> (min, minmap)
-          EQ -> (zerocount, map)
-  )
-  (10000, undefined)
-  list
+getLayerWithMinZeros = minimumBy (\m1 m2 -> compare (M.findWithDefault 0 "0" m1) (M.findWithDefault 0 "0" m2))
 
 type Layermap = M.Map (Int, Int, Int) String
 type Imagemap = M.Map (Int, Int) String
@@ -61,26 +49,23 @@ createImage = M.foldrWithKey
   )
   M.empty
 
+main :: IO ()
 main = do
-  handle   <- openFile "./input.txt" ReadMode
-  contents <- hGetContents handle
-  let layers         = createLayers (parse contents) 25 6
-  -- print layers
+  imagedata <- getParsedInput 8 (many parsePixel)
+  let layers         = createLayers imagedata 25 6
+  print layers
   let combinedlayers = combineLayers layers
   let minzeros = getLayerWithMinZeros combinedlayers
-      ones     = fromMaybe 0 (M.lookup "1" minzeros)
-      twos     = fromMaybe 0 (M.lookup "2" minzeros)
+      ones     = M.findWithDefault 0 "1" minzeros
+      twos     = M.findWithDefault 0 "2" minzeros
 
+  print minzeros
   let positionmap = getPositionMap layers
 
-  -- print positionmap
-
-  -- print $ contents == M.foldl (++) "" positionmap -- check if input == parsed
-
-  print "part1:"
+  putStrLn "part1:"
   print $ ones * twos
 
-  print "part2:"
+  putStrLn "part2:"
   let image = createImage positionmap
   -- print image
-  putStr $ unlines $ map concat $ sequences 25 $ map snd $ M.toList image
+  putStr $ unlines $ map concat $ chunks 25 $ map snd $ M.toList image

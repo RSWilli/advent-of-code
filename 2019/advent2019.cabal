@@ -14,6 +14,7 @@ library
   import: shared-properties
   exposed-modules: 
     Computer,
+    Util
     InputParser
 
   build-depends:        
@@ -63,6 +64,12 @@ executable Day07
   import: shared-properties
   main-is:             day07.hs
   build-depends:       base >=4.12 && <4.13, advent2019
+  hs-source-dirs:      days
+
+executable Day08
+  import: shared-properties
+  main-is:             day08.hs
+  build-depends:       base >=4.12 && <4.13, advent2019, containers
   hs-source-dirs:      days
 
 executable Day13
