@@ -2,6 +2,7 @@ import InputParser
 
 import qualified Computer as C
 
+main :: IO ()
 main = do  
   [machine] <- map C.new <$> getParsedLines 5 C.memoryParser
   let running = C.run machine
