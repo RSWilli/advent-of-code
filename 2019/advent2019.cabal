@@ -53,6 +53,12 @@ executable Day05
   build-depends:       base >=4.12 && <4.13, advent2019
   hs-source-dirs:      days
 
+executable Day06
+  import: shared-properties
+  main-is:             day06.hs
+  build-depends:       base >=4.12 && <4.13, advent2019, containers
+  hs-source-dirs:      days
+
 executable Day13
   import: shared-properties
   main-is:             main.hs
