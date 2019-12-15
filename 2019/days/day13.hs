@@ -1,27 +1,22 @@
 import qualified Computer as C
-import System.IO
 import qualified Data.Map as M
+import Util
+import InputParser
 
 type Field = M.Map (Integer, Integer) Integer
 
-sequences :: Integer -> [a] -> [[a]]
-sequences c l =
-  let (x, xs) = splitAt (fromIntegral c) l in if null xs then [x] else x : sequences c xs
-
 main :: IO ()
 main = do
-  h    <- openFile "./13/input.txt" ReadMode
-  code <- hGetContents h
-  let program   = C.parseIntcodeProgram code
+  [program] <- getParsedLines 13 C.memoryParser
   part1 program
-  part2 program
+  part2 (C.new program)
 
 getWidth :: Field -> Integer
 getWidth field = 
   let (minX, maxX) = foldl (\(minX, maxX) (_, x) -> (min minX x, max maxX x)) (1000, 0) $ M.keys field
   in
     maxX - minX + 1
-                
+
 replaceTileID :: Integer -> String
 replaceTileID i = case i of
   0 -> " "
@@ -32,31 +27,31 @@ replaceTileID i = case i of
   _ -> error "unknown tile"
 
 printField :: Field -> String
-printField field = unlines $ sequences (getWidth field) $ concatMap (replaceTileID.snd) $ M.toList field
+printField field = unlines $ chunks (getWidth field) $ concatMap (replaceTileID.snd) $ M.toList field
 
 
-part1 :: C.Memory -> IO ()
+part1 :: C.Program -> IO ()
 part1 program = do
-  let triples = sequences 3 $ C.runIntcodeToList program []
+  let triples = chunks 3 $ C.runIntcodeToList program []
   let field = foldl (\f [x,y,tileId] -> M.insert (y,x) tileId f) M.empty triples
+  let triples = chunks 3 $ C.runIntcodeToList program []
+  let field = foldl (\f [x,y,tileId] -> M.insert (y,x) tileId f) M.empty triples
+  putStr $ printField field
   print $ length $ filter ((2==).snd) $ M.toList field
 
 
 
-part2 :: C.Memory -> IO  ()
+part2 :: C.Machine -> IO  ()
 part2 program = do
-  let programWithJoystick = M.insert 0 2 program
-  let triples = sequences 3 $ C.runIntcodeToList program []
-  let field = foldl (\f [x,y,tileId] -> M.insert (y,x) tileId f) M.empty triples
-  putStr $ printField field
+  let programWithJoystick = C.set 0 2 program
 
-  let score = autoPlay 0 0 0 (C.run $ C.machine programWithJoystick)
+  let score = autoPlay 0 0 0 (C.run programWithJoystick)
 
   print score
 
 
 
-autoPlay :: Integer -> Integer -> Integer -> C.Effect -> Integer
+autoPlay :: C.Datatype -> C.Datatype -> C.Datatype -> C.Effect -> C.Datatype
 autoPlay ball paddle score eff = case eff of
 
   -- new score:

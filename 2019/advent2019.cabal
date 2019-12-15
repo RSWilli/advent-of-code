@@ -98,6 +98,6 @@ executable Day12
 
 executable Day13
   import: shared-properties
-  main-is:             main.hs
+  main-is:             day13.hs
   build-depends:       base >=4.12 && <4.13, containers, advent2019
-  hs-source-dirs:      13
+  hs-source-dirs:      days

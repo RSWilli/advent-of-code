@@ -15,6 +15,7 @@ module Computer
   , memoryParser
   , runIntcodeToList
   , Datatype
+  , Program
   )
 where
 
