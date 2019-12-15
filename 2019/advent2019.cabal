@@ -43,7 +43,7 @@ executable Day03
 
 executable Day04
   import: shared-properties
-  main-is:             day03.hs
+  main-is:             day04.hs
   build-depends:       base >=4.12 && <4.13
   hs-source-dirs:      days
 
