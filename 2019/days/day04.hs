@@ -19,10 +19,10 @@ exactlyOnePair []  = False
 exactlyOnePair [x] = False
 exactlyOnePair xs =
   let x = head xs
-    eq = takeWhile (x ==) xs
-    neq = dropWhile (x ==) xs
-    in
-      length eq == 2 || exactlyOnePair neq
+      eq = takeWhile (x ==) xs
+      neq = dropWhile (x ==) xs
+      in
+        length eq == 2 || exactlyOnePair neq
 
 main :: IO ()
 main = do
