@@ -1,9 +1,11 @@
+{-# Language OverloadedStrings #-}
 import Data.Function (fix)
 import qualified Data.Set as S
 import qualified Data.Map as M
-import System.IO
 import Data.List
-import Data.Maybe (fromMaybe)
+import InputParser
+import Util
+import Control.Applicative (many, (<|>))
 
 data AsteroidField = AsteroidField {
   width :: Int, 
@@ -11,29 +13,16 @@ data AsteroidField = AsteroidField {
   field :: S.Set (Int, Int)
 } deriving (Show)
 
-index :: [a] -> [(Int, a)]
-index = zip [0..]
-
-parse :: String -> AsteroidField
-parse input = let ls = lines input
-                  height = length ls
-                  width = length $ head ls
-
-                  pairList  = concatMap 
-                    (\(y, row) ->
-                      map (\(x,y, char) -> (x,y))
-                      $
-                        filter (\(_,_,c) -> c == '#') 
-                        $ map 
-                          (\(x, char) -> (x,y,char)) 
-                          $ index row
-                    ) 
-                    $ index ls
-                  in
-                    AsteroidField {width = width, height = height, field = S.fromList pairList}
+parse :: IO AsteroidField
+parse = do
+  input <- getParsedLines 10 (many $ True <$ "#" <|> False <$ ".")
+  let astf = S.fromList [(x,y) | (y, row) <- index input, (x, True) <- index row]
+  let w = length $ head input
+  let h = length input
+  return $ AsteroidField {width = w, height = h, field = astf}
 
 shadow :: (Int, Int) -> (Int, Int) -> AsteroidField -> AsteroidField
-shadow start@(startX, startY) (astX, astY) asteroidfield =
+shadow (startX, startY) (astX, astY) asteroidfield =
   let w = width asteroidfield
       h = height asteroidfield
 
@@ -47,7 +36,7 @@ shadow start@(startX, startY) (astX, astY) asteroidfield =
 
       shadowedPositions = getPositions deltaX deltaY w h astX astY
 
-      newastfield = foldl (\set pos -> S.delete pos set) (field asteroidfield) shadowedPositions
+      newastfield = foldl (flip S.delete) (field asteroidfield) shadowedPositions
       in
         asteroidfield {field = newastfield}
 
@@ -69,7 +58,7 @@ visibleFrom start asteroidfield = let shadowAsteroid = shadow start
                                       astf = asteroidfield { field = S.delete start $ field asteroidfield }
 
                                       newastfield = S.foldl 
-                                        (\astfield ast -> shadowAsteroid ast astfield) 
+                                        (flip shadowAsteroid) 
                                         astf 
                                         $ field astf
                                       in
@@ -84,10 +73,12 @@ getAllViews astf =
 
 -- get the angle -> adjusted to be relative to the y axis 
 getAngle :: Int -> Int -> Int -> Int -> Double
-getAngle sx sy x y = let ang = pi/2 + (atan2 (fromIntegral $ y-sy) (fromIntegral $ x-sx))
+getAngle sx sy x y = let ang = pi/2 + atan2 (fromIntegral $ y-sy) (fromIntegral $ x-sx)
                          in
                            if ang > 2*pi then ang - 2*pi else if ang < 0 then ang + 2* pi else ang
 
+
+getDistance :: (Floating b, Integral a) => a -> a -> a -> a -> b
 getDistance x1 y1 x2 y2 = let nx = fromIntegral $ x2 - x1 
                               ny = fromIntegral $ y2 - y1
                               in
@@ -119,16 +110,13 @@ getLaserOrder :: [[(Int, Int)]] -> [(Int, Int)]
 getLaserOrder [] = []
 getLaserOrder (x:xs) = case x of
   [] -> getLaserOrder xs
-  y:ys -> y : (getLaserOrder $ xs ++ [ys])
+  y:ys -> y : getLaserOrder(xs ++ [ys])
 
+main :: IO()
 main = do
-  handle <- openFile "./input.txt" ReadMode
-  contents <- hGetContents handle
-  let astf = parse contents
-  let (bestVis, bestX, bestY) = maximum $ getAllViews $ astf
+  astf <- parse
+  let (bestVis, bestX, bestY) = maximum $ getAllViews astf
   print bestVis
-  print bestX
-  print bestY 
 
   let orderFn = orderAngles bestX bestY
   let eqFn = angleEqual bestX bestY
@@ -137,10 +125,8 @@ main = do
 
   let orderedAngles = map (sortBy orderDistFn) $ groupBy eqFn $ sortBy orderFn $ S.toList $ field astf
 
-  print $ getLaserOrder orderedAngles
-
   let lasered = M.fromList $ zip [1..] $ getLaserOrder orderedAngles
 
-  let (x,y) = fromMaybe (error "wut?") (M.lookup 200 lasered)
+  let (x,y) = M.findWithDefault (error "wut?") 200 lasered
 
   print $ x*100 + y
