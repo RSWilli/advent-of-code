@@ -1,13 +1,11 @@
 import qualified Computer                      as C
 import qualified Data.Map                      as M
-import           Data.Maybe                     ( fromMaybe )
-import           System.IO
+import InputParser
+import Util
 
 type Position = (Int, Int)
 
 type Hull = M.Map Position Color
-
-type ListFn = [Int] -> [Int]
 
 data Color = Black | White
 
@@ -59,7 +57,7 @@ step (x, y) U = (x, y + 1)
 step (x, y) D = (x, y - 1)
 
 getColor :: Position -> Hull -> Color
-getColor pos hull = fromMaybe Black (M.lookup pos hull)
+getColor = M.findWithDefault Black
 
 fromColorCode :: Integer -> Color
 fromColorCode i = case i of
@@ -120,29 +118,20 @@ generateImage hull =
   let ((minx, miny),(maxx, maxy)) = getBoundingBox $ M.keys hull
       pixels       = [ (x, y) | y <- [miny .. maxy], x <- [minx .. maxx] ]
 
-      color pix = colorToChar $ fromMaybe Black (M.lookup pix hull)
-  in  unlines $ reverse $ sequences (maxx-minx + 1) $ foldl (\str pix -> str ++ color pix) "" pixels
+      color pix = colorToChar $ getColor pix hull
+  in  unlines $ reverse $ chunks (maxx-minx + 1) $ foldl (\str pix -> str ++ color pix) "" pixels
 
+main :: IO ()
 main = do
-  h    <- openFile "./input.txt" ReadMode
-  code <- hGetContents h
-  let program   = C.parseIntcodeProgram code
-  let p1Painter = newHullpainter (C.run $ C.machine program) Black
+  [machine] <- map C.new <$> getParsedLines 11 C.memoryParser
+  let p1Painter = newHullpainter (C.run machine) Black
   let part1     = paintHull p1Painter
 
-  let p2Painter = newHullpainter (C.run $ C.machine program) White
+  let p2Painter = newHullpainter (C.run machine) White
   let part2     = paintHull p2Painter
 
   print $ M.size $ hull part1
 
-  print $ getBoundingBox $ M.keys $ hull part2
-
   let image = generateImage $ hull part2
 
-  print $ length image
-
   putStrLn image
-
-
-sequences c l =
-  let (x, xs) = splitAt c l in if null xs then [x] else x : sequences c xs
