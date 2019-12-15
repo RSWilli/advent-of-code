@@ -29,15 +29,16 @@ findPath current destination graph visited =
   let newVisited = current : visited
   in
     if current == destination
-      then return newVisited
-      else do
-        connectedNodes <- M.lookup current graph
-        let next = filter (`notElem` visited) connectedNodes
-        let
-        let paths = map (\v -> findPath v destination graph newVisited) next
+    then return newVisited
+    else do
+      connectedNodes <- M.lookup current graph
+      let next = filter (`notElem` visited) connectedNodes
+      let
+      let paths = map (\v -> findPath v destination graph newVisited) next
 
-        foldr (liftA2 (++)) (return []) paths
+      foldr (liftA2 (++)) (return []) paths
 
+main :: IO ()
 main = do
   input <- getParsedLines 6 orbitParser
   let orbitsTree = M.fromListWith (++) input
