@@ -18,7 +18,7 @@ library
     InputParser
 
   build-depends:        
-    base >=4.12 && <4.13,
+    base,
     containers,
     megaparsec  ^>= 8.0
 
@@ -27,83 +27,83 @@ library
 executable Day01
   import: shared-properties
   main-is:             day01.hs
-  build-depends:       base >=4.12 && <4.13, advent2019
+  build-depends:       base, advent2019
   hs-source-dirs:      days
 
 executable Day02
   import: shared-properties
   main-is:             day02.hs
-  build-depends:       base >=4.12 && <4.13, advent2019
+  build-depends:       base, advent2019
   hs-source-dirs:      days
 
 executable Day03
   import: shared-properties
   main-is:             day03.hs
-  build-depends:       base >=4.12 && <4.13, containers, advent2019
+  build-depends:       base, containers, advent2019
   hs-source-dirs:      days
 
 executable Day04
   import: shared-properties
   main-is:             day04.hs
-  build-depends:       base >=4.12 && <4.13
+  build-depends:       base
   hs-source-dirs:      days
 
 executable Day05
   import: shared-properties
   main-is:             day05.hs
-  build-depends:       base >=4.12 && <4.13, advent2019
+  build-depends:       base, advent2019
   hs-source-dirs:      days
 
 executable Day06
   import: shared-properties
   main-is:             day06.hs
-  build-depends:       base >=4.12 && <4.13, advent2019, containers
+  build-depends:       base, advent2019, containers
   hs-source-dirs:      days
 
 executable Day07
   import: shared-properties
   main-is:             day07.hs
-  build-depends:       base >=4.12 && <4.13, advent2019
+  build-depends:       base, advent2019
   hs-source-dirs:      days
 
 executable Day08
   import: shared-properties
   main-is:             day08.hs
-  build-depends:       base >=4.12 && <4.13, advent2019, containers
+  build-depends:       base, advent2019, containers
   hs-source-dirs:      days
 
 executable Day09
   import: shared-properties
   main-is:             day09.hs
-  build-depends:       base >=4.12 && <4.13, advent2019
+  build-depends:       base, advent2019
   hs-source-dirs:      days
 
 executable Day10
   import: shared-properties
   main-is:             day10.hs
-  build-depends:       base >=4.12 && <4.13, advent2019, containers
+  build-depends:       base, advent2019, containers
   hs-source-dirs:      days
 
 executable Day11
   import: shared-properties
   main-is:             day11.hs
-  build-depends:       base >=4.12 && <4.13, advent2019, containers
+  build-depends:       base, advent2019, containers
   hs-source-dirs:      days
 
 executable Day12
   import: shared-properties
   main-is:             day12.hs
-  build-depends:       base >=4.12 && <4.13, advent2019, containers
+  build-depends:       base, advent2019, containers
   hs-source-dirs:      days
 
 executable Day13
   import: shared-properties
   main-is:             day13.hs
-  build-depends:       base >=4.12 && <4.13, containers, advent2019
+  build-depends:       base, containers, advent2019
   hs-source-dirs:      days
 
 executable Day14
   import: shared-properties
   main-is:             day14.hs
-  build-depends:       base >=4.12 && <4.13, containers, advent2019
+  build-depends:       base, containers, advent2019
   hs-source-dirs:      days
