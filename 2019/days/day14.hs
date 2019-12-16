@@ -1,28 +1,29 @@
 {-# Language OverloadedStrings #-}
 import InputParser
-import Data.List (intercalate)
 import qualified Data.Map as M
 
-data Chemical = Chemical Int String deriving (Ord, Eq)
-instance Show Chemical where
-  show (Chemical amount n) = show amount ++ " " ++ n
+type Reactions = M.Map String (Int, M.Map String Int)
 
-data Reaction = Reaction [Chemical] Chemical
-instance Show Reaction where
-  show (Reaction input output) = intercalate ", " (map show input) ++ " => " ++ show output
+type Chemical = (String, Int)
 
 chemicalParser :: Parser Chemical
-chemicalParser = Chemical <$> (number <* " ") <*> name
+chemicalParser = (flip (,)) <$> (number <* " ") <*> name
 
 chemicalListParser :: Parser [Chemical]
 chemicalListParser = chemicalParser `sepBy` ", "
 
-reactionParser :: Parser Reaction
-reactionParser = Reaction <$> (chemicalListParser <* " => ") <*> chemicalParser
+reactionParser :: Parser (String, (Int, M.Map String Int))
+reactionParser = do
+  srcChemList <- chemicalListParser
+  " => "
+  (name, count) <- chemicalParser
+
+  return (name, (count, M.fromList srcChemList))
+
+-- create
 
 main :: IO ()
 main = do
-  reactions <- getParsedLines 14 reactionParser
-  let reactionTree = M.fromList $ map (\(Reaction s (Chemical c n)) -> (n, (c,s))) reactions
-  print $ M.lookup "FUEL" reactionTree
+  reactions <- M.fromList <$> getParsedLines 14 reactionParser
+  print $ M.lookup "FUEL" reactions
   
