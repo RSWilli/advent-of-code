@@ -113,3 +113,9 @@ executable Day15
   main-is:             day15.hs
   build-depends:       base, containers, advent2019, dequeue ^>= 0.1.12
   hs-source-dirs:      days
+
+executable Day17
+  import: shared-properties
+  main-is:             day17.hs
+  build-depends:       base, containers, advent2019
+  hs-source-dirs:      days

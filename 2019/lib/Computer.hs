@@ -91,7 +91,7 @@ step machine = result machine
     AdjRel a -> Step . adv 2 . adjustBase (val a)
     Hlt      -> StepHalt
 
-memoryParser :: Parser [Datatype]
+memoryParser :: Parser Program
 memoryParser = number `sepBy` ","
 
 -- advance pc
