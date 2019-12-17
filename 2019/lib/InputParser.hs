@@ -1,7 +1,7 @@
 {-# Language OverloadedStrings #-}
 module InputParser 
 ( module InputParser
-, satisfy, anySingle, sepBy, manyTill, space, string
+, satisfy, anySingle, sepBy, manyTill, space, string, many, some
 ) where
 
 import Text.Megaparsec (setInput, anySingle, satisfy, parse, Parsec, eof, sepBy, manyTill)
@@ -9,7 +9,7 @@ import Text.Megaparsec.Char (newline, string)
 import Text.Megaparsec.Char.Lexer (decimal, signed, space)
 import Text.Megaparsec.Error (errorBundlePretty)
 import Data.Char (isAlpha)
-import Control.Applicative (some)
+import Control.Applicative (some, many)
 import Data.Void
 import Text.Printf
 import System.Environment (getArgs)
