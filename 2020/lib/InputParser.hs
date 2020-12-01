@@ -1,22 +1,24 @@
 module InputParser
   ( module InputParser,
-    parse,
+    decimal,
+    signed,
+    space,
   )
 where
 
 import Data.Char (isAlpha)
 import Data.Text (Text)
-import Data.Void
-import System.IO
-import Text.Megaparsec
-import Text.Megaparsec.Char
+import Data.Void (Void)
+import System.IO (readFile)
+import Text.Megaparsec (Parsec, eof, parse, satisfy, sepBy, some)
+import Text.Megaparsec.Char (newline)
 import Text.Megaparsec.Char.Lexer (decimal, signed, space)
 import Text.Megaparsec.Error (errorBundlePretty)
-import Text.Printf
+import Text.Printf (printf)
 
 type Parser = Parsec Void String
 
-myparse parser input = case parse parser "input" input of
+myparse parser input = case parse (parser <* eof) "input" input of
   Left a -> Left (errorBundlePretty a)
   Right a -> Right a
 
@@ -26,7 +28,7 @@ getInputPath = printf "inputs/day%02d.txt"
 parseLines :: Parser a -> String -> Either String [a]
 parseLines parser = myparse combinedParser
   where
-    combinedParser = (parser `sepBy` newline) <* eof
+    combinedParser = parser `sepBy` newline
 
 printParseError :: Either String a -> IO a
 printParseError = either fail return
@@ -39,6 +41,18 @@ parseInput i parser = do
 parseInputLines :: Int -> Parser a -> IO [a]
 parseInputLines i parser = do
   content <- readFile $ getInputPath i
+  printParseError $ parseLines parser content
+
+parseTest :: String -> Parser a -> IO a
+
+parseInput path parser = do
+  content <- readFile path
+  printParseError $ myparse parser content
+
+parseTestLines :: String -> Parser a -> IO [a]
+
+parseInputLines path parser = do
+  content <- readFile path
   printParseError $ parseLines parser content
 
 -- Number parser
