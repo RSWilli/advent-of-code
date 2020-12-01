@@ -44,14 +44,12 @@ parseInputLines i parser = do
   printParseError $ parseLines parser content
 
 parseTest :: String -> Parser a -> IO a
-
-parseInput path parser = do
+parseTest path parser = do
   content <- readFile path
   printParseError $ myparse parser content
 
 parseTestLines :: String -> Parser a -> IO [a]
-
-parseInputLines path parser = do
+parseTestLines path parser = do
   content <- readFile path
   printParseError $ parseLines parser content
 
