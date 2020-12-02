@@ -3,6 +3,7 @@ module InputParser
     decimal,
     signed,
     space,
+    letterChar,
   )
 where
 
@@ -11,7 +12,7 @@ import Data.Text (Text)
 import Data.Void (Void)
 import System.IO (readFile)
 import Text.Megaparsec (Parsec, eof, parse, satisfy, sepBy, some)
-import Text.Megaparsec.Char (newline)
+import Text.Megaparsec.Char (letterChar, newline)
 import Text.Megaparsec.Char.Lexer (decimal, signed, space)
 import Text.Megaparsec.Error (errorBundlePretty)
 import Text.Printf (printf)
