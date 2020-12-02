@@ -16,7 +16,7 @@ isCharAtPos :: M.Map Int Char -> Int -> Char -> Bool
 isCharAtPos m i c = Just c == M.lookup i m
 
 countLetter :: Char -> String -> Int
-countLetter c = foldr (\char sum -> if char == c then sum + 1 else sum) 0
+countLetter c = length . filter (c ==)
 
 policyCorrectP1 :: Policy -> Bool
 policyCorrectP1 (Policy min max char pass) = min <=> max $ countLetter char pass
