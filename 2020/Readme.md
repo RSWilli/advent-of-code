@@ -1,10 +1,12 @@
 # Benchmarks
 
-## Hardware
+## Hardware specs
 
-Model: Surface Pro 4
-CPU: Intel i5-6300U (4) @ 3.000GHz
-RAM: 8GB
+|       |                               |
+| :---: | :---------------------------: |
+| Model |         Surface Pro 4         |
+|  CPU  | Intel i5-6300U (4) @ 3.000GHz |
+|  RAM  |              8GB              |
 
 ## GHC opts
 
