@@ -8,6 +8,7 @@ module InputParser
 where
 
 import Data.Char (isAlpha)
+import qualified Data.Map as M
 import Data.Text (Text)
 import Data.Void (Void)
 import System.IO (readFile)
@@ -43,6 +44,18 @@ parseInputLines :: Int -> Parser a -> IO [a]
 parseInputLines i parser = do
   content <- readFile $ getInputPath i
   printParseError $ parseLines parser content
+
+type Pos = (Int, Int)
+
+type Positions = M.Map Pos Char
+
+parseInput2D :: Int -> IO Positions
+parseInput2D i = do
+  content <- lines <$> readFile (getInputPath i)
+  return $ M.fromList $ concat $ zipWith (\y line -> zipWith (\x char -> ((x, y), char)) [0 ..] line) [0 ..] content
+
+dimensions :: Positions -> Pos
+dimensions p = let ((width, height), _) = M.findMax p in (width + 1, height + 1)
 
 parseTest :: String -> Parser a -> IO a
 parseTest path parser = do
