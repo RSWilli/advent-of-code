@@ -1,4 +1,5 @@
 import Bench
+import Control.Monad (guard)
 import qualified Data.Set as S
 import InputParser
 
@@ -8,8 +9,14 @@ part1 list =
 
 part2 list =
   let set = S.fromList list
-      first = map (2020 -) list
-   in product $ S.fromList $ filter (`S.member` set) $ concatMap (\first -> map (first -) list) first
+      indexed = zip [1 ..] list
+   in product $ do
+        (i, x) <- indexed
+        (j, y) <- indexed
+        guard $ i <= j
+        let v = 2020 - x - y
+        guard $ S.member v set
+        return v
 
 main = do
   input <- parseInputLines 1 number
