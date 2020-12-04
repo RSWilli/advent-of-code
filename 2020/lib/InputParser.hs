@@ -13,15 +13,21 @@ module InputParser
     manyTill,
     sepEndBy,
     isDigit,
+    choice,
+    someTill,
+    isControl,
+    try,
+    anySingle,
+    notFollowedBy,
   )
 where
 
-import Data.Char (isAlpha, isDigit, isSpace)
+import Data.Char (isAlpha, isControl, isDigit, isSpace)
 import qualified Data.Map as M
 import Data.Text (Text)
 import Data.Void (Void)
 import System.IO (readFile)
-import Text.Megaparsec (Parsec, endBy, eof, many, manyTill, parse, satisfy, sepBy, sepEndBy, some)
+import Text.Megaparsec (Parsec, anySingle, choice, endBy, eof, many, manyTill, notFollowedBy, parse, satisfy, sepBy, sepEndBy, some, someTill, try)
 import Text.Megaparsec.Char (letterChar, newline, printChar, space)
 import Text.Megaparsec.Char.Lexer (decimal, signed)
 import Text.Megaparsec.Error (errorBundlePretty)

@@ -8,59 +8,87 @@ import qualified Data.Set as S
 import InputParser
 import Util
 
-type Passport = M.Map String String
+data Key = Byr Bool | Iyr Bool | Eyr Bool | Hgt Bool | Hcl Bool | Ecl Bool | Pid Bool | Other Bool deriving (Eq, Show)
+
+type Passport = [Key]
 
 validKeys = S.fromList $ words "byr iyr eyr hgt hcl ecl pid" -- "cid"
 
 isHex :: Char -> Bool
 isHex c = isDigit c || ('a' <=> 'f') c
 
-isValueInRange :: Int -> Int -> String -> Passport -> Maybe ()
-isValueInRange min max key pass = M.lookup key pass >>= guard . (min <=> max) . read
+parseAny :: Parser String
+parseAny = some (satisfy (\x -> not (isSpace x || isControl x)))
 
-isValidData :: Passport -> Bool
-isValidData pass = isJust $
-  do
-    isValueInRange 1920 2002 "byr" pass
-    isValueInRange 2010 2020 "iyr" pass
-    isValueInRange 2020 2030 "eyr" pass
+validatingParser :: Parser a -> (a -> Bool) -> Parser Bool
+validatingParser correctParser validator =
+  try (validator <$> correctParser) <|> False <$ parseAny
 
-    (hgt, unit) <- span isDigit <$> M.lookup "hgt" pass
-    guard $ case unit of
-      "cm" -> (150 <=> 193) (read hgt)
-      "in" -> (59 <=> 76) (read hgt)
-      _ -> False
+validateHeight :: (Int, String) -> Bool
+validateHeight (hgt, unit) = case unit of
+  "cm" -> (150 <=> 193) hgt
+  "in" -> (59 <=> 76) hgt
 
-    '#' : hcl <- M.lookup "hcl" pass
-    guard $ all isHex hcl && length hcl == 6
+validateEyeColor :: String -> Bool
+validateEyeColor ecl = elem ecl $ words "amb blu brn gry grn hzl oth"
 
-    ecl <- M.lookup "ecl" pass
-    guard $ ecl `elem` words "amb blu brn gry grn hzl oth"
+numberParser = decimal <* notFollowedBy (satisfy isAlpha)
 
-    pid <- M.lookup "pid" pass
-    guard $ all isDigit pid && length pid == 9
+heightParser = (,) <$> decimal <*> ("in" <|> "cm")
 
-keyValueParser :: Parser (String, String)
-keyValueParser = (,) <$> manyTill (satisfy isAlpha) ":" <*> many (satisfy (not . isSpace))
+hexParser = "#" *> some (satisfy isHex)
+
+keyParser :: Parser Key
+keyParser =
+  choice
+    [ Byr <$> ("byr:" *> validatingParser numberParser (1920 <=> 2002)),
+      Iyr <$> ("iyr:" *> validatingParser numberParser (2010 <=> 2020)),
+      Eyr <$> ("eyr:" *> validatingParser numberParser (2020 <=> 2030)),
+      Hgt <$> ("hgt:" *> validatingParser heightParser validateHeight),
+      Hcl <$> ("hcl:" *> validatingParser hexParser ((6 ==) . length)),
+      Ecl <$> ("ecl:" *> validatingParser name validateEyeColor),
+      Pid <$> ("pid:" *> validatingParser numberParser (1000000000 >)),
+      Other False <$ parseAny
+    ]
 
 passportParser :: Parser Passport
-passportParser = M.fromList <$> sepEndBy keyValueParser (" " <|> "\n")
+passportParser = sepEndBy keyParser (" " <|> "\n")
 
 passportsParser :: Parser [Passport]
 passportsParser = passportParser `sepBy` "\n"
 
+isOther :: Key -> Bool
+isOther key = case key of
+  Other _ -> True
+  _ -> False
+
+isDataValid :: Key -> Bool
+isDataValid (Byr x) = x
+isDataValid (Iyr x) = x
+isDataValid (Eyr x) = x
+isDataValid (Hgt x) = x
+isDataValid (Hcl x) = x
+isDataValid (Ecl x) = x
+isDataValid (Pid x) = x
+isDataValid (Other _) = False
+
 part1 :: [Passport] -> Int
-part1 passes = length $ filter (S.isSubsetOf validKeys . M.keysSet) passes
+part1 passes = length $ filter ((7 ==) . length . filter (not . isOther)) passes
 
 part2 :: [Passport] -> Int
-part2 passes = length $ filter isValidData passes
+part2 passes = length $ filter ((7 ==) . length . filter isDataValid) passes
 
 main = do
   passports <- parseInput 4 passportsParser
+  print passports
   print $ part1 passports
   print $ part2 passports
   defaultMain
     [ bgroup
+        "parse"
+        [ bench "input" $ nfIO (parseInput 4 passportsParser)
+        ],
+      bgroup
         "run"
         [ bench "part1" $ whnf part1 passports,
           bench "part2" $ whnf part2 passports
