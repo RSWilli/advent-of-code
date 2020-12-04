@@ -26,6 +26,10 @@ main = do
   print $ part2 mountain
   defaultMain
     [ bgroup
+        "parse"
+        [ bench "input" $ whnfIO (parseInput2D 3)
+        ],
+      bgroup
         "run"
         [ bench "part1" $ whnf part1 mountain,
           bench "part2" $ whnf part2 mountain

@@ -24,10 +24,10 @@ main = do
   print (part1 input)
   print (part2 input)
   defaultMain
-    [ -- bgroup
-      --   "parse"
-      --   [ bench "input" $ nfIO (parseInputLines 1) number
-      --   ],
+    [ bgroup
+        "parse"
+        [ bench "input" $ whnfIO (parseInputLines 1 number)
+        ],
       bgroup
         "run"
         [ bench "part1" $ whnf part1 input,
