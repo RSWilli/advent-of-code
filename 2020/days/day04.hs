@@ -86,7 +86,7 @@ main = do
   defaultMain
     [ bgroup
         "parse"
-        [ bench "input" $ nfIO (parseInput 4 passportsParser)
+        [ bench "input" $ whnfIO (parseInput 4 passportsParser)
         ],
       bgroup
         "run"
