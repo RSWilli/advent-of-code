@@ -4,14 +4,12 @@ import Bench
 import Control.Applicative
 import qualified Data.Map as M
 import InputParser
+import Util
 
 data Policy = Policy Int Int Char String deriving (Show)
 
 -- 8-10 q: qqglqqqqqqqjqmdbq
 policyParser = Policy <$> (decimal <* "-") <*> (decimal <* " ") <*> (letterChar <* ": ") <*> name
-
-(<=>) :: Ord a => a -> a -> a -> Bool
-x <=> y = \z -> x <= z && z <= y
 
 isCharAtPos :: M.Map Int Char -> Int -> Char -> Bool
 isCharAtPos m i c = Just c == M.lookup i m

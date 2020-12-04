@@ -4,17 +4,26 @@ module InputParser
     signed,
     space,
     letterChar,
+    printChar,
+    sepBy,
+    satisfy,
+    isSpace,
+    isAlpha,
+    endBy,
+    manyTill,
+    sepEndBy,
+    isDigit,
   )
 where
 
-import Data.Char (isAlpha)
+import Data.Char (isAlpha, isDigit, isSpace)
 import qualified Data.Map as M
 import Data.Text (Text)
 import Data.Void (Void)
 import System.IO (readFile)
-import Text.Megaparsec (Parsec, eof, parse, satisfy, sepBy, some)
-import Text.Megaparsec.Char (letterChar, newline)
-import Text.Megaparsec.Char.Lexer (decimal, signed, space)
+import Text.Megaparsec (Parsec, endBy, eof, many, manyTill, parse, satisfy, sepBy, sepEndBy, some)
+import Text.Megaparsec.Char (letterChar, newline, printChar, space)
+import Text.Megaparsec.Char.Lexer (decimal, signed)
 import Text.Megaparsec.Error (errorBundlePretty)
 import Text.Printf (printf)
 
@@ -74,3 +83,7 @@ number = signed (return ()) decimal
 -- name parser
 name :: Parser String
 name = some (satisfy isAlpha)
+
+-- text parser match any text
+text :: Parser String
+text = some printChar
