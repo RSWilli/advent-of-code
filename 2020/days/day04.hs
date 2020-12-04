@@ -8,6 +8,7 @@ import qualified Data.Set as S
 import InputParser
 import Util
 
+-- a datatype that holds wether or not the key has the correct data format
 data Key = Byr Bool | Iyr Bool | Eyr Bool | Hgt Bool | Hcl Bool | Ecl Bool | Pid Bool | Other Bool deriving (Eq, Show)
 
 type Passport = [Key]
@@ -75,6 +76,7 @@ isDataValid (Other _) = False
 part1 :: [Passport] -> Int
 part1 passes = length $ filter ((7 ==) . length . filter (not . isOther)) passes
 
+-- currently bugged: 1 false positive
 part2 :: [Passport] -> Int
 part2 passes = length $ filter ((7 ==) . length . filter isDataValid) passes
 
