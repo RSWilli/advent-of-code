@@ -19,10 +19,11 @@ module InputParser
     try,
     anySingle,
     notFollowedBy,
+    isHexDigit,
   )
 where
 
-import Data.Char (isAlpha, isControl, isDigit, isSpace)
+import Data.Char (isAlpha, isControl, isDigit, isHexDigit, isSpace)
 import qualified Data.Map as M
 import Data.Text (Text)
 import Data.Void (Void)

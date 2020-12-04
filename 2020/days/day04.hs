@@ -8,22 +8,28 @@ import qualified Data.Set as S
 import InputParser
 import Util
 
+type Value a = Either String a
+
 -- a datatype that holds wether or not the key has the correct data format
-data Key = Byr Bool | Iyr Bool | Eyr Bool | Hgt Bool | Hcl Bool | Ecl Bool | Pid Bool | Other Bool deriving (Eq, Show)
+data Key
+  = Byr (Value Int)
+  | Iyr (Value Int)
+  | Eyr (Value Int)
+  | Hgt (Value (Int, String))
+  | Hcl (Value String)
+  | Ecl (Value String)
+  | Pid (Value Int)
+  | Other (Value String)
+  deriving (Eq, Show)
 
 type Passport = [Key]
-
-validKeys = S.fromList $ words "byr iyr eyr hgt hcl ecl pid" -- "cid"
-
-isHex :: Char -> Bool
-isHex c = isDigit c || ('a' <=> 'f') c
 
 parseAny :: Parser String
 parseAny = some (satisfy (\x -> not (isSpace x || isControl x)))
 
-validatingParser :: Parser a -> (a -> Bool) -> Parser Bool
+validatingParser :: Parser a -> (a -> Bool) -> Parser (Value a)
 validatingParser correctParser validator =
-  try (validator <$> correctParser) <|> False <$ parseAny
+  try (correctParser >>= \res -> guard (validator res) >> return (Right res)) <|> Left <$> parseAny
 
 validateHeight :: (Int, String) -> Bool
 validateHeight (hgt, unit) = case unit of
@@ -37,7 +43,7 @@ numberParser = decimal <* notFollowedBy (satisfy isAlpha)
 
 heightParser = (,) <$> decimal <*> ("in" <|> "cm")
 
-hexParser = "#" *> some (satisfy isHex)
+hexParser = "#" *> some (satisfy isHexDigit)
 
 keyParser :: Parser Key
 keyParser =
@@ -49,7 +55,7 @@ keyParser =
       Hcl <$> ("hcl:" *> validatingParser hexParser ((6 ==) . length)),
       Ecl <$> ("ecl:" *> validatingParser name validateEyeColor),
       Pid <$> ("pid:" *> validatingParser numberParser (1000000000 >)),
-      Other False <$ parseAny
+      Other . Left <$> parseAny
     ]
 
 passportParser :: Parser Passport
@@ -64,14 +70,14 @@ isOther key = case key of
   _ -> False
 
 isDataValid :: Key -> Bool
-isDataValid (Byr x) = x
-isDataValid (Iyr x) = x
-isDataValid (Eyr x) = x
-isDataValid (Hgt x) = x
-isDataValid (Hcl x) = x
-isDataValid (Ecl x) = x
-isDataValid (Pid x) = x
-isDataValid (Other _) = False
+isDataValid (Byr (Right _)) = True
+isDataValid (Iyr (Right _)) = True
+isDataValid (Eyr (Right _)) = True
+isDataValid (Hgt (Right _)) = True
+isDataValid (Hcl (Right _)) = True
+isDataValid (Ecl (Right _)) = True
+isDataValid (Pid (Right _)) = True
+isDataValid _ = False
 
 part1 :: [Passport] -> Int
 part1 passes = length $ filter ((7 ==) . length . filter (not . isOther)) passes
@@ -82,7 +88,8 @@ part2 passes = length $ filter ((7 ==) . length . filter isDataValid) passes
 
 main = do
   passports <- parseInput 4 passportsParser
-  print passports
+  -- print passports
+  print $ map (filter (\x -> not (isDataValid x) && isOther x)) passports
   print $ part1 passports
   print $ part2 passports
   defaultMain
