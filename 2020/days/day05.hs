@@ -1,9 +1,7 @@
-{-# LANGUAGE OverloadedStrings #-}
+´{-# LANGUAGE OverloadedStrings #-}
 
 import Bench
 import Control.Applicative
-import Data.Bits (xor)
-import qualified Data.IntSet as S
 import InputParser
 import Util
 
@@ -18,10 +16,10 @@ part1 = maximum
 
 part2 :: [Int] -> Int
 part2 passes =
-  let seats = S.fromList passes
-      lowerSum = sumTo $ S.findMin seats - 1
-      fullSum = sumTo $ S.findMax seats
-      actualSum = S.foldr (+) 0 seats
+  let (min, max) = (minimum passes, maximum passes)
+      lowerSum = sumTo $ min - 1
+      fullSum = sumTo max
+      actualSum = sum passes
    in (fullSum - lowerSum) - actualSum
 
 main = do
