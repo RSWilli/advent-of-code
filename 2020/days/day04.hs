@@ -3,8 +3,6 @@
 import Bench
 import Control.Applicative
 import Control.Monad
-import qualified Data.Map as M
-import qualified Data.Set as S
 import InputParser
 import Util
 
@@ -88,8 +86,6 @@ part2 passes = length $ filter ((7 ==) . length . filter isDataValid) passes
 
 main = do
   passports <- parseInput 4 passportsParser
-  -- print passports
-  print $ map (filter (\x -> not (isDataValid x) && isOther x)) passports
   print $ part1 passports
   print $ part2 passports
   defaultMain

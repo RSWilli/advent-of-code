@@ -1,6 +1,6 @@
 import Bench
 import Control.Monad (guard)
-import qualified Data.Set as S
+import qualified Data.IntSet as S
 import InputParser
 
 part1 list =

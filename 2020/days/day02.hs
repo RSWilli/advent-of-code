@@ -2,7 +2,7 @@
 
 import Bench
 import Control.Applicative
-import qualified Data.Map as M
+import qualified Data.IntMap as M
 import InputParser
 import Util
 
@@ -11,7 +11,7 @@ data Policy = Policy Int Int Char String deriving (Show)
 -- 8-10 q: qqglqqqqqqqjqmdbq
 policyParser = Policy <$> (decimal <* "-") <*> (decimal <* " ") <*> (letterChar <* ": ") <*> name
 
-isCharAtPos :: M.Map Int Char -> Int -> Char -> Bool
+isCharAtPos :: M.IntMap Char -> Int -> Char -> Bool
 isCharAtPos m i c = Just c == M.lookup i m
 
 countLetter :: Char -> String -> Int
@@ -33,7 +33,6 @@ part2 = length . filter policyCorrectP2
 
 main = do
   input <- parseInputLines 2 policyParser
-  print input
   print $ part1 input
   print $ part2 input
   defaultMain
