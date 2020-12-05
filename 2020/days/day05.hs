@@ -10,15 +10,19 @@ import Util
 seatParser :: Parser Int
 seatParser = foldl (\sum i -> sum * 2 + i) 0 <$> many (1 <$ ("B" <|> "R") <|> (0 <$ ("F" <|> "L")))
 
+sumTo :: Int -> Int
+sumTo x = x * (x + 1) `div` 2
+
 part1 :: [Int] -> Int
 part1 = maximum
 
 part2 :: [Int] -> Int
 part2 passes =
   let seats = S.fromList passes
-   in foldr xor 0 [0 .. (S.findMin seats - 1)]
-        `xor` S.foldr xor 0 seats
-        `xor` foldr xor 0 [(S.findMax seats + 1) .. 1023]
+      lowerSum = sumTo $ S.findMin seats - 1
+      fullSum = sumTo $ S.findMax seats
+      actualSum = S.foldr (+) 0 seats
+   in (fullSum - lowerSum) - actualSum
 
 main = do
   passes <- parseInputLines 5 seatParser
