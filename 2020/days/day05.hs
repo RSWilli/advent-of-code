@@ -3,7 +3,7 @@
 import Bench
 import Control.Applicative
 import Data.Bits (xor)
-import qualified Data.Set as S
+import qualified Data.IntSet as S
 import InputParser
 import Util
 
