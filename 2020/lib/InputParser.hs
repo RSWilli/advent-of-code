@@ -74,14 +74,10 @@ dimensions :: Positions -> Pos
 dimensions p = let ((width, height), _) = M.findMax p in (width + 1, height + 1)
 
 parseTest :: String -> Parser a -> IO a
-parseTest path parser = do
-  content <- readFile path
-  printParseError $ myparse parser content
+parseTest content parser = printParseError $ myparse parser content
 
 parseTestLines :: String -> Parser a -> IO [a]
-parseTestLines path parser = do
-  content <- readFile path
-  printParseError $ parseLines parser content
+parseTestLines content parser = printParseError $ parseLines parser content
 
 -- Number parser
 number :: Integral a => Parser a
