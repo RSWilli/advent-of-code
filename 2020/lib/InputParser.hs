@@ -53,21 +53,24 @@ printParseError = either fail return
 
 parseInput :: Int -> Parser a -> IO a
 parseInput i parser = do
-  content <- readFile $ getInputPath i
+  content <- getInput i
   printParseError $ myparse parser content
 
 parseInputLines :: Int -> Parser a -> IO [a]
 parseInputLines i parser = do
-  content <- readFile $ getInputPath i
+  content <- getInput i
   printParseError $ parseLines parser content
 
 type Pos = (Int, Int)
 
 type Positions = M.Map Pos Char
 
+getInput :: Int -> IO String
+getInput i = readFile $ getInputPath i
+
 parseInput2D :: Int -> IO Positions
 parseInput2D i = do
-  content <- lines <$> readFile (getInputPath i)
+  content <- lines <$> getInput i
   return $ M.fromList $ concat $ zipWith (\y line -> zipWith (\x char -> ((x, y), char)) [0 ..] line) [0 ..] content
 
 dimensions :: Positions -> Pos
