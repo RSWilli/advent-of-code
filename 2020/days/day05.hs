@@ -22,7 +22,6 @@ part2 passes =
 
 main = do
   passes <- parseInputLines 5 seatParser
-  print passes
   print $ part1 passes
   print $ part2 passes
   defaultMain
