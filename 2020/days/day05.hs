@@ -8,8 +8,8 @@ import Util
 seatParser :: Parser Int
 seatParser = foldl (\sum i -> sum * 2 + i) 0 <$> many (1 <$ ("B" <|> "R") <|> (0 <$ ("F" <|> "L")))
 
-bounds :: Ord a => [a] -> (a, a)
-bounds (x : xs) = foldl (\(min', max') num -> (min min' num, max max' num)) (x, x) xs
+boundsSum :: [Int] -> (Int, Int, Int)
+boundsSum (x : xs) = foldl (\(min', max', sum) num -> (min min' num, max max' num, sum + num)) (x, x, x) xs
 
 sumTo :: Int -> Int
 sumTo x = x * (x + 1) `div` 2
@@ -19,10 +19,9 @@ part1 = maximum
 
 part2 :: [Int] -> Int
 part2 passes =
-  let (min, max) = bounds passes
+  let (min, max, actualSum) = boundsSum passes
       lowerSum = sumTo $ min - 1
       fullSum = sumTo max
-      actualSum = sum passes
    in (fullSum - lowerSum) - actualSum
 
 main = do
