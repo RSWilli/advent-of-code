@@ -2,9 +2,8 @@
 
 import Bench
 import Control.Applicative
-import qualified Data.Graph as G
+import Data.List (nub)
 import qualified Data.Map as M
-import qualified Data.Tree as T
 import InputParser
 import Util
 
@@ -25,12 +24,11 @@ containsNothingParser = [] <$ "no other bags"
 ruleParser :: Parser Rule
 ruleParser = (,) <$> (bagNameParser <* " contain ") <*> (try containsNothingParser <|> containsListParser) <* "."
 
-part1 :: [Rule] -> Int
+-- part1 :: [Rule] -> Int
 part1 rules =
-  let edgeList = map (\(v, edges) -> (v, v, map snd edges)) rules
-      (graph, vertexToKey, keyToVertex) = G.graphFromEdges edgeList
-      Just start = keyToVertex "shiny gold"
-   in length (G.reachable (G.transposeG graph) start) - 1
+  let graph = M.fromListWith (++) $ concatMap (\(start, edges) -> map (\(_, end) -> (end, [start])) edges) rules
+      countBags = concatMap (\name -> name : countBags (M.findWithDefault [] name graph))
+   in length $ nub $ countBags $ graph M.! "shiny gold"
 
 part2 :: [Rule] -> Int
 part2 rules =
@@ -40,20 +38,16 @@ part2 rules =
 
 main = do
   rules <- parseInputLines 7 ruleParser
-  -- putStrLn $ unlines $ map show rules
   print $ part1 rules
   print $ part2 rules
-
--- print $ part1 groups
--- print $ part2 groups
--- defaultMain
---   [ bgroup
---       "parse"
---       [ bench "input" $ whnfIO (parseInput 6 groupsParser)
---       ],
---     bgroup
---       "run"
---       [ bench "part1" $ whnf part1 groups,
---         bench "part2" $ whnf part2 groups
---       ]
---   ]
+  defaultMain
+    [ bgroup
+        "parse"
+        [ bench "input" $ whnfIO (parseInputLines 7 ruleParser)
+        ],
+      bgroup
+        "run"
+        [ bench "part1" $ whnf part1 rules,
+          bench "part2" $ whnf part2 rules
+        ]
+    ]
