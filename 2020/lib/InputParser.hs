@@ -20,6 +20,7 @@ module InputParser
     anySingle,
     notFollowedBy,
     isHexDigit,
+    oneOf,
   )
 where
 
@@ -28,7 +29,7 @@ import qualified Data.Map as M
 import Data.Text (Text)
 import Data.Void (Void)
 import System.IO (readFile)
-import Text.Megaparsec (Parsec, anySingle, choice, endBy, eof, many, manyTill, notFollowedBy, parse, satisfy, sepBy, sepEndBy, some, someTill, try)
+import Text.Megaparsec (Parsec, anySingle, choice, endBy, eof, many, manyTill, notFollowedBy, oneOf, parse, satisfy, sepBy, sepEndBy, some, someTill, try)
 import Text.Megaparsec.Char (letterChar, newline, printChar, space)
 import Text.Megaparsec.Char.Lexer (decimal, signed)
 import Text.Megaparsec.Error (errorBundlePretty)
