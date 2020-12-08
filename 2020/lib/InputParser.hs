@@ -84,7 +84,7 @@ parseTestLines :: String -> Parser a -> IO [a]
 parseTestLines content parser = printParseError $ parseLines parser content
 
 -- Number parser
-number :: Integral a => Parser a
+number :: Parser Int
 number = signed (return ()) decimal
 
 -- name parser

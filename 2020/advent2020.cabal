@@ -96,3 +96,11 @@ executable day07
   -- hs-source-dirs:
   default-language:    Haskell2010
   ghc-options: -threaded -O3
+executable day08
+  main-is:             days/day08.hs
+  -- other-modules:
+  -- other-extensions:
+  build-depends: base, advent2020, containers
+  -- hs-source-dirs:
+  default-language:    Haskell2010
+  ghc-options: -threaded -O3
