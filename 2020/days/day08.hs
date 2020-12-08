@@ -2,7 +2,6 @@
 
 import Bench
 import Control.Applicative
-import Control.Monad (guard)
 import qualified Data.IntSet as S
 import qualified Data.Vector as V
 import InputParser
