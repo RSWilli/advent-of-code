@@ -24,7 +24,7 @@ containsNothingParser = [] <$ "no other bags"
 ruleParser :: Parser Rule
 ruleParser = (,) <$> (bagNameParser <* " contain ") <*> (try containsNothingParser <|> containsListParser) <* "."
 
--- part1 :: [Rule] -> Int
+part1 :: [Rule] -> Int
 part1 rules =
   let graph = M.fromListWith (++) $ concatMap (\(start, edges) -> map (\(_, end) -> (end, [start])) edges) rules
       countBags = concatMap (\name -> name : countBags (M.findWithDefault [] name graph))
