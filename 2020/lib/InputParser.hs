@@ -1,3 +1,5 @@
+{-# LANGUAGE OverloadedStrings #-}
+
 module InputParser
   ( module InputParser,
     decimal,
@@ -26,18 +28,17 @@ where
 
 import Data.Char (isAlpha, isControl, isDigit, isHexDigit, isSpace)
 import qualified Data.Map as M
-import Data.Text (Text)
+import Data.Text (Text, pack)
 import Data.Void (Void)
-import System.IO (readFile)
 import Text.Megaparsec (Parsec, anySingle, choice, endBy, eof, many, manyTill, notFollowedBy, oneOf, parse, satisfy, sepBy, sepEndBy, some, someTill, try)
 import Text.Megaparsec.Char (letterChar, newline, printChar, space)
 import Text.Megaparsec.Char.Lexer (decimal, signed)
 import Text.Megaparsec.Error (errorBundlePretty)
 import Text.Printf (printf)
 
-type Parser = Parsec Void String
+type Parser = Parsec Void Text
 
-myparse parser input = case parse (parser <* eof) "input" input of
+myparse parser input = case parse (parser <* eof) "input" (pack input) of
   Left a -> Left (errorBundlePretty a)
   Right a -> Right a
 
