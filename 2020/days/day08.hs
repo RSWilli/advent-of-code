@@ -2,78 +2,71 @@
 
 import Bench
 import Control.Applicative
-import Data.Either (isRight)
-import qualified Data.IntMap as M
-import Data.List (nub)
-import qualified Data.Set as S
+import Control.Monad (guard)
+import qualified Data.IntSet as S
+import qualified Data.Vector as V
 import InputParser
 import Util
 
 data Op = Nop Int | Jump Int | Acc Int deriving (Show)
 
-type Program = [Op]
+type Program = V.Vector Op
 
-data Machine = Machine
-  { pc :: Int,
-    acc :: Int,
-    program :: M.IntMap Op
-  }
+data Step = Halt Int | Loop Int | Go Op deriving (Show)
 
-createMachine :: Program -> Machine
-createMachine prog = Machine {pc = 0, acc = 0, program = M.fromList $ zip [0 ..] prog}
+type State = (Int, Int)
 
-createHistory mach = (S.empty, mach)
+step :: State -> Op -> State
+step (acc, pc) (Nop _) = (acc, pc + 1)
+step (acc, pc) (Jump x) = (acc, pc + x)
+step (acc, pc) (Acc x) = (acc + x, pc + 1)
 
-step :: Machine -> Maybe Machine
-step m = run operation
-  where
-    mem = program m
-    addr = pc m
-    accu = acc m
-    operation = mem M.!? addr
-    run Nothing = Nothing
-    run (Just (Nop _)) = Just $ m {pc = addr + 1}
-    run (Just (Jump x)) = Just $ m {pc = addr + x}
-    run (Just (Acc x)) = Just $ m {pc = addr + 1, acc = accu + x}
+alt :: State -> Op -> Maybe State
+alt state (Jump x) = Just $ step state (Nop x)
+alt state (Nop x) = Just $step state (Jump x)
+alt _ _ = Nothing
 
-type RunHistory = (S.Set Int, Machine)
+run :: Program -> S.IntSet -> State -> Step
+run prog seen (acc, pc)
+  | S.member pc seen = Loop acc
+  | otherwise = case prog V.!? pc of
+    Nothing -> Halt acc
+    Just op ->
+      let newstate = step (acc, pc) op
+       in run prog (S.insert pc seen) newstate
 
--- left = ran into loop
--- right = reached end
-runTillEnd :: RunHistory -> Either RunHistory RunHistory
-runTillEnd (h, m) = maybe (Right (h, m)) go $ step m
-  where
-    go newm =
-      if S.member (pc newm) h
-        then Left (h, newm)
-        else runTillEnd (S.insert (pc newm) h, newm)
+fromStep :: Step -> Maybe Int
+fromStep (Loop _) = Nothing
+fromStep (Halt acc) = Just acc
 
-part1 :: Program -> Int
-part1 = either (acc . snd) (error "huh?") . runTillEnd . createHistory . createMachine
+runWithChange :: Program -> S.IntSet -> State -> Maybe Int
+runWithChange prog seen (acc, pc) = case prog V.!? pc of
+  _ | S.member pc seen -> Nothing
+  Nothing -> Just acc
+  Just op -> do
+    let newstate = step (acc, pc) op
+        seen' = S.insert pc seen
+        run' = run prog seen'
+        runWithChange' = runWithChange prog seen'
+        alternate = alt (acc, pc) op
+    runWithChange' newstate <|> (fromStep =<< (run' <$> alternate))
+
+part1 :: Program -> Step
+part1 prog = run prog S.empty (0, 0)
+
+part2 :: Program -> Maybe Int
+part2 prog = runWithChange prog S.empty (0, 0)
 
 opParser :: Parser Op
 opParser =
   choice
-    [ Nop <$> ("nop" *> space *> number),
-      Jump <$> ("jmp" *> space *> number),
-      Acc <$> ("acc" *> space *> number)
+    [ Nop <$> ("nop" *> " " *> number),
+      Jump <$> ("jmp" *> " " *> number),
+      Acc <$> ("acc" *> " " *> number)
     ]
 
-createPrograms :: Program -> [Program]
-createPrograms = tail . foldr createOption [[]]
-  where
-    createOption op@(Acc _) ops = map (op :) ops
-    createOption op@(Nop x) (real : rest) = (op : real) : (Jump x : real) : map (op :) rest
-    createOption op@(Jump x) (real : rest) = (op : real) : (Nop x : real) : map (op :) rest
-
-part2 :: Program -> Int
-part2 prog =
-  let progs = createPrograms prog
-      machs = map (runTillEnd . createHistory . createMachine) progs
-   in either (\x -> error "huh?") (acc . snd) $ head $ filter isRight machs
-
 main = do
-  ops <- parseInputLines 8 opParser
+  ops <- V.fromList <$> parseInputLines 8 opParser
   print $ part1 ops
   print $ part2 ops
   defaultMain
