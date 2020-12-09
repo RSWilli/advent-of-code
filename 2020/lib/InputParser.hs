@@ -28,17 +28,19 @@ where
 
 import Data.Char (isAlpha, isControl, isDigit, isHexDigit, isSpace)
 import qualified Data.Map as M
-import Data.Text (Text, pack)
+import Data.Text (Text, lines, unpack)
+import Data.Text.IO (readFile)
 import Data.Void (Void)
 import Text.Megaparsec (Parsec, anySingle, choice, endBy, eof, many, manyTill, notFollowedBy, oneOf, parse, satisfy, sepBy, sepEndBy, some, someTill, try)
 import Text.Megaparsec.Char (letterChar, newline, printChar, space)
 import Text.Megaparsec.Char.Lexer (decimal, signed)
 import Text.Megaparsec.Error (errorBundlePretty)
 import Text.Printf (printf)
+import Prelude hiding (lines, readFile)
 
 type Parser = Parsec Void Text
 
-myparse parser input = case parse (parser <* eof) "input" (pack input) of
+myparse parser input = case parse (parser <* eof) "input" input of
   Left a -> Left (errorBundlePretty a)
   Right a -> Right a
 
@@ -48,7 +50,7 @@ getInputPath = printf "inputs/day%02d.txt"
 getTestPath :: Int -> Int -> String
 getTestPath = printf "tests/day%02d_%d.txt"
 
-parseLines :: Parser a -> String -> Either String [a]
+parseLines :: Parser a -> Text -> Either String [a]
 parseLines parser = myparse combinedParser
   where
     combinedParser = parser `sepBy` newline
@@ -70,16 +72,29 @@ type Pos = (Int, Int)
 
 type Positions = M.Map Pos Char
 
-getInput :: Int -> IO String
+getInput :: Int -> IO Text
 getInput i = readFile $ getInputPath i
 
-getTest :: Int -> Int -> IO String
+getTest :: Int -> Int -> IO Text
 getTest i j = readFile $ getTestPath i j
 
 parseInput2D :: Int -> IO Positions
 parseInput2D i = do
   content <- lines <$> getInput i
-  return $ M.fromList $ concat $ zipWith (\y line -> zipWith (\x char -> ((x, y), char)) [0 ..] line) [0 ..] content
+  return $
+    M.fromList $
+      concat $
+        zipWith
+          ( \y line ->
+              zipWith
+                ( \x char ->
+                    ((x, y), char)
+                )
+                [0 ..]
+                line
+          )
+          [0 ..]
+          (map unpack content)
 
 dimensions :: Positions -> Pos
 dimensions p = let ((width, height), _) = M.findMax p in (width + 1, height + 1)
