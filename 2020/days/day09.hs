@@ -18,8 +18,8 @@ sumAll xs = do
   guard $ x /= y
   return $ x + y
 
-findContigousSum :: V.Vector Int -> Int -> [Int]
-findContigousSum xs targetSum = do
+findContigousSum :: V.Vector Int -> Int -> Int
+findContigousSum xs targetSum = head $ do
   let max = V.length xs
 
   start <- [0 .. max]
@@ -74,5 +74,5 @@ test1 = do
 
 test2 = do
   nums <- V.fromList <$> parseTestLines 9 1 number
-  guard $ findContigousSum nums 127 == [62]
+  guard $ findContigousSum nums 127 == 62
   print "ok"
