@@ -45,6 +45,9 @@ myparse parser input = case parse (parser <* eof) "input" (pack input) of
 getInputPath :: Int -> String
 getInputPath = printf "inputs/day%02d.txt"
 
+getTestPath :: Int -> Int -> String
+getTestPath = printf "tests/day%02d_%d.txt"
+
 parseLines :: Parser a -> String -> Either String [a]
 parseLines parser = myparse combinedParser
   where
@@ -70,6 +73,9 @@ type Positions = M.Map Pos Char
 getInput :: Int -> IO String
 getInput i = readFile $ getInputPath i
 
+getTest :: Int -> Int -> IO String
+getTest i j = readFile $ getTestPath i j
+
 parseInput2D :: Int -> IO Positions
 parseInput2D i = do
   content <- lines <$> getInput i
@@ -78,11 +84,15 @@ parseInput2D i = do
 dimensions :: Positions -> Pos
 dimensions p = let ((width, height), _) = M.findMax p in (width + 1, height + 1)
 
-parseTest :: String -> Parser a -> IO a
-parseTest content parser = printParseError $ myparse parser content
+parseTest :: Int -> Int -> Parser a -> IO a
+parseTest i j parser = do
+  content <- getTest i j
+  printParseError $ myparse parser content
 
-parseTestLines :: String -> Parser a -> IO [a]
-parseTestLines content parser = printParseError $ parseLines parser content
+parseTestLines :: Int -> Int -> Parser a -> IO [a]
+parseTestLines i j parser = do
+  content <- getTest i j
+  printParseError $ parseLines parser content
 
 -- Number parser
 number :: Parser Int
