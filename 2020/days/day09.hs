@@ -23,10 +23,11 @@ findContigousSum xs targetSum = head $ do
   let max = V.length xs
 
   start <- [0 .. max]
-  end <- [0 .. max]
+  end <- [(start + 1) .. (max -1)]
+
+  guard $ (xs V.! end) < targetSum
 
   let length = end - start
-  guard $ length > 1
 
   let vec = V.slice start length xs
   guard $ sum vec == targetSum
@@ -42,8 +43,7 @@ checkBounds preamble vec = go preamble
     go i =
       let current = vec V.! i
           preceding = V.slice (i - preamble) preamble vec
-          sums = toSet $ sumAll preceding
-       in if current `S.member` sums
+       in if V.any (\n -> (current - n) `V.elem` preceding) preceding
             then go (i + 1)
             else current
 
