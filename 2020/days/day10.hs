@@ -10,27 +10,21 @@ import Data.Maybe (mapMaybe)
 import InputParser
 import Util
 
-addPair (a, b) (c, d) = (a + c, b + d)
+count :: (a -> Bool) -> [a] -> Int
+count pred xs = length $ filter pred xs
 
-part1 :: [Int] -> (Int, Int)
+part1 :: [Int] -> Int
 part1 adaps =
   let sortedAdaps = sort adaps
       diffs = zipWith (-) sortedAdaps (0 : sortedAdaps)
-   in addPair (1, 0) $
-        foldr
-          ( addPair
-              . ( \x ->
-                    if x == 3 then (1, 0) else if x == 1 then (0, 1) else (0, 0)
-                )
-          )
-          (0, 0)
-          diffs
+   in (1 + count (3 ==) diffs) * count (1 ==) diffs
 
 countPaths :: M.IntMap Int -> [Int] -> Int
 countPaths m = sum . mapMaybe (m M.!?)
 
 next i = [i + 1, i + 2, i + 3]
 
+part2 :: [Int] -> Int
 part2 adaps =
   let possible = S.fromList $ 0 : adaps
       phone = 3 + S.findMax possible
@@ -46,8 +40,7 @@ part2 adaps =
 
 main = do
   adaps <- parseInputLines 10 number
-  let (t, o) = part1 adaps
-  print $ t * o
+  print $ part1 adaps
   print $ part2 adaps
   test1
   test2
@@ -67,13 +60,13 @@ main = do
 
 test1 = do
   adaps <- parseTestLines 10 1 number
-  guard $ part1 adaps == (5, 7)
+  guard $ part1 adaps == 35
 
   print "ok"
 
 test2 = do
   adaps <- parseTestLines 10 2 number
-  guard $ part1 adaps == (10, 22)
+  guard $ part1 adaps == 220
   print "ok"
 
 test3 = do
