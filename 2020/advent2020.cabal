@@ -28,7 +28,8 @@ library
     text,
     megaparsec,
     containers,
-    criterion
+    criterion,
+    vector
   hs-source-dirs:       lib
 
 executable dayTPL

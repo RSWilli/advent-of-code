@@ -34,7 +34,7 @@ visible seats poses =
   let (w, h) = dimensions seats
       checkBounds (x, y) = (0 <=> (w -1)) x && (0 <=> (h -1)) y
       validPoses = takeWhile checkBounds poses
-      firstSeats = map (seats M.!) $ dropWhile (isFloor seats) validPoses
+      firstSeats = map (seats `lookup2D`) $ dropWhile (isFloor seats) validPoses
    in case firstSeats of
         [] -> 0
         'L' : _ -> 0
@@ -56,14 +56,14 @@ visibleNeighbors pos seats =
       ]
 
 isTaken :: Seats -> Pos -> Bool
-isTaken m p = (m M.! p) == '#'
+isTaken m p = lookup2D m p == '#'
 
 isFloor :: Seats -> Pos -> Bool
-isFloor m p = (m M.! p) == '.'
+isFloor m p = lookup2D m p == '.'
 
 stepP1 :: Seats -> Seats
 stepP1 seats =
-  M.mapWithKey
+  map2D
     ( \pos seat ->
         let takenneighs = neighbors pos seats
          in case seat of
@@ -75,7 +75,7 @@ stepP1 seats =
 
 stepP2 :: Seats -> Seats
 stepP2 seats =
-  M.mapWithKey
+  map2D
     ( \pos seat ->
         let takenneighs = visibleNeighbors pos seats
          in case seat of
@@ -92,7 +92,7 @@ runTillStable stepfn seats =
    in fst $ head $ filter (uncurry (==)) successors
 
 countOccupied :: Seats -> Int
-countOccupied = length . filter ((== '#') . snd) . M.toList
+countOccupied = length . filter (== '#') . show2D
 
 part1 :: Seats -> Int
 part1 seats = countOccupied $ runTillStable stepP1 seats
