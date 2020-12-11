@@ -26,6 +26,8 @@ module InputParser
   )
 where
 
+import Data.ByteString.Char8 (ByteString)
+import qualified Data.ByteString.Char8 as BS
 import Data.Char (isAlpha, isControl, isDigit, isHexDigit, isSpace)
 import qualified Data.Map as M
 import Data.Text (Text)
@@ -82,13 +84,13 @@ getTest i j = T.readFile $ getTestPath i j
 
 parseInput2D :: Int -> IO Positions
 parseInput2D i = do
-  content <- T.lines <$> getInput i
-  return $ V.fromList $ map (V.fromList . T.unpack) content
+  content <- BS.lines <$> BS.readFile (getInputPath i)
+  return $ V.fromList $ map (V.fromList . BS.unpack) content
 
 parseTest2D :: Int -> Int -> IO Positions
 parseTest2D i j = do
-  content <- T.lines <$> getTest i j
-  return $ V.fromList $ map (V.fromList . T.unpack) content
+  content <- BS.lines <$> BS.readFile (getTestPath i j)
+  return $ V.fromList $ map (V.fromList . BS.unpack) content
 
 lookup2D :: Positions -> Pos -> Char
 lookup2D poses (x, y) = (poses V.! y) V.! x
