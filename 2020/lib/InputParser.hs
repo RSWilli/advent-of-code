@@ -36,6 +36,7 @@ import Text.Megaparsec.Char (letterChar, newline, printChar, space)
 import Text.Megaparsec.Char.Lexer (decimal, signed)
 import Text.Megaparsec.Error (errorBundlePretty)
 import Text.Printf (printf)
+import Util
 import Prelude hiding (lines, readFile)
 
 type Parser = Parsec Void Text
@@ -70,6 +71,8 @@ parseInputLines i parser = do
 
 type Pos = (Int, Int)
 
+type TwoDimensional = M.Map Pos
+
 type Positions = M.Map Pos Char
 
 getInput :: Int -> IO Text
@@ -81,8 +84,17 @@ getTest i j = readFile $ getTestPath i j
 parseInput2D :: Int -> IO Positions
 parseInput2D i = do
   content <- lines <$> getInput i
-  return $
-    M.fromList $
+  return $ parse2D content
+
+parseTest2D :: Int -> Int -> IO Positions
+parseTest2D i j = do
+  content <- lines <$> getTest i j
+  return $ parse2D content
+
+parse2D :: [Text] -> Positions
+parse2D content =
+  M.fromList $
+    reverse $
       concat $
         zipWith
           ( \y line ->
@@ -95,6 +107,15 @@ parseInput2D i = do
           )
           [0 ..]
           (map unpack content)
+
+print2D :: Positions -> IO ()
+print2D pos =
+  let (width, height) = dimensions pos
+      poses = do
+        y <- [0 .. (height -1)]
+        x <- [0 .. (width -1)]
+        return $ pos M.! (x, y)
+   in putStrLn $ unlines $ chunks width poses
 
 dimensions :: Positions -> Pos
 dimensions p = let ((width, height), _) = M.findMax p in (width + 1, height + 1)
