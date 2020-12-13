@@ -12,6 +12,7 @@ module InputParser
     isSpace,
     isAlpha,
     endBy,
+    newline,
     manyTill,
     sepEndBy,
     isDigit,
