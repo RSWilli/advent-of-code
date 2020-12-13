@@ -11,16 +11,6 @@ import Util
 
 type Schedule = (Int, [Maybe Int])
 
---https://gist.github.com/trevordixon/6895802
-extendedEu :: Integer -> Integer -> (Integer, Integer)
-extendedEu a 0 = (1, 0)
-extendedEu a b = (t, s - q * t)
-  where
-    (q, r) = quotRem a b
-    (s, t) = extendedEu b r
-
-eEuA a b = let (x, y) = extendedEu a b in (mod x a, mod y b)
-
 listParser :: Parser [Maybe Int]
 listParser = ((Nothing <$ "x") <|> (Just <$> decimal)) `sepBy` ","
 
