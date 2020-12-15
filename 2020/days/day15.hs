@@ -4,12 +4,9 @@
 import Bench
 import Control.Applicative
 import Control.Monad (guard)
-import Data.Bits (xor, (.&.), (.|.))
-import Data.Char (intToDigit)
 import Data.IntMap (IntMap)
 import qualified Data.IntMap as M
 import InputParser
-import Numeric (showIntAtBase)
 import Util
 
 numberparser :: Parser [Int]
