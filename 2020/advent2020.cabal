@@ -40,7 +40,7 @@ executable dayTPL
   build-depends: base, advent2020
   -- hs-source-dirs:
   default-language:    Haskell2010
-  ghc-options: -threaded -O3
+  ghc-options: -threaded -O3 -Wall
 
 executable day01
   main-is:             days/day01.hs
@@ -49,7 +49,7 @@ executable day01
   build-depends: base, advent2020, containers
   -- hs-source-dirs:
   default-language:    Haskell2010
-  ghc-options: -threaded -O3
+  ghc-options: -threaded -O3 -Wall
 executable day02
   main-is:             days/day02.hs
   -- other-modules:
@@ -57,7 +57,7 @@ executable day02
   build-depends: base, advent2020, containers
   -- hs-source-dirs:
   default-language:    Haskell2010
-  ghc-options: -threaded -O3
+  ghc-options: -threaded -O3 -Wall
 executable day03
   main-is:             days/day03.hs
   -- other-modules:
@@ -65,7 +65,7 @@ executable day03
   build-depends: base, advent2020, containers
   -- hs-source-dirs:
   default-language:    Haskell2010
-  ghc-options: -threaded -O3
+  ghc-options: -threaded -O3 -Wall
 executable day04
   main-is:             days/day04.hs
   -- other-modules:
@@ -73,7 +73,7 @@ executable day04
   build-depends: base, advent2020, containers
   -- hs-source-dirs:
   default-language:    Haskell2010
-  ghc-options: -threaded -O3
+  ghc-options: -threaded -O3 -Wall
 executable day05
   main-is:             days/day05.hs
   -- other-modules:
@@ -81,7 +81,7 @@ executable day05
   build-depends: base, advent2020, containers
   -- hs-source-dirs:
   default-language:    Haskell2010
-  ghc-options: -threaded -O3
+  ghc-options: -threaded -O3 -Wall
 executable day06
   main-is:             days/day06.hs
   -- other-modules:
@@ -89,7 +89,7 @@ executable day06
   build-depends: base, advent2020, containers
   -- hs-source-dirs:
   default-language:    Haskell2010
-  ghc-options: -threaded -O3
+  ghc-options: -threaded -O3 -Wall
 executable day07
   main-is:             days/day07.hs
   -- other-modules:
@@ -97,7 +97,7 @@ executable day07
   build-depends: base, advent2020, containers
   -- hs-source-dirs:
   default-language:    Haskell2010
-  ghc-options: -threaded -O3
+  ghc-options: -threaded -O3 -Wall
 executable day08
   main-is:             days/day08.hs
   -- other-modules:
@@ -105,7 +105,7 @@ executable day08
   build-depends: base, advent2020, containers, vector
   -- hs-source-dirs:
   default-language:    Haskell2010
-  ghc-options: -threaded -O3
+  ghc-options: -threaded -O3 -Wall
 executable day09
   main-is:             days/day09.hs
   -- other-modules:
@@ -113,7 +113,7 @@ executable day09
   build-depends: base, advent2020, containers, vector
   -- hs-source-dirs:
   default-language:    Haskell2010
-  ghc-options: -threaded -O3
+  ghc-options: -threaded -O3 -Wall
 executable day10
   main-is:             days/day10.hs
   -- other-modules:
@@ -121,7 +121,7 @@ executable day10
   build-depends: base, advent2020, containers
   -- hs-source-dirs:
   default-language:    Haskell2010
-  ghc-options: -threaded -O3
+  ghc-options: -threaded -O3 -Wall
 executable day11
   main-is:             days/day11.hs
   -- other-modules:
@@ -129,7 +129,7 @@ executable day11
   build-depends: base, advent2020, containers
   -- hs-source-dirs:
   default-language:    Haskell2010
-  ghc-options: -threaded -O3
+  ghc-options: -threaded -O3 -Wall
 executable day12
   main-is:             days/day12.hs
   -- other-modules:
@@ -137,7 +137,7 @@ executable day12
   build-depends: base, advent2020
   -- hs-source-dirs:
   default-language:    Haskell2010
-  ghc-options: -threaded -O3
+  ghc-options: -threaded -O3 -Wall
 executable day13
   main-is:             days/day13.hs
   -- other-modules:
@@ -145,7 +145,7 @@ executable day13
   build-depends: base, advent2020
   -- hs-source-dirs:
   default-language:    Haskell2010
-  ghc-options: -threaded -O3
+  ghc-options: -threaded -O3 -Wall
 executable day14
   main-is:             days/day14.hs
   -- other-modules:
@@ -153,4 +153,12 @@ executable day14
   build-depends: base, advent2020, containers
   -- hs-source-dirs:
   default-language:    Haskell2010
-  ghc-options: -threaded -O3
+  ghc-options: -threaded -O3 -Wall
+executable day15
+  main-is:             days/day15.hs
+  -- other-modules:
+  -- other-extensions:
+  build-depends: base, advent2020, containers
+  -- hs-source-dirs:
+  default-language:    Haskell2010
+  ghc-options: -threaded -O3 -Wall
