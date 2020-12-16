@@ -3,7 +3,10 @@
 import Bench
 import Control.Applicative
 import Control.Monad (guard)
-import Data.List (isPrefixOf, transpose)
+import Data.List (isPrefixOf, sortOn, transpose)
+import qualified Data.Map as M
+import qualified Data.Set as S
+import qualified Data.Vector as V
 import InputParser
 import Util
 
@@ -60,13 +63,30 @@ filterValid tickets rules =
   let allrules = map snd rules
    in filter (all (\t -> any (\rule -> rule t) allrules)) tickets
 
--- part2 :: AllTickets -> Int
+mapRules :: [[String]] -> M.Map String Int
+mapRules possibilities =
+  let ordered = sortOn (length . snd) $ zip [0 ..] $ map S.fromList possibilities
+   in snd $
+        foldl
+          ( \(taken, indices) (index, possible) ->
+              let v = head $ S.toList $ possible S.\\ taken
+                  taken' = S.insert v taken
+                  indices' = M.insert v index indices
+               in (taken', indices')
+          )
+          (S.empty, M.empty)
+          ordered
+
+part2 :: AllTickets -> Int
 part2 ts =
   let (rules, mine, tickets) = ts
+      myTicket = V.fromList mine
       ruleNames = map fst rules
       departureRules = filter ("departure" `isPrefixOf`) ruleNames
       validTickets = filterValid tickets rules
-   in findNames validTickets rules
+      names = findNames validTickets rules
+      ruleIndexes = mapRules names
+   in product $ map (\dep -> myTicket V.! (ruleIndexes M.! dep)) departureRules
 
 main = do
   tickets <- parseInput 16 allTicketsParser
@@ -74,28 +94,19 @@ main = do
   print $ part2 tickets
 
   test1
-
-  test2
-
---   defaultMain
---     [ bgroup
---         "parse"
---         [ bench "input" $ whnfIO (parseInput 16 allTicketsParser)
---         ],
---       bgroup
---         "run"
---         [ bench "part1" $ whnf part1 tickets,
---           bench "part2" $ whnf part2 tickets
---         ]
---     ]
+  defaultMain
+    [ bgroup
+        "parse"
+        [ bench "input" $ whnfIO (parseInput 16 allTicketsParser)
+        ],
+      bgroup
+        "run"
+        [ bench "part1" $ whnf part1 tickets,
+          bench "part2" $ whnf part2 tickets
+        ]
+    ]
 
 test1 = do
   tickets <- parseTest 16 1 allTicketsParser
   guard $ part1 tickets == 71
-  print "ok"
-
-test2 = do
-  tickets <- parseTest 16 2 allTicketsParser
-  print $ part2 tickets
-  -- guard $ part2 tickets == 175594
   print "ok"
