@@ -9,56 +9,61 @@ import Util
 
 type Rule = Int -> Bool
 
-type Rules = [(String, Rule, Rule)]
+type Rules = [(String, Rule)]
 
 type Ticket = [Int]
 
-type Tickets = (Rules, Ticket, [Ticket])
+type Tickets = [Ticket]
 
-rangeParser :: Parser Rule
-rangeParser = (<=>) <$> decimal <* "-" <*> decimal
+type AllTickets = (Rules, Ticket, [Ticket])
 
-ruleParser :: Parser (String, Rule, Rule)
-ruleParser = (,,) <$> manyTill printChar ": " <*> (rangeParser <* " or ") <*> rangeParser
+rangeParser :: Parser (Int, Int)
+rangeParser = (,) <$> decimal <* "-" <*> decimal
+
+ruleParser :: Parser Rule
+ruleParser = (\(x1, y1) (x2, y2) v -> (x1 <=> y1) v || (x2 <=> y2) v) <$> rangeParser <* " or " <*> rangeParser
+
+nameRuleParser :: Parser (String, Rule)
+nameRuleParser = (,) <$> manyTill printChar ": " <*> ruleParser
 
 rulesParser :: Parser Rules
-rulesParser = ruleParser `sepEndBy` "\n"
+rulesParser = nameRuleParser `sepEndBy` "\n"
 
 ticketParser :: Parser Ticket
 ticketParser = decimal `sepEndBy` ","
 
-ticketsParser :: Parser [Ticket]
+ticketsParser :: Parser Tickets
 ticketsParser = ticketParser `sepEndBy` "\n"
 
-allTicketsParser :: Parser Tickets
+allTicketsParser :: Parser AllTickets
 allTicketsParser = (,,) <$> (rulesParser <* "\nyour ticket:\n") <*> (ticketParser <* "\n\nnearby tickets:\n") <*> ticketsParser
 
-part1 :: Tickets -> Int
+part1 :: AllTickets -> Int
 part1 ts =
   let (rs, _, tickets) = ts
-      rules = concatMap (\(_, r1, r2) -> [r1, r2]) rs
-      invalid = filter (\t -> all (\rule -> not $ rule t) rules) $ concat tickets
+      rules = map snd rs
+      invalid = filter (\t -> not $ any (\rule -> rule t) rules) $ concat tickets
    in sum invalid
 
-findNames :: [Ticket] -> Rules -> [[String]]
+findNames :: Tickets -> Rules -> [[String]]
 findNames ts rules =
   let columns = transpose ts
    in map
         ( \column ->
-            map (\(n, _, _) -> n) $
-              filter (\(_, r1, r2) -> all (\field -> r1 field || r2 field) column) rules
+            map fst $
+              filter (\(_, rule) -> all rule column) rules
         )
         columns
 
-filterValid :: [Ticket] -> Rules -> [Ticket]
+filterValid :: Tickets -> Rules -> Tickets
 filterValid tickets rules =
-  let allrules = concatMap (\(_, r1, r2) -> [r1, r2]) rules
+  let allrules = map snd rules
    in filter (all (\t -> any (\rule -> rule t) allrules)) tickets
 
--- part2 :: Tickets -> Int
+-- part2 :: AllTickets -> Int
 part2 ts =
   let (rules, mine, tickets) = ts
-      ruleNames = map (\(x, _, _) -> x) rules
+      ruleNames = map fst rules
       departureRules = filter ("departure" `isPrefixOf`) ruleNames
       validTickets = filterValid tickets rules
    in findNames validTickets rules
