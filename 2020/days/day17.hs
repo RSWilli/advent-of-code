@@ -63,12 +63,12 @@ toHyper input =
    in S.fromList $ map fst $ filter ((== '#') . snd) poses
 
 part1 :: Spacial -> Int
-part1 space = S.size $ step3d $ step3d $ step3d $ step3d $ step3d $ step3d space
+part1 space = S.size $ iterate step3d space !! 6
   where
     step3d = step neighbors3d
 
 part2 :: Hyper -> Int
-part2 space = S.size $ step4d $ step4d $ step4d $ step4d $ step4d $ step4d space
+part2 space = S.size $ iterate step4d space !! 6
   where
     step4d = step neighbors4d
 
