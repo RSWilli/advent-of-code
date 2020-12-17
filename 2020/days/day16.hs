@@ -1,7 +1,6 @@
 {-# LANGUAGE OverloadedStrings #-}
 
 import Bench
-import Control.Applicative
 import Control.Monad (guard)
 import Data.List (isPrefixOf, sortOn, transpose)
 import qualified Data.Map as M
