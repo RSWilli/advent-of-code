@@ -8,6 +8,7 @@ module InputParser
     letterChar,
     printChar,
     sepBy,
+    (<?>),
     satisfy,
     isSpace,
     isAlpha,
@@ -22,9 +23,10 @@ module InputParser
     try,
     anySingle,
     notFollowedBy,
+    hspace,
     isHexDigit,
     binary,
-    oneOf,
+    oneOf
   )
 where
 
@@ -36,10 +38,12 @@ import Data.Text (Text)
 import qualified Data.Text as T
 import qualified Data.Text.IO as T
 import qualified Data.Vector as V
+import Control.Applicative (empty)
 import Data.Void (Void)
-import Text.Megaparsec (Parsec, anySingle, choice, endBy, eof, many, manyTill, notFollowedBy, oneOf, parse, satisfy, sepBy, sepEndBy, some, someTill, try)
-import Text.Megaparsec.Char (letterChar, newline, printChar, space)
+import Text.Megaparsec (Parsec, anySingle, between, choice, endBy, eof, many, manyTill, notFollowedBy, oneOf, parse, satisfy, sepBy, sepEndBy, some, someTill, try, (<?>))
+import Text.Megaparsec.Char (letterChar, newline, printChar, space, space1, hspace, hspace1)
 import Text.Megaparsec.Char.Lexer (binary, decimal, signed)
+import qualified Text.Megaparsec.Char.Lexer as L
 import Text.Megaparsec.Error (errorBundlePretty)
 import Text.Printf (printf)
 import Util
@@ -133,3 +137,9 @@ name = some (satisfy isAlpha)
 -- text parser match any text
 text :: Parser String
 text = some printChar
+
+-- symbol :: Text -> Parser Char
+symbol = L.symbol (L.space hspace1 empty empty)
+
+parens :: Parser a -> Parser a
+parens = between (symbol "(") (symbol ")")
