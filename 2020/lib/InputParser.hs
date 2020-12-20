@@ -26,10 +26,11 @@ module InputParser
     hspace,
     isHexDigit,
     binary,
-    oneOf
+    oneOf,
   )
 where
 
+import Control.Applicative (empty)
 import Data.ByteString.Char8 (ByteString)
 import qualified Data.ByteString.Char8 as BS
 import Data.Char (isAlpha, isControl, isDigit, isHexDigit, isSpace)
@@ -38,10 +39,9 @@ import Data.Text (Text)
 import qualified Data.Text as T
 import qualified Data.Text.IO as T
 import qualified Data.Vector as V
-import Control.Applicative (empty)
 import Data.Void (Void)
 import Text.Megaparsec (Parsec, anySingle, between, choice, endBy, eof, many, manyTill, notFollowedBy, oneOf, parse, satisfy, sepBy, sepEndBy, some, someTill, try, (<?>))
-import Text.Megaparsec.Char (letterChar, newline, printChar, space, space1, hspace, hspace1)
+import Text.Megaparsec.Char (hspace, hspace1, letterChar, newline, printChar, space, space1)
 import Text.Megaparsec.Char.Lexer (binary, decimal, signed)
 import qualified Text.Megaparsec.Char.Lexer as L
 import Text.Megaparsec.Error (errorBundlePretty)
@@ -138,8 +138,17 @@ name = some (satisfy isAlpha)
 text :: Parser String
 text = some printChar
 
--- symbol :: Text -> Parser Char
-symbol = L.symbol (L.space hspace1 empty empty)
+spaceConsumer = L.space hspace1 empty empty
+
+symbol = L.symbol spaceConsumer
+
+lexeme = L.lexeme spaceConsumer
+
+integer :: (Num a) => Parser a
+integer = lexeme decimal
 
 parens :: Parser a -> Parser a
 parens = between (symbol "(") (symbol ")")
+
+doubleTicks :: Parser a -> Parser a
+doubleTicks = between (symbol "\"") (symbol "\"")
