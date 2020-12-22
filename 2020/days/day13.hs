@@ -20,9 +20,7 @@ part1 :: Schedule -> Int
 part1 (now, busses) = uncurry (*) $ minimum [(mod (- now) x, x) | Just x <- busses]
 
 part2 :: Schedule -> Int
-part2 (_, busses) = fst $ allSubsequent [(mod (- i) b, b) | (i, Just b) <- zip [0 ..] busses]
-
-allSubsequent = foldl1 subsequent
+part2 (_, busses) = fst $ foldl1 subsequent [(mod (- i) b, b) | (i, Just b) <- zip [0 ..] busses]
   where
     subsequent (offset, bus1) (diff, bus2)
       | offset `mod` bus2 == diff = (offset, bus1 * bus2)
