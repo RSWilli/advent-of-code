@@ -136,7 +136,7 @@ name = some (satisfy isAlpha)
 
 -- text parser match any text
 text :: Parser String
-text = some printChar
+text = some $ satisfy isAlpha
 
 spaceConsumer = L.space hspace1 empty empty
 
