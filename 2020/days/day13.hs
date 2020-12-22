@@ -5,7 +5,6 @@ import Bench
 import Control.Applicative
 import Control.Monad (guard)
 import Data.Char (intToDigit)
-import Data.Maybe (catMaybes)
 import InputParser
 import Util
 
@@ -17,37 +16,20 @@ listParser = ((Nothing <$ "x") <|> (Just <$> decimal)) `sepBy` ","
 scheduleParser :: Parser Schedule
 scheduleParser = (,) <$> (decimal <* newline) <*> listParser
 
-diffTo :: Int -> Int -> Int
-diffTo now sched = mod (div now sched * sched - now) sched
-
 part1 :: Schedule -> Int
-part1 (now, busses) =
-  let withDiffs = map (\x -> (diffTo now x, x)) (catMaybes busses)
-      (diff, id) = minimum withDiffs
-   in id * diff
+part1 (now, busses) = uncurry (*) $ minimum [(mod (- now) x, x) | Just x <- busses]
 
 part2 :: Schedule -> Int
-part2 (now, busses) =
-  let withDiffs = catMaybes $ zipWith (\x y -> fmap (x,) y) [0 ..] busses
-   in fst $ allSubsequent withDiffs
+part2 (_, busses) = fst $ allSubsequent [(mod (- i) b, b) | (i, Just b) <- zip [0 ..] busses]
 
-subsequent bus1 bus2 offset diff =
-  let d = (bus2 - diff) `mod` bus2
-      arrivals i =
-        if (bus1 * i + offset) `mod` bus2 == d
-          then (bus1 * i + offset, bus1 * bus2)
-          else arrivals (i + 1)
-   in arrivals 0
-
-allSubsequent (bus : busses) =
-  foldl
-    (\(index, b1) (diff, b2) -> subsequent b1 b2 index diff)
-    bus
-    busses
+allSubsequent = foldl1 subsequent
+  where
+    subsequent (offset, bus1) (diff, bus2)
+      | offset `mod` bus2 == diff = (offset, bus1 * bus2)
+      | otherwise = subsequent (offset + bus1, bus1) (diff, bus2)
 
 main = do
   sched <- parseInput 13 scheduleParser
-  print $ catMaybes $ zipWith (\x y -> fmap (x,) y) [0 ..] $ snd sched
   print $ part1 sched
   test1
   test2
