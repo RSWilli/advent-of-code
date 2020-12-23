@@ -9,6 +9,7 @@ module InputParser
     printChar,
     sepBy,
     (<?>),
+    Parsec,
     satisfy,
     isSpace,
     isAlpha,
@@ -17,6 +18,7 @@ module InputParser
     manyTill,
     sepEndBy,
     isDigit,
+    eof,
     choice,
     someTill,
     isControl,
@@ -45,11 +47,13 @@ import Text.Megaparsec.Char (hspace, hspace1, letterChar, newline, printChar, sp
 import Text.Megaparsec.Char.Lexer (binary, decimal, signed)
 import qualified Text.Megaparsec.Char.Lexer as L
 import Text.Megaparsec.Error (errorBundlePretty)
+import Text.Megaparsec.Stream (TraversableStream, VisualStream)
 import Text.Printf (printf)
 import Util
 
 type Parser = Parsec Void Text
 
+myparse :: (TraversableStream a, VisualStream a) => Parsec Void a b -> a -> Either String b
 myparse parser input = case parse (parser <* eof) "input" input of
   Left a -> Left (errorBundlePretty a)
   Right a -> Right a
