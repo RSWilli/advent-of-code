@@ -3,11 +3,11 @@ import Control.Monad (guard)
 import Data.List (zip3)
 import InputParser
 
-countIncreasing = snd . foldl (\(x', c) x -> (x, if x' < x then c + 1 else c)) (0, -1)
+countIncreasing xs window = length $ filter (\(a, b) -> a < b) $ zip xs $ drop window xs
 
-part1 = countIncreasing
+part1 xs = countIncreasing xs 1
 
-part2 list = countIncreasing $ map (\(x, y, z) -> x + y + z) $ zip3 list (tail list) (tail $ tail list)
+part2 xs = countIncreasing xs 3
 
 main = do
   test1
