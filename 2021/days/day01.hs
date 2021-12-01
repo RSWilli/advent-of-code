@@ -11,6 +11,7 @@ part2 list = countIncreasing $ map (\(x, y, z) -> x + y + z) $ zip3 list (tail l
 
 main = do
   test1
+  test2
 
   input <- parseInputLines 1 number
   print (part1 input)
