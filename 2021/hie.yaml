@@ -1,0 +1,7 @@
+cradle:
+  cabal:
+    - path: "lib"
+      component: "lib:advent2021"
+
+    - path: "./days/day-template.hs"
+      component: "advent2021:exe:dayTPL"
