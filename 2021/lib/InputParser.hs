@@ -134,13 +134,9 @@ parseTestLines i j parser = do
 number :: Parser Int
 number = signed (return ()) decimal
 
--- name parser
-name :: Parser String
-name = some (satisfy isAlpha)
-
 -- text parser match any text
 text :: Parser String
-text = some $ satisfy isAlpha
+text = lexeme $ some $ satisfy isAlpha
 
 spaceConsumer = L.space hspace1 empty empty
 
