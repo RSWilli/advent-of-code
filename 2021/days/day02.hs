@@ -2,7 +2,6 @@
 
 import Bench
 import Control.Monad (guard)
-import Data.List (zip3)
 import InputParser
 
 data Instruction = Forward Int | Up Int | Down Int deriving (Show, Eq)
@@ -15,23 +14,21 @@ instructionParser =
       Down <$> (lexeme "down" *> number)
     ]
 
-driveSubmarineSimpleStep :: Pos -> Instruction -> Pos
-driveSubmarineSimpleStep (x, depth) i = case i of
-  Forward n -> (x + n, depth)
-  Up n -> (x, depth - n)
-  Down n -> (x, depth + n)
-
 driveSubmarineSimple :: [Instruction] -> Pos
-driveSubmarineSimple = foldl driveSubmarineSimpleStep (0, 0)
-
-driveSubmarineStep :: (Int, Int, Int) -> Instruction -> (Int, Int, Int)
-driveSubmarineStep (x, depth, aim) i = case i of
-  Forward n -> (x + n, depth + aim * n, aim)
-  Up n -> (x, depth, aim - n)
-  Down n -> (x, depth, aim + n)
+driveSubmarineSimple = foldl step (0, 0)
+  where
+    step (x, depth) i = case i of
+      Forward n -> (x + n, depth)
+      Up n -> (x, depth - n)
+      Down n -> (x, depth + n)
 
 driveSubmarine :: [Instruction] -> (Int, Int, Int)
-driveSubmarine = foldl driveSubmarineStep (0, 0, 0)
+driveSubmarine = foldl step (0, 0, 0)
+  where
+    step (x, depth, aim) i = case i of
+      Forward n -> (x + n, depth + aim * n, aim)
+      Up n -> (x, depth, aim - n)
+      Down n -> (x, depth, aim + n)
 
 part1 xs = let (x, d) = driveSubmarineSimple xs in x * d
 
