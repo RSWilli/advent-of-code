@@ -1,14 +1,17 @@
 import Bench
 import Control.Monad (guard)
-import Data.List (zip3)
 import InputParser
 
-countIncreasing xs window = length $ filter (\(a, b) -> a < b) $ zip xs $ drop window xs
+countIncreasing :: Ord a => [a] -> Int -> Int
+countIncreasing xs window = length $ filter (uncurry (<)) $ zip xs $ drop window xs
 
+part1 :: Ord a => [a] -> Int
 part1 xs = countIncreasing xs 1
 
+part2 :: Ord a => [a] -> Int
 part2 xs = countIncreasing xs 3
 
+main :: IO ()
 main = do
   test1
   test2
@@ -30,11 +33,13 @@ main = do
         ]
     ]
 
+test1 :: IO ()
 test1 = do
   list <- parseTestLines 1 1 number
   guard $ part1 list == 7
   print "ok"
 
+test2 :: IO ()
 test2 = do
   list <- parseTestLines 1 1 number
   guard $ part2 list == 5

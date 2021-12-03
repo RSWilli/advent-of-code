@@ -29,6 +29,7 @@ module InputParser
     isHexDigit,
     binary,
     oneOf,
+    many,
   )
 where
 

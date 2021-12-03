@@ -30,10 +30,13 @@ driveSubmarine = foldl step (0, 0, 0)
       Up n -> (x, depth, aim - n)
       Down n -> (x, depth, aim + n)
 
+part1 :: [Instruction] -> Int
 part1 xs = let (x, d) = driveSubmarineSimple xs in x * d
 
+part2 :: [Instruction] -> Int
 part2 xs = let (x, d, _) = driveSubmarine xs in x * d
 
+main :: IO ()
 main = do
   test1
   test2
@@ -55,12 +58,14 @@ main = do
         ]
     ]
 
+test1 :: IO ()
 test1 = do
   input <- parseTestLines 2 1 instructionParser
   guard $ part1 input == 150
-  print "ok"
+  print ("ok" :: [Char])
 
+test2 :: IO ()
 test2 = do
   list <- parseTestLines 2 1 instructionParser
   guard $ part2 list == 900
-  print "ok"
+  print ("ok" :: [Char])
