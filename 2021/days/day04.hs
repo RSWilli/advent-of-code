@@ -5,12 +5,10 @@ import Bench
 import Control.Applicative hiding (many)
 import Control.Monad (guard)
 import qualified Data.IntMap as M
-import qualified Data.Set as S
 import InputParser
 
 data Bingo = Bingo
-  { opennumbers :: S.Set Int,
-    numberPoses :: M.IntMap Pos,
+  { numberPoses :: M.IntMap Pos,
     rowScores :: M.IntMap Int,
     colScores :: M.IntMap Int
   }
@@ -23,7 +21,7 @@ bingoParser :: Parser Bingo
 bingoParser = do
   nums <- some $ rowParser <* (() <$ "\n" <|> eof)
   let numPoses = concat $ zipWith (\ls y -> zipWith (\l x -> (l, (x, y))) ls [0 ..]) nums [0 ..]
-  return $ Bingo (S.fromList $ concat nums) (M.fromList numPoses) M.empty M.empty
+  return $ Bingo (M.fromList numPoses) M.empty M.empty
   where
     rowParser = some (hspace *> number)
 
@@ -39,8 +37,7 @@ drawNumber n bingo =
    in case pos of
         Just (x, y) ->
           bingo
-            { opennumbers = S.delete n (opennumbers bingo),
-              numberPoses = M.delete n (numberPoses bingo),
+            { numberPoses = M.delete n (numberPoses bingo),
               rowScores = M.insertWith (+) x 1 (rowScores bingo),
               colScores = M.insertWith (+) y 1 (colScores bingo)
             }
@@ -68,7 +65,7 @@ findLooserBingo (x : xs) bingos =
         notFinished -> findLooserBingo xs notFinished
 
 bingoScore :: Bingo -> Int -> Int
-bingoScore bingo n = n * S.foldr (+) 0 (opennumbers bingo)
+bingoScore bingo n = n * M.foldrWithKey (\k _ s -> k + s) 0 (numberPoses bingo)
 
 part1 :: ([Int], [Bingo]) -> Int
 part1 (xs, bingos) = let (b, x) = playBingo xs bingos in bingoScore b x
