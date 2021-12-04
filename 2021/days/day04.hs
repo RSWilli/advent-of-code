@@ -5,6 +5,7 @@ import Bench
 import Control.Applicative hiding (many)
 import Control.Monad (guard)
 import qualified Data.IntMap as M
+import Data.List (partition)
 import InputParser
 
 data Bingo = Bingo
@@ -46,32 +47,21 @@ drawNumber n bingo =
 finished :: Bingo -> Bool
 finished bingo = any ((== 5) . snd) (M.toList $ rowScores bingo) || any ((== 5) . snd) (M.toList $ colScores bingo)
 
-playBingo :: [Int] -> [Bingo] -> (Bingo, Int)
-playBingo [] _ = error "No more numbers to draw"
+playBingo :: [Int] -> [Bingo] -> [Int]
+playBingo [] _ = []
 playBingo (x : xs) bingos =
   let newBingos = map (drawNumber x) bingos
-   in case filter finished newBingos of
-        [] -> playBingo xs newBingos
-        [b] -> (b, x)
-        _ -> error "Multiple Bingos not possible"
+      (winners, losers) = partition finished newBingos
+   in map (bingoScore x) winners ++ playBingo xs losers
 
-findLooserBingo :: [Int] -> [Bingo] -> (Bingo, Int)
-findLooserBingo [] _ = error "No more numbers to draw"
-findLooserBingo (x : xs) bingos =
-  let newBingos = map (drawNumber x) bingos
-   in case filter (not . finished) newBingos of
-        [] -> error "all fields finished"
-        [b] -> playBingo xs [b]
-        notFinished -> findLooserBingo xs notFinished
-
-bingoScore :: Bingo -> Int -> Int
-bingoScore bingo n = n * M.foldrWithKey (\k _ s -> k + s) 0 (numberPoses bingo)
+bingoScore :: Int -> Bingo -> Int
+bingoScore n bingo = n * M.foldrWithKey (\k _ s -> k + s) 0 (numberPoses bingo)
 
 part1 :: ([Int], [Bingo]) -> Int
-part1 (xs, bingos) = let (b, x) = playBingo xs bingos in bingoScore b x
+part1 (xs, bingos) = head $ playBingo xs bingos
 
 part2 :: ([Int], [Bingo]) -> Int
-part2 (xs, bingos) = let (b, x) = findLooserBingo xs bingos in bingoScore b x
+part2 (xs, bingos) = last $ playBingo xs bingos
 
 main :: IO ()
 main = do
