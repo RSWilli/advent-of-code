@@ -45,7 +45,7 @@ drawNumber n bingo =
         Nothing -> bingo
 
 finished :: Bingo -> Bool
-finished bingo = any ((== 5) . snd) (M.toList (colScores bingo) ++ M.toList (rowScores bingo))
+finished bingo = elem 5 (colScores bingo) || elem 5 (rowScores bingo)
 
 playBingo :: [Int] -> [Bingo] -> [Int]
 playBingo [] _ = []
