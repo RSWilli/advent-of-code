@@ -77,3 +77,12 @@ executable day04
   -- hs-source-dirs:
   default-language:    Haskell2010
   ghc-options: -threaded -O3 -Wall
+
+executable day05
+  main-is:             days/day05.hs
+  -- other-modules:
+  -- other-extensions:
+  build-depends: base, advent2021, containers
+  -- hs-source-dirs:
+  default-language:    Haskell2010
+  ghc-options: -threaded -O3 -Wall
