@@ -4,7 +4,7 @@
 
 import Bench
 import Control.Monad (guard)
-import qualified Data.Map as M
+import qualified Data.HashMap.Strict as M
 import InputParser
 
 type Line = (Pos, Pos)
@@ -22,13 +22,11 @@ isHorizontal :: Line -> Bool
 isHorizontal ((_, y1), (_, y2)) = y1 == y2
 
 getLineCoords :: Line -> [Pos]
-getLineCoords ((x1, y1), (x2, y2)) = do
+getLineCoords ((x1, y1), (x2, y2)) =
   let xstep = signum (x2 - x1)
-  let ystep = signum (y2 - y1)
-  let len = max (abs (x2 - x1)) (abs (y2 - y1))
-
-  s <- [0 .. len]
-  pure (x1 + s * xstep, y1 + s * ystep)
+      ystep = signum (y2 - y1)
+      len = max (abs (x2 - x1)) (abs (y2 - y1))
+   in [(x1 + xstep * i, y1 + ystep * i) | i <- [0 .. len]]
 
 getLineOverlaps :: [Line] -> Int
 getLineOverlaps = M.size . M.filter (>= 2) . M.fromListWith (+) . map (,1) . concatMap getLineCoords
