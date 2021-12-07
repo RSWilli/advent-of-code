@@ -2,14 +2,36 @@
 
 import Bench
 import Control.Monad (guard)
+import qualified Data.Matrix as M
 import InputParser
 
-type Fishes = (Int, Int, Int, Int, Int, Int, Int, Int, Int)
+successorMatrix :: M.Matrix Integer
+successorMatrix =
+  M.fromLists
+    [ [0, 0, 0, 0, 0, 0, 1, 0, 1], -- take all 0s and add them to 6 and 8
+      [1, 0, 0, 0, 0, 0, 0, 0, 0], -- shift the 1s one to the smaller number
+      [0, 1, 0, 0, 0, 0, 0, 0, 0], -- shift the 2s one to the smaller number
+      [0, 0, 1, 0, 0, 0, 0, 0, 0], -- shift the 3s one to the smaller number
+      [0, 0, 0, 1, 0, 0, 0, 0, 0], -- shift the 4s one to the smaller number
+      [0, 0, 0, 0, 1, 0, 0, 0, 0], -- shift the 5s one to the smaller number
+      [0, 0, 0, 0, 0, 1, 0, 0, 0], -- shift the 6s one to the smaller number
+      [0, 0, 0, 0, 0, 0, 1, 0, 0], -- shift the 7s one to the smaller number
+      [0, 0, 0, 0, 0, 0, 0, 1, 0] --  shift the 8s one to the smaller number
+    ]
 
-lanternfishParser :: Parser Fishes
-lanternfishParser = toTuple <$> (decimal `sepBy` ",")
+nthSuccessorMatrix :: Integer -> M.Matrix Integer
+nthSuccessorMatrix n = case n of
+  0 -> M.identity 9
+  1 -> successorMatrix
+  _ ->
+    if odd n
+      then let n' = nthSuccessorMatrix $ (n - 1) `div` 2 in M.multStd successorMatrix $ M.multStd n' n'
+      else let n' = nthSuccessorMatrix $ n `div` 2 in M.multStd n' n'
+
+lanternfishParser :: Parser (M.Matrix Integer)
+lanternfishParser = toMatrix . toTuple <$> (decimal `sepBy` ",")
   where
-    toTuple :: [Int] -> Fishes
+    toTuple :: [Integer] -> (Integer, Integer, Integer, Integer, Integer, Integer, Integer, Integer, Integer)
     toTuple = foldl countNumbers (0, 0, 0, 0, 0, 0, 0, 0, 0)
     countNumbers (a, b, c, d, e, f, g, h, i) n =
       case n of
@@ -23,30 +45,23 @@ lanternfishParser = toTuple <$> (decimal `sepBy` ",")
         7 -> (a, b, c, d, e, f, g, h + 1, i)
         8 -> (a, b, c, d, e, f, g, h, i + 1)
         _ -> error "Invalid number"
+    toMatrix :: (Integer, Integer, Integer, Integer, Integer, Integer, Integer, Integer, Integer) -> M.Matrix Integer
+    toMatrix (a, b, c, d, e, f, g, h, i) =
+      M.fromList
+        1 -- rows
+        9 -- cols
+        [a, b, c, d, e, f, g, h, i]
 
-simulateDay :: Fishes -> Fishes
-simulateDay (f0, f1, f2, f3, f4, f5, f6, f7, f8) = (f0', f1', f2', f3', f4', f5', f6', f7', f8')
-  where
-    f0' = f1
-    f1' = f2
-    f2' = f3
-    f3' = f4
-    f4' = f5
-    f5' = f6
-    f6' = f7 + f0
-    f7' = f8
-    f8' = f0
+simulate :: Integer -> M.Matrix Integer -> M.Matrix Integer
+simulate c m = M.multStd m $ nthSuccessorMatrix c
 
-simulate :: Int -> Fishes -> Fishes
-simulate c = foldr (.) id (replicate c simulateDay)
+countFishes :: M.Matrix Integer -> Integer
+countFishes = sum . M.toList
 
-countFishes :: Fishes -> Int
-countFishes (f0, f1, f2, f3, f4, f5, f6, f7, f8) = f0 + f1 + f2 + f3 + f4 + f5 + f6 + f7 + f8
-
-part1 :: Fishes -> Int
+part1 :: M.Matrix Integer -> Integer
 part1 = countFishes . simulate 80
 
-part2 :: Fishes -> Int
+part2 :: M.Matrix Integer -> Integer
 part2 = countFishes . simulate 256
 
 main :: IO ()
