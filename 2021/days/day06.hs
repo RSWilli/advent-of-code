@@ -9,14 +9,14 @@ successorMatrix :: M.Matrix Integer
 successorMatrix =
   M.fromLists
     [ [0, 0, 0, 0, 0, 0, 1, 0, 1], -- take all 0s and add them to 6 and 8
-      [1, 0, 0, 0, 0, 0, 0, 0, 0], -- shift the 1s one to the smaller number
-      [0, 1, 0, 0, 0, 0, 0, 0, 0], -- shift the 2s one to the smaller number
-      [0, 0, 1, 0, 0, 0, 0, 0, 0], -- shift the 3s one to the smaller number
-      [0, 0, 0, 1, 0, 0, 0, 0, 0], -- shift the 4s one to the smaller number
-      [0, 0, 0, 0, 1, 0, 0, 0, 0], -- shift the 5s one to the smaller number
-      [0, 0, 0, 0, 0, 1, 0, 0, 0], -- shift the 6s one to the smaller number
-      [0, 0, 0, 0, 0, 0, 1, 0, 0], -- shift the 7s one to the smaller number
-      [0, 0, 0, 0, 0, 0, 0, 1, 0] --  shift the 8s one to the smaller number
+      [1, 0, 0, 0, 0, 0, 0, 0, 0], -- shift the 1s to the 0s
+      [0, 1, 0, 0, 0, 0, 0, 0, 0], -- shift the 2s to the 1s
+      [0, 0, 1, 0, 0, 0, 0, 0, 0], -- shift the 3s to the 2s
+      [0, 0, 0, 1, 0, 0, 0, 0, 0], -- shift the 4s to the 3s
+      [0, 0, 0, 0, 1, 0, 0, 0, 0], -- shift the 5s to the 4s
+      [0, 0, 0, 0, 0, 1, 0, 0, 0], -- shift the 6s to the 5s
+      [0, 0, 0, 0, 0, 0, 1, 0, 0], -- shift the 7s to the 6s
+      [0, 0, 0, 0, 0, 0, 0, 1, 0] --  shift the 8s to the 7s
     ]
 
 nthSuccessorMatrix :: Integer -> M.Matrix Integer
