@@ -21,6 +21,7 @@ library
   exposed-modules:
     InputParser
     Bench
+    TwoD
     Util
 
   build-depends:        
@@ -30,7 +31,8 @@ library
     megaparsec,
     containers,
     criterion,
-    vector
+    vector,
+    array
   hs-source-dirs:       lib
 
 executable dayTPL
@@ -110,6 +112,15 @@ executable day08
   -- other-modules:
   -- other-extensions:
   build-depends: base, advent2021, containers
+  -- hs-source-dirs:
+  default-language:    Haskell2010
+  ghc-options: -threaded -O3 -Wall
+
+executable day09
+  main-is:             days/day09.hs
+  -- other-modules:
+  -- other-extensions:
+  build-depends: base, advent2021, vector
   -- hs-source-dirs:
   default-language:    Haskell2010
   ghc-options: -threaded -O3 -Wall
