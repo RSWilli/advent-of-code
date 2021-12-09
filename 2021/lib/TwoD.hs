@@ -4,6 +4,7 @@ module TwoD
   ( TwoD (field, TwoD),
     Pos,
     lookup2D,
+    lookup2DWithDefault,
     dimensions,
     parseInput2D,
     parseTest2D,
@@ -17,6 +18,7 @@ where
 
 import qualified Data.Array as A
 import qualified Data.ByteString.Char8 as BS
+import Data.Maybe (fromMaybe)
 import qualified Data.Vector as V
 import InputParser (getInputPath, getTestPath)
 import Util (chunks)
@@ -49,6 +51,9 @@ lookup2D poses pos =
   if A.inRange (A.bounds $ field poses) pos
     then Just $ field poses A.! pos
     else Nothing
+
+lookup2DWithDefault :: a -> TwoD a -> Pos -> a
+lookup2DWithDefault def poses pos = fromMaybe def $ lookup2D poses pos
 
 map2D :: (Pos -> a -> b) -> TwoD a -> TwoD b
 map2D fn (TwoD p) =
