@@ -1,7 +1,7 @@
 {-# LANGUAGE DeriveFoldable #-}
 
 module TwoD
-  ( TwoD (field, TwoD),
+  ( TwoD,
     Pos,
     lookup2D,
     lookup2DWithDefault,

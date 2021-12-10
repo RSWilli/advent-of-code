@@ -4,23 +4,34 @@ import Bench
 import Control.Monad (guard)
 import Data.Char (digitToInt)
 import Data.List (sortBy)
-import Data.Maybe (fromMaybe)
+import Data.Sequence (Seq (Empty, (:<|)), fromList, singleton, (><))
 import qualified Data.Set as S
 import TwoD
+  ( Pos,
+    TwoD,
+    fold2D,
+    ifold2D,
+    lookup2DWithDefault,
+    map2D,
+    neighs,
+    parseInput2D,
+    parseTest2D,
+  )
 
 type Field = TwoD Int
 
 floodFill :: Field -> Pos -> Int
-floodFill f seed = go [seed] S.empty
+floodFill f seed = go (singleton seed) S.empty
   where
-    go [] done = S.size done
-    go (t : odo) done =
-      let done' = S.insert t done
-          todo' = odo ++ filter (\p -> (9 /= lookup2DWithDefault 9 f p) && not (p `S.member` done)) (neighs t)
+    go :: Seq Pos -> S.Set Pos -> Int
+    go Empty done = S.size done
+    go (first :<| q) done =
+      let done' = S.insert first done
+          todo' = q >< fromList (filter (\p -> (9 /= lookup2DWithDefault 9 f p) && not (p `S.member` done)) (neighs first))
        in go todo' done'
 
 neighbors :: Field -> (Int, Int) -> [Int]
-neighbors positions = map (fromMaybe 9 . lookup2D positions) . neighs
+neighbors positions = map (lookup2DWithDefault 9 positions) . neighs
 
 computeRiskLevel :: Field -> Field
 computeRiskLevel positions = map2D (\p v -> if 0 > maximum (map (v -) $ neighbors positions p) then v + 1 else 0) positions
