@@ -33,28 +33,30 @@ module InputParser
 where
 
 import Control.Applicative (empty)
-import Data.ByteString.Char8 (ByteString)
 import Data.Char (isAlpha, isControl, isDigit, isHexDigit, isSpace)
+import qualified Data.List.NonEmpty as NE
 import qualified Data.Map as M
 import Data.Text (Text)
 import qualified Data.Text as T
 import qualified Data.Text.IO as T
 import Data.Void (Void)
-import Text.Megaparsec (Parsec, anySingle, between, choice, endBy, eof, many, manyTill, notFollowedBy, oneOf, parse, satisfy, sepBy, sepEndBy, some, someTill, try, (<?>))
+import Text.Megaparsec (ParseErrorBundle (bundleErrors), Parsec, anySingle, between, choice, endBy, eof, many, manyTill, notFollowedBy, oneOf, parse, satisfy, sepBy, sepEndBy, some, someTill, try, (<?>))
 import Text.Megaparsec.Char (hspace, hspace1, letterChar, newline, printChar, space, space1)
 import Text.Megaparsec.Char.Lexer (binary, decimal, signed)
 import qualified Text.Megaparsec.Char.Lexer as L
 import Text.Megaparsec.Error (errorBundlePretty)
+import qualified Text.Megaparsec.Error as PE
 import Text.Megaparsec.Stream (TraversableStream, VisualStream)
 import Text.Printf (printf)
 import Util
 
 type Parser = Parsec Void Text
 
-myparse :: (TraversableStream a, VisualStream a) => Parsec Void a b -> a -> Either String b
-myparse parser input = case parse (parser <* eof) "input" input of
-  Left a -> Left (errorBundlePretty a)
-  Right a -> Right a
+type ParseError = ParseErrorBundle Text Void
+
+-- myparse :: (TraversableStream a, VisualStream a) => Parsec Void a b -> a -> Either String b
+myparse :: Parser a -> Text -> Either ParseError a
+myparse parser = parse (parser <* eof) "input"
 
 getInputPath :: Int -> String
 getInputPath = printf "inputs/day%02d.txt"
@@ -62,13 +64,13 @@ getInputPath = printf "inputs/day%02d.txt"
 getTestPath :: Int -> Int -> String
 getTestPath = printf "tests/day%02d_%d.txt"
 
-parseLines :: Parser a -> Text -> Either String [a]
+parseLines :: Parser a -> Text -> Either ParseError [a]
 parseLines parser = myparse combinedParser
   where
     combinedParser = parser `sepBy` newline
 
-printParseError :: Either String a -> IO a
-printParseError = either fail return
+printParseError :: Either ParseError a -> IO a
+printParseError = either (fail . errorBundlePretty) return
 
 parseInput :: Int -> Parser a -> IO a
 parseInput i parser = do
@@ -79,6 +81,11 @@ parseInputLines :: Int -> Parser a -> IO [a]
 parseInputLines i parser = do
   content <- getInput i
   printParseError $ parseLines parser content
+
+tryParseInputLines :: Int -> Parser a -> IO [Either ParseError a]
+tryParseInputLines i parser = do
+  content <- T.lines <$> getInput i
+  return $ map (myparse parser) content
 
 getInput :: Int -> IO Text
 getInput i = T.readFile $ getInputPath i
@@ -95,6 +102,11 @@ parseTestLines :: Int -> Int -> Parser a -> IO [a]
 parseTestLines i j parser = do
   content <- getTest i j
   printParseError $ parseLines parser content
+
+tryParseTestLines :: Int -> Int -> Parser a -> IO [Either ParseError a]
+tryParseTestLines i j parser = do
+  content <- T.lines <$> getTest i j
+  return $ map (myparse parser) content
 
 -- Number parser
 number :: Parser Int
@@ -116,5 +128,22 @@ integer = lexeme decimal
 parens :: Parser a -> Parser a
 parens = between (symbol "(") (symbol ")")
 
+brackets :: Parser a -> Parser a
+brackets = between (symbol "[") (symbol "]")
+
+braces :: Parser a -> Parser a
+braces = between (symbol "{") (symbol "}")
+
+angles :: Parser a -> Parser a
+angles = between (symbol "<") (symbol ">")
+
 doubleTicks :: Parser a -> Parser a
 doubleTicks = between (symbol "\"") (symbol "\"")
+
+-- TODO:
+-- getExpectedTokens :: ParseError -> [Char]
+-- getExpectedTokens e = let ex = bundleErrors e in foldl (\acc e -> getToken e ++ acc) [] ex
+--   where
+--     getToken :: PE.ParseError Text Void -> [Char]
+--     getToken (PE.TrivialError _ (Just (PE.Tokens i)) expected) =  -- NE.toList i
+--     getToken _ = []

@@ -1,5 +1,7 @@
 module Util where
 
+import Data.List (sort)
+
 (<=>) :: Ord a => a -> a -> a -> Bool
 x <=> y = \z -> x <= z && z <= y
 
@@ -14,3 +16,18 @@ chunks c l =
 -- https://github.com/quchen/articles/blob/master/loeb-moeb.md
 löb :: Functor f => f (f a -> a) -> f a
 löb x = go where go = fmap ($ go) x
+
+lIntListToInt :: Int -> [Int] -> Int
+lIntListToInt base = foldl (\acc x -> acc * base + x) 0
+
+rIntListToInt :: Int -> [Int] -> Int
+rIntListToInt base = foldr (\x acc -> acc * base + x) 0
+
+median :: (Fractional b, Integral a) => [a] -> b
+median xs =
+  let sorted = sort xs
+      l = length sorted
+      middle = sorted !! (l `div` 2)
+   in if odd l
+        then fromIntegral middle
+        else fromIntegral ((sorted !! (l `div` 2 - 1)) + middle) / 2
