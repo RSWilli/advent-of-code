@@ -11,8 +11,8 @@ import TwoD
     TwoD,
     fold2D,
     ifold2D,
+    imap2D,
     lookup2DWithDefault,
-    map2D,
     neighs,
     parseInput2D,
     parseTest2D,
@@ -34,7 +34,7 @@ neighbors :: Field -> (Int, Int) -> [Int]
 neighbors positions = map (lookup2DWithDefault 9 positions) . neighs
 
 computeRiskLevel :: Field -> Field
-computeRiskLevel positions = map2D (\p v -> if 0 > maximum (map (v -) $ neighbors positions p) then v + 1 else 0) positions
+computeRiskLevel positions = imap2D (\p v -> if 0 > maximum (map (v -) $ neighbors positions p) then v + 1 else 0) positions
 
 part1 :: Field -> Int
 part1 = fold2D (+) 0 . computeRiskLevel

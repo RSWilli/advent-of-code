@@ -31,3 +31,6 @@ median xs =
    in if odd l
         then fromIntegral middle
         else fromIntegral ((sorted !! (l `div` 2 - 1)) + middle) / 2
+
+applyN :: Int -> (b -> b) -> b -> b
+applyN n f = foldr (.) id (replicate n f)
