@@ -1,13 +1,19 @@
+{-# LANGUAGE DeriveGeneric #-}
 {-# LANGUAGE OverloadedStrings #-}
 
 import Bench
 import Control.Applicative (Alternative (some))
 import Control.Monad (guard)
-import qualified Data.Map as M
+import qualified Data.HashMap.Strict as M
+import Data.Hashable
 import qualified Data.Set as S
+import GHC.Generics (Generic)
 import InputParser
 
-data Cave = Start | End | Small String | Big String deriving (Eq, Ord)
+data Cave = Start | End | Small String | Big String deriving (Eq, Ord, Generic)
+
+--https://hackage.haskell.org/package/hashable-1.4.0.0/docs/Data-Hashable.html#g:4
+instance Hashable Cave
 
 instance Show Cave where
   show Start = "start"
@@ -17,7 +23,7 @@ instance Show Cave where
 
 type Edge = (Cave, Cave)
 
-type Graph = M.Map Cave [Cave]
+type Graph = M.HashMap Cave [Cave]
 
 caveParser :: Parser Cave
 caveParser =
@@ -32,39 +38,27 @@ edgeParser :: Parser Edge
 edgeParser = (,) <$> (caveParser <* "-") <*> caveParser
 
 graphParser :: Parser Graph
-graphParser = foldr (\(a, b) -> M.insertWith (++) a [b] . M.insertWith (++) b [a]) M.empty <$> edgeParser `sepBy` "\n"
+graphParser = foldr (\(a, b) -> M.insertWith (++) a [b] . M.insertWith (++) b [a | a /= Start]) M.empty <$> edgeParser `sepBy` "\n"
 
-findPaths :: Graph -> Bool -> [[Cave]]
-findPaths g = go Start (S.singleton Start)
+countPaths :: Graph -> Bool -> Int
+countPaths g = expand Start (S.singleton Start)
   where
-    go :: Cave -> S.Set Cave -> Bool -> [[Cave]]
-    go cur seen allowDouble = let next = filter (isStepAllowed seen allowDouble) $ g M.! cur in combinePaths cur $ map (step seen allowDouble) next
+    expand :: Cave -> S.Set Cave -> Bool -> Int
+    expand cur seen allowDouble = let next = g M.! cur in sum $ map (step seen allowDouble) next
 
-    combinePaths :: Cave -> [[[Cave]]] -> [[Cave]]
-    combinePaths el paths = concatMap (map (el :)) paths
-
-    isStepAllowed seen allowDouble s = case s of
-      Start -> False
-      End -> True
-      Big _ -> True
-      Small _
-        | s `S.notMember` seen -> True
-        | allowDouble -> True
-        | otherwise -> False
-
-    step _ _ Start = error "not allowed"
-    step _ _ End = [[End]]
-    step seen allowDouble t@(Big _) = go t seen allowDouble
+    step _ _ Start = 0
+    step _ _ End = 1
+    step seen allowDouble t@(Big _) = expand t seen allowDouble
     step seen allowDouble t@(Small _)
-      | t `S.notMember` seen = go t (S.insert t seen) allowDouble
-      | allowDouble = go t (S.insert t seen) False
-      | otherwise = []
+      | t `S.notMember` seen = expand t (S.insert t seen) allowDouble
+      | allowDouble = expand t (S.insert t seen) False
+      | otherwise = 0
 
 part1 :: Graph -> Int
-part1 = length . flip findPaths False
+part1 = flip countPaths False
 
 part2 :: Graph -> Int
-part2 = length . flip findPaths True
+part2 = flip countPaths True
 
 main :: IO ()
 main = do
