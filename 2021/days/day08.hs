@@ -5,6 +5,7 @@ import Control.Monad (guard)
 import Data.List (permutations, sort)
 import qualified Data.Map as M
 import InputParser
+import Util (lIntListToInt)
 
 sevenSegParser :: Parser ([String], [String])
 sevenSegParser = (,) <$> (map sort <$> many text) <* "| " <*> (map sort <$> many text)
@@ -17,34 +18,64 @@ sevenSegParser = (,) <$> (map sort <$> many text) <* "| " <*> (map sort <$> many
 -- e    f
 --  gggg
 
-segments :: String
-segments = "abcdefg"
+--   0:      1:      2:      3:      4:
+--  aaaa    ....    aaaa    aaaa    ....
+-- b    c  .    c  .    c  .    c  b    c
+-- b    c  .    c  .    c  .    c  b    c
+--  ....    ....    dddd    dddd    dddd
+-- e    f  .    f  e    .  .    f  .    f
+-- e    f  .    f  e    .  .    f  .    f
+--  gggg    ....    gggg    gggg    ....
 
-sevenSegmentToInt :: M.Map String Int
-sevenSegmentToInt = M.fromList [("abcefg", 0), ("cf", 1), ("acdeg", 2), ("acdfg", 3), ("bcdf", 4), ("abdfg", 5), ("abdefg", 6), ("acf", 7), ("abcdefg", 8), ("abcdfg", 9)]
+--   5:      6:      7:      8:      9:
+--  aaaa    aaaa    aaaa    aaaa    aaaa
+-- b    .  b    .  .    c  b    c  b    c
+-- b    .  b    .  .    c  b    c  b    c
+--  dddd    dddd    ....    dddd    dddd
+-- .    f  e    f  .    f  e    f  .    f
+-- .    f  e    f  .    f  e    f  .    f
+--  gggg    gggg    ....    gggg    gggg
 
-decode :: String -> Int
-decode x = sevenSegmentToInt M.! x
+-- number of occurences of each segment in the digits
+a, b, c, d, e, f, g :: Int
+a = 8
+b = 6
+c = 8
+d = 7
+e = 4
+f = 9
+g = 7
 
-allPossibleMappings :: [M.Map Char Char]
-allPossibleMappings = map (M.fromList . zip segments) $ permutations segments
-
-toInt :: [Int] -> Int
-toInt = foldl (\acc x -> acc * 10 + x) 0
+-- a map that the sum of the number of occurences of each segment in the digits to the digit
+digitScores :: M.Map Int Int
+digitScores =
+  M.fromList
+    [ (a + b + c + e + f + g, 0),
+      (c + f, 1),
+      (a + c + d + e + g, 2),
+      (a + c + d + f + g, 3),
+      (b + c + d + f, 4),
+      (a + b + d + f + g, 5),
+      (a + b + d + e + f + g, 6),
+      (a + c + f, 7),
+      (a + b + c + d + e + f + g, 8),
+      (a + b + c + d + f + g, 9)
+    ]
 
 getValidMapping :: ([String], [String]) -> [Int]
 getValidMapping (inp, out) = do
-  mapping <- allPossibleMappings
-  let translate xs = map (sort . map (mapping M.!)) xs
-  let mapped = translate inp
-  guard $ all (`M.member` sevenSegmentToInt) mapped
-  map decode $ translate out
+  -- count the occurences of each segment in the digits
+  let counts = foldr (\x -> M.insertWith (+) x 1) M.empty $ concat inp
+  num <- out
+  -- add the scores digits of the segments in the output together, and map them to the digit
+  let score = sum $ map (counts M.!) num
+  return $ digitScores M.! score
 
 part1 :: [([String], [String])] -> Int
-part1 xs = length $ filter (\x -> x == 2 || x == 3 || x == 4 || x == 7) $ concatMap (map length . snd) xs
+part1 = length . filter (\x -> x == 2 || x == 3 || x == 4 || x == 7) . concatMap (map length . snd)
 
 part2 :: [([String], [String])] -> Int
-part2 xs = sum $ map (toInt . getValidMapping) xs
+part2 = sum . map (lIntListToInt 10 . getValidMapping)
 
 main :: IO ()
 main = do
