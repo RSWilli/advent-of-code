@@ -8,7 +8,7 @@ import InputParser
 import Util (lIntListToInt)
 
 sevenSegParser :: Parser ([String], [String])
-sevenSegParser = (,) <$> (map sort <$> many text) <* "| " <*> (map sort <$> many text)
+sevenSegParser = (,) <$> many text <* "| " <*> many text
 
 --  aaaa
 -- b    c
