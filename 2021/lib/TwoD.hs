@@ -21,12 +21,14 @@ module TwoD
     updateAll2D,
     inRange,
     fromListWithDim,
+    print2D,
   )
 where
 
 import qualified Data.Array.Unboxed as A
 import qualified Data.ByteString.Char8 as BS
 import Data.Maybe (fromMaybe)
+import Data.Tuple (swap)
 import qualified Data.Vector as V
 import InputParser (getInputPath, getTestPath)
 import Util (chunks)
@@ -105,3 +107,11 @@ neighs (x, y) = [(x + 1, y), (x - 1, y), (x, y - 1), (x, y + 1)]
 
 neighsDiag :: Pos -> [Pos]
 neighsDiag (x, y) = [(x + dx, y + dy) | dx <- [-1, 0, 1], dy <- [-1, 0, 1], dx /= 0 || dy /= 0]
+
+print2D :: [Pos] -> IO ()
+print2D poses = do
+  let inverted = map swap poses
+  let (xMin, xMax, yMin, yMax) = foldl (\(xMin, xMax, yMin, yMax) (x, y) -> (min x xMin, max x xMax, min y yMin, max y yMax)) (maxBound, minBound, maxBound, minBound) inverted
+  let empty = (A.listArray ((xMin, yMin), (xMax, yMax)) $ repeat " ") :: A.Array Pos String
+  let filled = empty A.// (inverted `zip` repeat "#")
+  putStrLn $ unlines $ map concat $ chunks (yMax - yMin + 1) $ A.elems filled

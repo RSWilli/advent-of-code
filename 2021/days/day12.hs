@@ -5,8 +5,8 @@ import Bench
 import Control.Applicative (Alternative (some))
 import Control.Monad (guard)
 import qualified Data.HashMap.Strict as M
+import qualified Data.HashSet as S
 import Data.Hashable
-import qualified Data.Set as S
 import GHC.Generics (Generic)
 import InputParser
 
@@ -43,14 +43,14 @@ graphParser = foldr (\(a, b) -> M.insertWith (++) a [b] . M.insertWith (++) b [a
 countPaths :: Graph -> Bool -> Int
 countPaths g = expand Start (S.singleton Start)
   where
-    expand :: Cave -> S.Set Cave -> Bool -> Int
+    expand :: Cave -> S.HashSet Cave -> Bool -> Int
     expand cur seen allowDouble = let next = g M.! cur in sum $ map (step seen allowDouble) next
 
     step _ _ Start = 0
     step _ _ End = 1
     step seen allowDouble t@(Big _) = expand t seen allowDouble
     step seen allowDouble t@(Small _)
-      | t `S.notMember` seen = expand t (S.insert t seen) allowDouble
+      | not $ t `S.member` seen = expand t (S.insert t seen) allowDouble
       | allowDouble = expand t (S.insert t seen) False
       | otherwise = 0
 
