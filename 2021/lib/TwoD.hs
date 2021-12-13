@@ -113,5 +113,5 @@ print2D poses = do
   let inverted = map swap poses
   let (xMin, xMax, yMin, yMax) = foldl (\(xMin, xMax, yMin, yMax) (x, y) -> (min x xMin, max x xMax, min y yMin, max y yMax)) (maxBound, minBound, maxBound, minBound) inverted
   let empty = (A.listArray ((xMin, yMin), (xMax, yMax)) $ repeat " ") :: A.Array Pos String
-  let filled = empty A.// (inverted `zip` repeat "#")
+  let filled = empty A.// (inverted `zip` repeat "█")
   putStrLn $ unlines $ map concat $ chunks (yMax - yMin + 1) $ A.elems filled
