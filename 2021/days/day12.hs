@@ -21,6 +21,10 @@ instance Show Cave where
   show (Small s) = s
   show (Big s) = s
 
+isBig :: Cave -> Bool
+isBig (Big _) = True
+isBig _ = False
+
 type Edge = (Cave, Cave)
 
 type Graph = M.HashMap Cave [Cave]
@@ -37,8 +41,17 @@ caveParser =
 edgeParser :: Parser Edge
 edgeParser = (,) <$> (caveParser <* "-") <*> caveParser
 
+createGraph :: [Edge] -> Graph
+createGraph xs = let bigG = foldr (\(a, b) -> M.insertWith (++) a [b] . M.insertWith (++) b [a | a /= Start]) M.empty xs in removeBigCaves bigG
+  where
+    removeBigCaves g = M.fromList $ do
+      (k, v) <- M.toList g
+      case k of
+        Big _ -> []
+        _ -> [(k, [c | c <- v, not (isBig c)] ++ [c | big <- v, isBig big, let caves = g M.! big, c <- caves])]
+
 graphParser :: Parser Graph
-graphParser = foldr (\(a, b) -> M.insertWith (++) a [b] . M.insertWith (++) b [a | a /= Start]) M.empty <$> edgeParser `sepBy` "\n"
+graphParser = createGraph <$> edgeParser `sepBy` "\n"
 
 countPaths :: Graph -> Bool -> Int
 countPaths g = expand Start (S.singleton Start)
