@@ -1,5 +1,9 @@
+{-# LANGUAGE TupleSections #-}
+
 module Util where
 
+import qualified Data.HashMap.Strict as M
+import Data.Hashable (Hashable)
 import Data.List (sort)
 
 (<=>) :: Ord a => a -> a -> a -> Bool
@@ -34,3 +38,6 @@ median xs =
 
 applyN :: Int -> (b -> b) -> b -> b
 applyN n f = foldr (.) id (replicate n f)
+
+countAll :: (Hashable k, Num v) => [k] -> M.HashMap k v
+countAll xs = M.fromListWith (+) $ map (,1) xs

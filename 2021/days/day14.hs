@@ -5,32 +5,25 @@ import Bench
 import Control.Monad (guard)
 import qualified Data.HashMap.Strict as M
 import InputParser
+import Util (countAll)
 
 type Counts = M.HashMap (Char, Char) Int
 
 type Insertions = M.HashMap (Char, Char) [(Char, Char)]
 
-type Pairs = [(Char, Char)]
-
 inputParser :: Parser (Counts, Insertions)
-inputParser = letterCounts <$> text <* "\n\n" <*> (M.fromList <$> polymerParser `sepBy` "\n")
+inputParser = letterCounts <$> text <* "\n\n" <*> polymerParser `sepBy` "\n"
   where
-    letterCounts s p = (M.fromListWith (+) $ flip zip (repeat 1) $ letterPairs s, p)
+    letterCounts s p = (countAll $ letterPairs s, M.fromList p)
+    letterPairs xs = zip xs (tail xs)
 
 polymerParser :: Parser ((Char, Char), [(Char, Char)])
-polymerParser = toPolymer <$> ((,) <$> letterChar <*> letterChar) <* " -> " <*> letterChar
+polymerParser = toPolymer <$> letterChar <*> letterChar <* " -> " <*> letterChar
   where
-    toPolymer (a, b) c = ((a, b), [(a, c), (c, b)])
+    toPolymer a b c = ((a, b), [(a, c), (c, b)])
 
 step :: Insertions -> M.HashMap (Char, Char) Int -> M.HashMap (Char, Char) Int
 step i m = M.fromListWith (+) [(suc, v) | (p, v) <- M.toList m, suc <- M.findWithDefault [] p i]
-
-letterPairs :: String -> Pairs
-letterPairs = go
-  where
-    go [] = []
-    go [_] = []
-    go (x : y : xs) = (x, y) : go (y : xs)
 
 run :: Int -> Counts -> Insertions -> Counts
 run 0 s _ = s
