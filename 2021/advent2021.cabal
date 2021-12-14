@@ -160,3 +160,12 @@ executable day13
   -- hs-source-dirs:
   default-language:    Haskell2010
   ghc-options: -threaded -O3 -Wall
+
+executable day14
+  main-is:             days/day14.hs
+  -- other-modules:
+  -- other-extensions:
+  build-depends: base, advent2021, unordered-containers, hashable
+  -- hs-source-dirs:
+  default-language:    Haskell2010
+  ghc-options: -threaded -O3 -Wall
