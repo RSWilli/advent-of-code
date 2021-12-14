@@ -2,72 +2,85 @@
 {-# LANGUAGE OverloadedStrings #-}
 
 import Bench
-import Control.Applicative ((<|>))
 import Control.Monad (guard)
 import qualified Data.HashMap.Strict as M
-import Data.Hashable
-import GHC.Generics (Generic)
 import InputParser
-import TwoD (Pos, print2D)
 
-type Insertions = M.HashMap (Char, Char) Char
+type Counts = M.HashMap (Char, Char) Int
 
-inputParser :: Parser (String, Insertions)
-inputParser = (,) <$> text <* "\n\n" <*> (M.fromList <$> polymerParser `sepBy` "\n")
+type Insertions = M.HashMap (Char, Char) [(Char, Char)]
 
-polymerParser :: Parser ((Char, Char), Char)
-polymerParser = (,) <$> ((,) <$> letterChar <*> letterChar) <* " -> " <*> letterChar
+type Pairs = [(Char, Char)]
 
-step :: String -> Insertions -> String
-step = go
+inputParser :: Parser (Counts, Insertions)
+inputParser = letterCounts <$> text <* "\n\n" <*> (M.fromList <$> polymerParser `sepBy` "\n")
   where
-    go [] _ = []
-    go [x] _ = [x]
-    go (x : y : xs) m = case M.lookup (x, y) m of
-      Just z -> x : z : go (y : xs) m
-      Nothing -> x : y : go xs m
+    letterCounts s p = (M.fromListWith (+) $ flip zip (repeat 1) $ letterPairs s, p)
 
-run :: Int -> String -> Insertions -> String
+polymerParser :: Parser ((Char, Char), [(Char, Char)])
+polymerParser = toPolymer <$> ((,) <$> letterChar <*> letterChar) <* " -> " <*> letterChar
+  where
+    toPolymer (a, b) c = ((a, b), [(a, c), (c, b)])
+
+step :: Insertions -> M.HashMap (Char, Char) Int -> M.HashMap (Char, Char) Int
+step i m = M.fromListWith (+) [(suc, v) | (p, v) <- M.toList m, suc <- M.findWithDefault [] p i]
+
+letterPairs :: String -> Pairs
+letterPairs = go
+  where
+    go [] = []
+    go [_] = []
+    go (x : y : xs) = (x, y) : go (y : xs)
+
+run :: Int -> Counts -> Insertions -> Counts
 run 0 s _ = s
-run n s m = run (n - 1) (step s m) m
+run n c i = run (n - 1) (step i c) i
 
-getScore :: String -> Int
+getScore :: Counts -> Int
 getScore s = score
   where
-    counts = foldr (\x -> M.insertWith (+) x 1) M.empty s
-    (lo, hi) = M.foldr (\v (mini, maxi) -> (mini `min` v, maxi `max` v)) (maxBound, minBound) counts
-    score = hi - lo
+    counts = M.fromListWith (+) $ [v | ((a, b), count) <- M.toList s, v <- [(a, count), (b, count)]]
+    hi = maximum counts
+    lo = minimum counts
+    score = ((hi + 1) `div` 2) - ((lo + 1) `div` 2)
 
-part1 :: (String, Insertions) -> Int
+part1 :: (Counts, Insertions) -> Int
 part1 (str, ins) = getScore $ run 10 str ins
 
--- part2 = S.toList . uncurry applyFolds
+part2 :: (Counts, Insertions) -> Int
+part2 (str, ins) = getScore $ run 40 str ins
 
 main :: IO ()
 main = do
   test1
+  test2
 
   input <- parseInput 14 inputParser
 
   print (part1 input)
 
--- print (part2 input)
+  print (part2 input)
 
--- defaultMain
---   [ bgroup
---       "parse"
---       [ bench "input" $ whnfIO (parseInput 14 inputParser)
---       ],
---     bgroup
---       "run"
---       [ bench "part1" $ whnf part1 input,
---         bench "part2" $ whnf part2 input
---       ]
---   ]
+  defaultMain
+    [ bgroup
+        "parse"
+        [ bench "input" $ whnfIO (parseInput 14 inputParser)
+        ],
+      bgroup
+        "run"
+        [ bench "part1" $ whnf part1 input,
+          bench "part2" $ whnf part2 input
+        ]
+    ]
 
 test1 :: IO ()
 test1 = do
   input <- parseTest 14 1 inputParser
-  print $ part1 input
   guard $ part1 input == 1588
+  print ("ok" :: String)
+
+test2 :: IO ()
+test2 = do
+  input <- parseTest 14 1 inputParser
+  guard $ part2 input == 2188189693529
   print ("ok" :: String)

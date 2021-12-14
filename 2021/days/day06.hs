@@ -1,5 +1,6 @@
 {-# LANGUAGE OverloadedStrings #-}
 
+import Adjacency (nthSuccessorMatrix)
 import Bench
 import Control.Monad (guard)
 import qualified Data.Matrix as M
@@ -18,15 +19,6 @@ successorMatrix =
       [0, 0, 0, 0, 0, 0, 1, 0, 0], -- shift the 7s to the 6s
       [0, 0, 0, 0, 0, 0, 0, 1, 0] --  shift the 8s to the 7s
     ]
-
-nthSuccessorMatrix :: Integer -> M.Matrix Integer
-nthSuccessorMatrix n = case n of
-  0 -> M.identity 9
-  1 -> successorMatrix
-  _ ->
-    if odd n
-      then let n' = nthSuccessorMatrix $ (n - 1) `div` 2 in M.multStd successorMatrix $ M.multStd n' n'
-      else let n' = nthSuccessorMatrix $ n `div` 2 in M.multStd n' n'
 
 lanternfishParser :: Parser (M.Matrix Integer)
 lanternfishParser = toMatrix . toTuple <$> (decimal `sepBy` ",")
@@ -53,7 +45,7 @@ lanternfishParser = toMatrix . toTuple <$> (decimal `sepBy` ",")
         [a, b, c, d, e, f, g, h, i]
 
 simulate :: Integer -> M.Matrix Integer -> M.Matrix Integer
-simulate c m = M.multStd m $ nthSuccessorMatrix c
+simulate c m = M.multStd m $ nthSuccessorMatrix 9 c successorMatrix
 
 countFishes :: M.Matrix Integer -> Integer
 countFishes = sum . M.toList
