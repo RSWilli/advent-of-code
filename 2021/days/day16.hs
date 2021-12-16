@@ -43,13 +43,13 @@ run (Op _ 6 [x, y]) = fromEnum $ run x < run y
 run (Op _ 7 [x, y]) = fromEnum $ run x == run y
 run _ = error "invalid type id"
 
-type PacketParser a = State String a
+type PacketParser a = State (String, Int) a
 
 next :: Int -> PacketParser String
 next n = do
-  s <- get
+  (s, c) <- get
   let (x, y) = splitAt n s
-  put y
+  put (y, c + n)
   return x
 
 version :: PacketParser Int
@@ -100,10 +100,10 @@ subPacketsParser = do
 
 parseNBits :: Int -> PacketParser a -> PacketParser [a]
 parseNBits n p = do
-  inp <- get
+  (_, a) <- get
   v <- p
-  inp' <- get
-  let diff = length inp - length inp'
+  (_, b) <- get
+  let diff = b - a
   if diff < n
     then (v :) <$> parseNBits (n - diff) p
     else return [v]
@@ -117,7 +117,7 @@ parsePacket = do
     _ -> Op v t <$> subPacketsParser
 
 parse :: String -> Packet
-parse = evalState parsePacket
+parse s = evalState parsePacket (s, 0)
 
 part1 :: String -> Int
 part1 = versionsSum . parse
