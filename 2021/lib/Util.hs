@@ -41,3 +41,6 @@ applyN n f = foldr (.) id (replicate n f)
 
 countAll :: (Hashable k, Num v) => [k] -> M.HashMap k v
 countAll xs = M.fromListWith (+) $ map (,1) xs
+
+binToInt :: String -> Int
+binToInt = lIntListToInt 2 . map (\x -> if x == '1' then 1 else 0)
