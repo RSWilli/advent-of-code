@@ -22,6 +22,9 @@ module TwoD
     inRange,
     fromListWithDim,
     print2D,
+    (!),
+    inBounds,
+    stack,
   )
 where
 
@@ -65,6 +68,9 @@ lookup2D poses pos =
     then Just $ field poses A.! pos
     else Nothing
 
+(!) :: TwoD e -> Pos -> e
+f ! p = field f A.! p
+
 lookup2DWithDefault :: a -> TwoD a -> Pos -> a
 lookup2DWithDefault def poses pos = fromMaybe def $ lookup2D poses pos
 
@@ -102,6 +108,9 @@ ifold2D fn e (TwoD p) =
 filter2D :: ((Pos, a) -> Bool) -> TwoD a -> [(Pos, a)]
 filter2D fn (TwoD p) = filter fn $ A.assocs p
 
+inBounds :: TwoD a -> Pos -> Bool
+inBounds (TwoD p) = A.inRange (A.bounds p)
+
 neighs :: Pos -> [Pos]
 neighs (x, y) = [(x + 1, y), (x - 1, y), (x, y - 1), (x, y + 1)]
 
@@ -115,3 +124,8 @@ print2D poses = do
   let empty = (A.listArray ((xMin, yMin), (xMax, yMax)) $ repeat " ") :: A.Array Pos String
   let filled = empty A.// (inverted `zip` repeat "█")
   putStrLn $ unlines $ map concat $ chunks (yMax - yMin + 1) $ A.elems filled
+
+stack :: TwoD a -> Int -> Int -> TwoD a
+stack dd@(TwoD a) sx sy =
+  let (oldmaxy, oldmaxx) = dimensions dd
+   in TwoD $ A.array ((0, 0), (oldmaxy * sy - 1, oldmaxx * sx - 1)) [((y + oldmaxy * iy, x + oldmaxx * ix), v) | ((y, x), v) <- A.assocs a, ix <- [0 .. sx - 1], iy <- [0 .. sy - 1]]
