@@ -29,7 +29,7 @@ throw b@((_, ymin), (xmax, _)) v0 = go v0 (0, 0) 0
 
 throwAll :: (Pos, Pos) -> [Int]
 throwAll b@((x0, y0), (x1, y1)) = do
-  v0 <- [(vx, vy) | vx <- [0 .. max x0 x1], vy <- [min y0 y1 .. - min y0 y1 + 1]]
+  v0 <- [(vx, vy) | vx <- [0 .. max x0 x1], vy <- [min y0 y1 .. - min y0 y1]]
   let res = throw b v0
   case res of
     Nothing -> []
