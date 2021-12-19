@@ -51,8 +51,11 @@ gaussianSum n = (n * (n + 1)) `div` 2
 invertGauss :: (Integral b, Integral a) => a -> b
 invertGauss sum = round $ 0.5 * (sqrt (8 * fromIntegral sum + 1) - 1)
 
+cartesianProductWith :: (a -> b -> c) -> [a] -> [b] -> [c]
+cartesianProductWith f xs ys = [f x y | x <- xs, y <- ys]
+
 cartesianProduct :: [a] -> [b] -> [(a, b)]
-cartesianProduct xs ys = [(x, y) | x <- xs, y <- ys]
+cartesianProduct = cartesianProductWith (,)
 
 printRows :: Show a => [a] -> IO ()
 printRows = putStr . unlines . map show

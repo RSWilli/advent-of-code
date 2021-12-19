@@ -66,28 +66,22 @@ ystepInBounds vy ymin ymax = do
       guard (tmin <= tmax')
       return (tmin, tmax)
 
+boundsToRange :: Int -> Maybe (Int, Maybe Int) -> [Int]
+boundsToRange _ Nothing = []
+boundsToRange m (Just (lo, hi)) = maybe [lo .. m] (enumFromTo lo) hi
+
 -- throwAll :: (Pos, Pos) -> Int
 throwAll ((xmin, ymin), (xmax, ymax)) =
   let vxmin = invertGauss xmin
       Just tmax = ceiling . fst <$> invertY (- ymin - 1) ymin -- the moment where the maxmimum y force reaches the bottom of the box
-      vx = transpose $ do
-        v <- [vxmin .. xmax]
-        let xTRange = xstepInBounds v xmin xmax
-        if isJust xTRange
-          then do
-            let Just (txmin, m) = xTRange
-            let txmax = fromMaybe tmax m
-            return [txmin .. txmax]
-          else []
+      vx = head $
+        transpose $ do
+          v <- [vxmin .. xmax]
+          return $ boundsToRange tmax $ xstepInBounds v xmin xmax
 
       vy = do
         v <- [ymin .. - ymin - 1]
-        let yTRange = ystepInBounds v ymin ymax
-        if isJust yTRange
-          then do
-            let Just (tymin, Just tymax) = yTRange
-            return [tymin .. tymax]
-          else []
+        return $ boundsToRange tmax $ ystepInBounds v ymin ymax
    in --  in sum $ zipWith (*) vx (vy ++ reverse vy)
       (vx, vy)
 
