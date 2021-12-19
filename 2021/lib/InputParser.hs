@@ -34,6 +34,7 @@ where
 
 import Control.Applicative (empty)
 import Data.Char (isAlpha, isControl, isDigit, isHexDigit, isSpace)
+import Data.Either (fromRight)
 import qualified Data.List.NonEmpty as NE
 import qualified Data.Map as M
 import Data.Text (Text)
@@ -46,7 +47,7 @@ import Text.Megaparsec.Char.Lexer (binary, decimal, signed)
 import qualified Text.Megaparsec.Char.Lexer as L
 import Text.Megaparsec.Error (errorBundlePretty)
 import qualified Text.Megaparsec.Error as PE
-import Text.Megaparsec.Stream (TraversableStream, VisualStream)
+import Text.Megaparsec.Stream (Stream, TraversableStream, VisualStream)
 import Text.Printf (printf)
 import Util
 
@@ -54,9 +55,12 @@ type Parser = Parsec Void Text
 
 type ParseError = ParseErrorBundle Text Void
 
--- myparse :: (TraversableStream a, VisualStream a) => Parsec Void a b -> a -> Either String b
-myparse :: Parser a -> Text -> Either ParseError a
-myparse parser = parse (parser <* eof) "input"
+tryParse :: Parser a -> Text -> Either ParseError a
+tryParse parser = parse (parser <* eof) "input"
+
+-- generalized parser that can parse any stream, but fails if the parser does
+mustParse :: Parser a -> Text -> a
+mustParse p i = either (error . errorBundlePretty) id $ tryParse p i
 
 getInputPath :: Int -> String
 getInputPath = printf "inputs/day%02d.txt"
@@ -65,7 +69,7 @@ getTestPath :: Int -> Int -> String
 getTestPath = printf "tests/day%02d_%d.txt"
 
 parseLines :: Parser a -> Text -> Either ParseError [a]
-parseLines parser = myparse combinedParser
+parseLines parser = tryParse combinedParser
   where
     combinedParser = parser `sepBy` newline
 
@@ -75,7 +79,7 @@ printParseError = either (fail . errorBundlePretty) return
 parseInput :: Int -> Parser a -> IO a
 parseInput i parser = do
   content <- getInput i
-  printParseError $ myparse parser content
+  printParseError $ tryParse parser content
 
 parseInputLines :: Int -> Parser a -> IO [a]
 parseInputLines i parser = do
@@ -85,7 +89,7 @@ parseInputLines i parser = do
 tryParseInputLines :: Int -> Parser a -> IO [Either ParseError a]
 tryParseInputLines i parser = do
   content <- T.lines <$> getInput i
-  return $ map (myparse parser) content
+  return $ map (tryParse parser) content
 
 getInput :: Int -> IO Text
 getInput i = T.readFile $ getInputPath i
@@ -96,7 +100,7 @@ getTest i j = T.readFile $ getTestPath i j
 parseTest :: Int -> Int -> Parser a -> IO a
 parseTest i j parser = do
   content <- getTest i j
-  printParseError $ myparse parser content
+  printParseError $ tryParse parser content
 
 parseTestLines :: Int -> Int -> Parser a -> IO [a]
 parseTestLines i j parser = do
@@ -106,7 +110,7 @@ parseTestLines i j parser = do
 tryParseTestLines :: Int -> Int -> Parser a -> IO [Either ParseError a]
 tryParseTestLines i j parser = do
   content <- T.lines <$> getTest i j
-  return $ map (myparse parser) content
+  return $ map (tryParse parser) content
 
 -- Number parser
 number :: Parser Int

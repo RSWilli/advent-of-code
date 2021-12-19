@@ -44,3 +44,15 @@ countAll xs = M.fromListWith (+) $ map (,1) xs
 
 binToInt :: String -> Int
 binToInt = lIntListToInt 2 . map (\x -> if x == '1' then 1 else 0)
+
+gaussianSum :: Integral a => a -> a
+gaussianSum n = (n * (n + 1)) `div` 2
+
+invertGauss :: (Integral b, Integral a) => a -> b
+invertGauss sum = round $ 0.5 * (sqrt (8 * fromIntegral sum + 1) - 1)
+
+cartesianProduct :: [a] -> [b] -> [(a, b)]
+cartesianProduct xs ys = [(x, y) | x <- xs, y <- ys]
+
+printRows :: Show a => [a] -> IO ()
+printRows = putStr . unlines . map show

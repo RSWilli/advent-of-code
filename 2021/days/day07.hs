@@ -4,12 +4,10 @@ import Bench
 import Control.Monad (guard)
 import Data.List (sort)
 import InputParser
+import Util (gaussianSum)
 
 numberListParser :: Parser [Int]
 numberListParser = decimal `sepBy` ","
-
-gaussianSum :: Integral a => a -> a
-gaussianSum n = n * (n + 1) `div` 2
 
 part1 :: [Int] -> Int
 part1 xs =
