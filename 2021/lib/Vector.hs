@@ -1,17 +1,26 @@
+{-# LANGUAGE DeriveGeneric #-}
+
 module Vector where
+
+import Data.Hashable (Hashable)
+import GHC.Generics (Generic)
 
 data V2 = V2
   { vx :: Int,
     vy :: Int
   }
-  deriving (Eq)
+  deriving (Eq, Ord, Generic)
 
 data V3 = V3
   { vx3 :: Int,
     vy3 :: Int,
     vz3 :: Int
   }
-  deriving (Eq, Ord)
+  deriving (Eq, Ord, Generic)
+
+instance Hashable V2
+
+instance Hashable V3
 
 instance Show V3 where
   show (V3 x y z) = "(" ++ show x ++ "," ++ show y ++ "," ++ show z ++ ")"

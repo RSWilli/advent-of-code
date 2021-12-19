@@ -217,7 +217,7 @@ executable day19
   main-is:             days/day19.hs
   -- other-modules:
   -- other-extensions:
-  build-depends: base, advent2021, containers, mtl
+  build-depends: base, advent2021, unordered-containers, mtl
   -- hs-source-dirs:
   default-language:    Haskell2010
   ghc-options: -threaded -O3 -Wall

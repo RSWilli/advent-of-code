@@ -3,8 +3,12 @@
 import Bench
 import Control.Monad (guard)
 import Control.Monad.State
+  ( MonadState (get, put),
+    State,
+    evalState,
+  )
+import qualified Data.HashSet as S
 import Data.Maybe (mapMaybe)
-import qualified Data.Set as S
 import InputParser hiding (angles)
 import Util (cartesianProduct, cartesianProductWith)
 import Vector
@@ -12,7 +16,7 @@ import Prelude hiding (sum)
 
 data Scanner = Scanner
   { ident :: Int,
-    beacons :: S.Set V3
+    beacons :: S.HashSet V3
   }
   deriving (Eq)
 
@@ -65,7 +69,7 @@ scannerRotations scanner =
         ]
    in concat vecs
 
-overlapScanner :: S.Set V3 -> Scanner -> Maybe (V3, S.Set V3)
+overlapScanner :: S.HashSet V3 -> Scanner -> Maybe (V3, S.HashSet V3)
 overlapScanner poses s2 = go matches
   where
     beacons0 = S.toList poses
@@ -81,7 +85,7 @@ overlapScanner poses s2 = go matches
             then Just (offset, beacons s2' `S.union` poses)
             else go bs
 
-findOverlap :: S.Set V3 -> State ([[Scanner]], [[Scanner]], [V3]) (S.Set V3)
+findOverlap :: S.HashSet V3 -> State ([[Scanner]], [[Scanner]], [V3]) (S.HashSet V3)
 findOverlap poses = do
   (failed, todo, offsets) <- get
   case todo of
@@ -98,7 +102,7 @@ findOverlap poses = do
           put (failed, odo, offset : offsets)
           findOverlap bs
 
-overlapAll :: S.Set V3 -> State ([[Scanner]], [[Scanner]], [V3]) ([V3], S.Set V3)
+overlapAll :: S.HashSet V3 -> State ([[Scanner]], [[Scanner]], [V3]) ([V3], S.HashSet V3)
 overlapAll initialBeacons = do
   r <- findOverlap initialBeacons
   (failed, _, offsets) <- get
@@ -108,7 +112,7 @@ overlapAll initialBeacons = do
       put ([], failed, offsets) -- if we still couldn't match all, we try again with the new matched beacons
       overlapAll r
 
-overlap :: [[Scanner]] -> ([V3], S.Set V3)
+overlap :: [[Scanner]] -> ([V3], S.HashSet V3)
 overlap scanners =
   let initial = beacons $ head $ head scanners
    in evalState (overlapAll initial) ([], tail scanners, [V3 0 0 0])
