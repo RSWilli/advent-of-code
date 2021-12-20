@@ -62,3 +62,6 @@ cradle:
 
     - path: "./days/day19.hs"
       component: "advent2021:exe:day19"
+
+    - path: "./days/day20.hs"
+      component: "advent2021:exe:day20"
