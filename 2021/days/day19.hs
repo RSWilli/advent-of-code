@@ -1,6 +1,7 @@
 {-# LANGUAGE OverloadedStrings #-}
 
 import Bench
+import Control.Applicative (Applicative (liftA2))
 import Control.Monad (guard)
 import Control.Monad.State
   ( MonadState (get, put),
@@ -10,7 +11,6 @@ import Control.Monad.State
 import qualified Data.HashSet as S
 import Data.Maybe (mapMaybe)
 import InputParser hiding (angles)
-import Util (cartesianProduct, cartesianProductWith)
 import Vector
 import Prelude hiding (sum)
 
@@ -74,7 +74,7 @@ overlapScanner poses s2 = go matches
   where
     beacons0 = S.toList poses
     beacons1 = S.toList $ beacons s2
-    matches = cartesianProduct beacons0 beacons1
+    matches = liftA2 (,) beacons0 beacons1
 
     go [] = Nothing
     go ((b0, b1) : bs) =
@@ -118,7 +118,7 @@ overlap scanners =
    in evalState (overlapAll initial) ([], tail scanners, [V3 0 0 0])
 
 maxmimumManhattanDistance :: [V3] -> Int
-maxmimumManhattanDistance xs = maximum $ cartesianProductWith (\x y -> manhattan (x - y)) xs xs
+maxmimumManhattanDistance xs = maximum $ (\x y -> manhattan (x - y)) <$> xs <*> xs
 
 part1 :: [[Scanner]] -> Int
 part1 = S.size . snd . overlap

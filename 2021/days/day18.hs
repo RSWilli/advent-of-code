@@ -4,7 +4,6 @@ import Bench
 import Control.Monad (guard)
 import Data.String (IsString (fromString))
 import InputParser
-import Util (cartesianProduct)
 import Prelude hiding (sum)
 
 data SnailFishNumber = P SnailFishNumber SnailFishNumber | N Int deriving (Eq)
@@ -84,7 +83,7 @@ part1 :: [SnailFishNumber] -> Int
 part1 = magnitude . sum
 
 part2 :: [SnailFishNumber] -> Int
-part2 xs = maximum $ map (magnitude . uncurry (+)) $ filter (uncurry (/=)) $ cartesianProduct xs xs
+part2 xs = maximum $ map (magnitude . uncurry (+)) $ filter (uncurry (/=)) $ (,) <$> xs <*> xs
 
 main :: IO ()
 main = do

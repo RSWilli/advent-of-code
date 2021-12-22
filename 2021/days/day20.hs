@@ -67,9 +67,6 @@ part1 (a, i) = countActive $ enhance 2 a i
 part2 :: (Algorithm, Image) -> Int
 part2 (a, i) = countActive $ enhance 50 a i
 
--- part2 :: [SnailFishNumber] -> Int
--- part2 xs = maximum $ map (magnitude . uncurry (+)) $ filter (uncurry (/=)) $ cartesianProduct xs xs
-
 main :: IO ()
 main = do
   test1

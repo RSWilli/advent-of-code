@@ -4,7 +4,7 @@ module Util where
 
 import qualified Data.HashMap.Strict as M
 import Data.Hashable (Hashable)
-import Data.List (sort)
+import Data.List (group, sort)
 
 (<=>) :: Ord a => a -> a -> a -> Bool
 x <=> y = \z -> x <= z && z <= y
@@ -51,11 +51,11 @@ gaussianSum n = (n * (n + 1)) `div` 2
 invertGauss :: (Integral b, Integral a) => a -> b
 invertGauss sum = round $ 0.5 * (sqrt (8 * fromIntegral sum + 1) - 1)
 
-cartesianProductWith :: (a -> b -> c) -> [a] -> [b] -> [c]
-cartesianProductWith f xs ys = [f x y | x <- xs, y <- ys]
-
-cartesianProduct :: [a] -> [b] -> [(a, b)]
-cartesianProduct = cartesianProductWith (,)
-
 printRows :: Show a => [a] -> IO ()
 printRows = putStr . unlines . map show
+
+ordNub :: (Ord a) => [a] -> [a]
+ordNub = map head . group . sort
+
+countUnique :: (Ord a) => [a] -> Int
+countUnique = length . group . sort

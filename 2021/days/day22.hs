@@ -33,11 +33,6 @@ filterPart1 = filter f
     f (On lo hi) = inRange boundsPart1 lo && inRange boundsPart1 hi
     f (Off lo hi) = inRange boundsPart1 lo && inRange boundsPart1 hi
 
-union :: Cube -> Cube -> [Cube]
-union c1 c2 = case intersection c1 c2 of
-  Nothing -> [c1]
-  Just cu -> subtract c1 cu
-
 difference :: Cube -> Cube -> [Cube]
 difference c1 c2 = case intersection c1 c2 of
   Nothing -> [c1]
@@ -46,10 +41,6 @@ difference c1 c2 = case intersection c1 c2 of
 valid :: Cube -> Bool
 valid (Cube (x1, y1, z1) (x2, y2, z2)) =
   (x1 <= x2) && (y1 <= y2) && (z1 <= z2)
-
-toCube :: Instruction -> [Cube]
-toCube (On lo hi) = [Cube lo hi]
-toCube (Off _ _) = []
 
 subtract :: Cube -> Cube -> [Cube]
 subtract (Cube (x1, y1, z1) (x2, y2, z2)) (Cube (x3, y3, z3) (x4, y4, z4)) =
@@ -66,18 +57,19 @@ subtract (Cube (x1, y1, z1) (x2, y2, z2)) (Cube (x3, y3, z3) (x4, y4, z4)) =
 intersection :: Cube -> Cube -> Maybe Cube
 intersection (Cube (x1, y1, z1) (x2, y2, z2)) (Cube (x3, y3, z3) (x4, y4, z4)) =
   let i = Cube (max x1 x3, max y1 y3, max z1 z3) (min x2 x4, min y2 y4, min z2 z4)
-   in if valid i then Just i else Nothing
+   in if valid i
+        then Just i
+        else Nothing
 
 volume :: Cube -> Int
 volume (Cube (x1, y1, z1) (x2, y2, z2)) = (x2 - x1 + 1) * (y2 - y1 + 1) * (z2 - z1 + 1)
 
 applyInstructions :: [Instruction] -> [Cube]
-applyInstructions (x : xs) = foldl apply (toCube x) xs
+applyInstructions = foldl apply []
   where
     apply :: [Cube] -> Instruction -> [Cube]
-    apply cubes (On lo hi) = Cube lo hi : (cubes >>= (`union` Cube lo hi))
+    apply cubes (On lo hi) = Cube lo hi : (cubes >>= (`difference` Cube lo hi))
     apply cubes (Off lo hi) = cubes >>= (`difference` Cube lo hi)
-applyInstructions _ = error "applyInstructions: empty list"
 
 part1 :: [Instruction] -> Int
 part1 = sum . map volume . applyInstructions . filterPart1

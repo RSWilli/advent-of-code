@@ -1,24 +1,25 @@
 {-# LANGUAGE OverloadedStrings #-}
 
 import Bench
+import Control.Applicative (Applicative (liftA2))
 import Control.Monad (guard)
-import Data.Ix (Ix (inRange))
-import Data.List (group, sort, transpose)
-import Data.Maybe (fromMaybe)
 import InputParser
 import TwoD (Pos)
-import Util (cartesianProduct, gaussianSum, invertGauss, isJust)
+import Util (countUnique, gaussianSum, invertGauss)
 
 targetAreaParser :: Parser (Pos, Pos)
 targetAreaParser = toBounds <$> ("target area: x=" *> number <* "..") <*> (number <* ", y=") <*> (number <* "..") <*> number
   where
     toBounds x1 x2 y1 y2 = ((x1, y1), (x2, y2))
 
-x :: Int -> Int -> Int
-x vx t =
-  if t >= vx
-    then gaussianSum vx
-    else gaussianSum vx - gaussianSum (vx - t)
+-- x :: Int -> Int -> Int
+-- x vx t =
+--   if t >= vx
+--     then gaussianSum vx
+--     else gaussianSum vx - gaussianSum (vx - t)
+
+-- y :: Int -> Int -> Int
+-- y vy t = vy * t - gaussianSum (t - 1)
 
 invertX :: Int -> Int -> Maybe Double
 invertX ivx ixdist =
@@ -29,9 +30,6 @@ invertX ivx ixdist =
       if diskr < 0
         then Nothing
         else Just $ 1 / 2 * (1 - sqrt diskr + 2 * vx)
-
-y :: Int -> Int -> Int
-y vy t = vy * t - gaussianSum (t - 1)
 
 invertY :: Int -> Int -> Maybe (Double, Double)
 invertY ivy iydist =
@@ -70,28 +68,25 @@ boundsToRange :: Int -> Maybe (Int, Maybe Int) -> [Int]
 boundsToRange _ Nothing = []
 boundsToRange m (Just (lo, hi)) = maybe [lo .. m] (enumFromTo lo) hi
 
--- throwAll :: (Pos, Pos) -> Int
+throwAll :: (Pos, Pos) -> Int
 throwAll ((xmin, ymin), (xmax, ymax)) =
   let vxmin = invertGauss xmin
       Just tmax = ceiling . fst <$> invertY (- ymin - 1) ymin -- the moment where the maxmimum y force reaches the bottom of the box
-      vx = head $
-        transpose $ do
-          v <- [vxmin .. xmax]
-          return $ boundsToRange tmax $ xstepInBounds v xmin xmax
+      vx = do
+        v <- [vxmin .. xmax]
+        t <- boundsToRange tmax $ xstepInBounds v xmin xmax
+        return (v, t)
 
       vy = do
         v <- [ymin .. - ymin - 1]
-        return $ boundsToRange tmax $ ystepInBounds v ymin ymax
-   in --  in sum $ zipWith (*) vx (vy ++ reverse vy)
-      (vx, vy)
-
--- length $ filter (uncurry (==)) $ cartesianProduct vx vy
+        t <- boundsToRange tmax $ ystepInBounds v ymin ymax
+        return (t, v)
+   in countUnique [(vx0, vy0) | ((vx0, t), (t', vy0)) <- liftA2 (,) vx vy, t == t']
 
 part1 :: (Pos, Pos) -> Int
 part1 ((_, ymin), _) = gaussianSum $ - ymin - 1
 
--- part2 :: (Pos, Pos) -> Int
--- part2 = length . throwAll
+part2 :: (Pos, Pos) -> Int
 part2 = throwAll
 
 main :: IO ()
@@ -127,5 +122,5 @@ test2 :: IO ()
 test2 = do
   input <- parseTest 17 1 targetAreaParser
   print $ part2 input
-  -- guard $ part2 input == 112
+  guard $ part2 input == 112
   print ("ok" :: String)
