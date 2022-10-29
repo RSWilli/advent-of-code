@@ -1,0 +1,73 @@
+cradle:
+  cabal:
+    - path: "lib"
+      component: "lib:advent2021"
+
+    - path: "./days/day-template.hs"
+      component: "advent2021:exe:dayTPL"
+
+    - path: "./days/day01.hs"
+      component: "advent2021:exe:day01"
+
+    - path: "./days/day02.hs"
+      component: "advent2021:exe:day02"
+
+    - path: "./days/day03.hs"
+      component: "advent2021:exe:day03"
+
+    - path: "./days/day04.hs"
+      component: "advent2021:exe:day04"
+
+    - path: "./days/day05.hs"
+      component: "advent2021:exe:day05"
+
+    - path: "./days/day06.hs"
+      component: "advent2021:exe:day06"
+
+    - path: "./days/day07.hs"
+      component: "advent2021:exe:day07"
+
+    - path: "./days/day08.hs"
+      component: "advent2021:exe:day08"
+
+    - path: "./days/day09.hs"
+      component: "advent2021:exe:day09"
+
+    - path: "./days/day10.hs"
+      component: "advent2021:exe:day10"
+
+    - path: "./days/day11.hs"
+      component: "advent2021:exe:day11"
+
+    - path: "./days/day12.hs"
+      component: "advent2021:exe:day12"
+
+    - path: "./days/day13.hs"
+      component: "advent2021:exe:day13"
+
+    - path: "./days/day14.hs"
+      component: "advent2021:exe:day14"
+
+    - path: "./days/day15.hs"
+      component: "advent2021:exe:day15"
+
+    - path: "./days/day16.hs"
+      component: "advent2021:exe:day16"
+
+    - path: "./days/day17.hs"
+      component: "advent2021:exe:day17"
+
+    - path: "./days/day18.hs"
+      component: "advent2021:exe:day18"
+
+    - path: "./days/day19.hs"
+      component: "advent2021:exe:day19"
+
+    - path: "./days/day20.hs"
+      component: "advent2021:exe:day20"
+
+    - path: "./days/day21.hs"
+      component: "advent2021:exe:day21"
+
+    - path: "./days/day22.hs"
+      component: "advent2021:exe:day22"
