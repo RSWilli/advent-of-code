@@ -1,14 +1,11 @@
-use std::{
-    fmt::{Debug, Display},
-    fs::File,
-    io,
-};
+use std::fmt::{Debug, Display};
 
-use error::AOCError;
+pub use error::AOCError;
 
-pub mod error;
-
+mod error;
 mod read;
+
+pub use read::AOCReader;
 
 // alias the return type so more traits can be easily added later
 pub trait AOCReturn: Debug + Display + std::cmp::PartialEq {}
@@ -19,7 +16,7 @@ impl<T: Debug + Display + std::cmp::PartialEq> AOCReturn for T {}
  */
 pub trait AdventOfCode<Parse, Res: AOCReturn> {
     const DAY: usize;
-    fn parse(&self, inp: io::BufReader<File>) -> Result<Parse, error::AOCError>;
+    fn parse(&self, inp: AOCReader) -> Result<Parse, error::AOCError>;
     fn part1(&self, input: &Parse) -> Result<Res, AOCError>;
     fn part2(&self, input: &Parse) -> Result<Res, AOCError>;
 }

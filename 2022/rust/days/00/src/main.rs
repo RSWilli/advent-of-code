@@ -1,9 +1,4 @@
-use std::{
-    fs::File,
-    io::{BufRead, BufReader},
-};
-
-use util::{error::AOCError, AdventOfCode};
+use util::{AOCError, AOCReader, AdventOfCode};
 
 struct Day {}
 
@@ -12,14 +7,8 @@ type Parse = Vec<usize>;
 impl AdventOfCode<Parse, usize> for Day {
     const DAY: usize = 0;
 
-    fn parse(&self, inp: BufReader<File>) -> Result<Parse, AOCError> {
-        inp.lines()
-            .map(|line| {
-                let v = line?.parse()?;
-
-                Ok(v)
-            })
-            .collect()
+    fn parse(&self, inp: AOCReader) -> Result<Parse, AOCError> {
+        inp.parse_lines().collect()
     }
 
     fn part1(&self, input: &Parse) -> Result<usize, AOCError> {

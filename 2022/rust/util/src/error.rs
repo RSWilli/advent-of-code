@@ -9,5 +9,5 @@ pub enum AOCError {
     #[error("test failed: expected {expected:?}, got {actual:?}")]
     TestFailed { expected: String, actual: String },
     #[error("parse error")]
-    ParseIntErr(#[from] std::num::ParseIntError),
+    ParseErr(),
 }
