@@ -29,14 +29,20 @@ pub trait AdventOfCode {
 pub fn run<P, R: AOCReturn, T: AdventOfCode<In = P, Out = R>>(
     aoc: T,
 ) -> Result<(), error::AOCError> {
+    let parse_start = std::time::Instant::now();
     let input = read::read_input(T::DAY)?;
+
     let parsed = aoc.parse(input)?;
 
-    let p1 = aoc.part1(&parsed)?;
-    println!("Part 1: {}", p1);
+    println!("Parsed input in {}µs", parse_start.elapsed().as_micros());
 
+    let part1_start = std::time::Instant::now();
+    let p1 = aoc.part1(&parsed)?;
+    println!("Part 1: {} ({}µs)", p1, part1_start.elapsed().as_micros());
+
+    let part2_start = std::time::Instant::now();
     let p2 = aoc.part2(&parsed)?;
-    println!("Part 2: {}", p2);
+    println!("Part 2: {} ({}µs)", p2, part2_start.elapsed().as_micros());
 
     Ok(())
 }
