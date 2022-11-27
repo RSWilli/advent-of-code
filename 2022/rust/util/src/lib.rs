@@ -14,17 +14,21 @@ impl<T: Debug + Display + std::cmp::PartialEq> AOCReturn for T {}
 /**
  * Trait for an Advent of Code solution.
  */
-pub trait AdventOfCode<Parse, Res: AOCReturn> {
+pub trait AdventOfCode {
     const DAY: usize;
-    fn parse(&self, inp: AOCReader) -> Result<Parse, error::AOCError>;
-    fn part1(&self, input: &Parse) -> Result<Res, AOCError>;
-    fn part2(&self, input: &Parse) -> Result<Res, AOCError>;
+    type In;
+    type Out: AOCReturn;
+    fn parse(&self, inp: AOCReader) -> Result<Self::In, error::AOCError>;
+    fn part1(&self, input: &Self::In) -> Result<Self::Out, AOCError>;
+    fn part2(&self, input: &Self::In) -> Result<Self::Out, AOCError>;
 }
 
 /**
  * Run the solutions for the given day.
  */
-pub fn run<P, R: AOCReturn, T: AdventOfCode<P, R>>(aoc: T) -> Result<(), error::AOCError> {
+pub fn run<P, R: AOCReturn, T: AdventOfCode<In = P, Out = R>>(
+    aoc: T,
+) -> Result<(), error::AOCError> {
     let input = read::read_input(T::DAY)?;
     let parsed = aoc.parse(input)?;
 
@@ -45,7 +49,7 @@ pub enum Part {
 /**
  * test the given part of the solution for the given day.
  */
-pub fn test<P, R: AOCReturn, T: AdventOfCode<P, R>>(
+pub fn test<P, R: AOCReturn, T: AdventOfCode<In = P, Out = R>>(
     aoc: T,
     part: Part,
     test: usize,

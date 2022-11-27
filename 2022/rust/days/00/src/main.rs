@@ -2,20 +2,22 @@ use util::{AOCError, AOCReader, AdventOfCode};
 
 struct Day {}
 
-type Parse = Vec<usize>;
-
-impl AdventOfCode<Parse, usize> for Day {
+impl AdventOfCode for Day {
     const DAY: usize = 0;
 
-    fn parse(&self, inp: AOCReader) -> Result<Parse, AOCError> {
+    type In = Vec<usize>;
+
+    type Out = usize;
+
+    fn parse(&self, inp: AOCReader) -> Result<Self::In, AOCError> {
         inp.parse_lines().collect()
     }
 
-    fn part1(&self, input: &Parse) -> Result<usize, AOCError> {
+    fn part1(&self, input: &Self::In) -> Result<Self::Out, AOCError> {
         Ok(input.into_iter().sum())
     }
 
-    fn part2(&self, input: &Parse) -> Result<usize, AOCError> {
+    fn part2(&self, input: &Self::In) -> Result<Self::Out, AOCError> {
         unimplemented!()
     }
 }
