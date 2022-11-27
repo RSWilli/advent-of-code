@@ -4,6 +4,7 @@ pub use error::AOCError;
 
 mod error;
 mod read;
+pub mod spatial;
 
 pub use read::AOCReader;
 
