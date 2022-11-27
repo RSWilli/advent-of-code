@@ -34,15 +34,15 @@ pub fn run<P, R: AOCReturn, T: AdventOfCode<In = P, Out = R>>(
 
     let parsed = aoc.parse(input)?;
 
-    println!("Parsed input in {}µs", parse_start.elapsed().as_micros());
+    println!("Parsed input ({:?})", parse_start.elapsed());
 
     let part1_start = std::time::Instant::now();
     let p1 = aoc.part1(&parsed)?;
-    println!("Part 1: {} ({}µs)", p1, part1_start.elapsed().as_micros());
+    println!("Part 1: {} ({:?})", p1, part1_start.elapsed());
 
     let part2_start = std::time::Instant::now();
     let p2 = aoc.part2(&parsed)?;
-    println!("Part 2: {} ({}µs)", p2, part2_start.elapsed().as_micros());
+    println!("Part 2: {} ({:?})", p2, part2_start.elapsed());
 
     Ok(())
 }
