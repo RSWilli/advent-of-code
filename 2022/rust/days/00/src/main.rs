@@ -1,4 +1,4 @@
-use util::{AOCError, AOCReader, AdventOfCode};
+use lib::{AOCError, AOCReader, AdventOfCode};
 
 struct Day {}
 
@@ -23,7 +23,7 @@ impl AdventOfCode for Day {
 }
 
 fn main() -> Result<(), AOCError> {
-    util::run(Day {})
+    lib::run(Day {})
 }
 
 #[cfg(test)]
@@ -32,6 +32,6 @@ mod tests {
 
     #[test]
     fn test1() -> Result<(), AOCError> {
-        util::test(Day {}, util::Part::Part1, 1, 10)
+        lib::test(Day {}, lib::Part::Part1, 1, 10)
     }
 }

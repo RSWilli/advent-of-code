@@ -3,8 +3,10 @@ use std::fmt::{Debug, Display};
 pub use error::AOCError;
 
 mod error;
+pub mod math;
 mod read;
 pub mod spatial;
+pub mod util;
 
 pub use read::AOCReader;
 

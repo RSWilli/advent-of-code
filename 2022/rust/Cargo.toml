@@ -9,4 +9,4 @@ edition = "2021"
 
 [workspace]
 
-members = ["util", "days/[0,1,2][0-9]"]
+members = ["lib", "days/[0,1,2][0-9]"]
