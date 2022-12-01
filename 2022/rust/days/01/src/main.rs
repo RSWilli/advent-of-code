@@ -4,8 +4,11 @@ use lib::{AOCError, AOCReader, AdventOfCode};
 
 struct Day {}
 
-fn sum_calories<'a>(elves: &'a Vec<Vec<usize>>) -> impl Iterator<Item = usize> + 'a {
-    elves.into_iter().map(|s| s.into_iter().sum())
+fn sum_calories<'a>(elves: &'a Vec<Vec<usize>>) -> Result<Vec<usize>, AOCError> {
+    elves
+        .into_iter()
+        .map(|s| s.into_iter().map(Ok).sum())
+        .collect()
 }
 
 impl AdventOfCode for Day {
@@ -34,13 +37,15 @@ impl AdventOfCode for Day {
     }
 
     fn part1(&self, input: &Self::In) -> Result<Self::Out, AOCError> {
-        sum_calories(input)
+        let sums = sum_calories(input)?;
+        sums.into_iter()
             .max()
             .ok_or(AOCError::AOCError { msg: "no max" })
     }
 
     fn part2(&self, input: &Self::In) -> Result<Self::Out, AOCError> {
-        let mut ordered: BinaryHeap<_> = sum_calories(input).collect();
+        let sums = sum_calories(input)?;
+        let mut ordered: BinaryHeap<_> = sums.into_iter().collect();
 
         let max = ordered.pop().ok_or(AOCError::AOCError { msg: "no max" })?;
         let snd = ordered.pop().ok_or(AOCError::AOCError { msg: "no snd" })?;
