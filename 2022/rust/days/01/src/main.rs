@@ -4,7 +4,7 @@ use lib::{AOCError, AOCReader, AdventOfCode};
 
 struct Day {}
 
-fn sum_calories<'a>(elves: &'a Vec<Vec<usize>>) -> Result<Vec<usize>, AOCError> {
+fn sum_calories(elves: &Vec<Vec<usize>>) -> Result<Vec<usize>, AOCError> {
     elves
         .into_iter()
         .map(|s| s.into_iter().map(Ok).sum())
