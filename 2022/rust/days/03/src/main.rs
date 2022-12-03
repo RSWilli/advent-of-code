@@ -17,52 +17,44 @@ fn priority(c: &char) -> u32 {
 impl AdventOfCode for Day {
     const DAY: usize = 3;
 
-    type In = Vec<(HashSet<char>, HashSet<char>)>;
+    type In = Vec<String>;
 
     type Out = u32;
 
     fn parse(&self, inp: AOCReader) -> Result<Self::In, AOCError> {
-        inp.lines()
-            .map(|line| {
-                let line = line?;
-
-                let first = &line[0..line.len() / 2];
-                let second = &line[line.len() / 2..];
-
-                println!("{} {}", first, second);
-
-                Ok((first.chars().collect(), second.chars().collect()))
-            })
-            .collect()
+        inp.lines().collect()
     }
 
     fn part1(&self, input: &Self::In) -> Result<Self::Out, AOCError> {
-        input
-            .into_iter()
-            .map(|(first, second)| {
-                let overlap = first.intersection(&second);
+        let mut sum = 0;
+        for line in input {
+            let first: HashSet<_> = line[0..line.len() / 2].chars().collect();
+            let second: HashSet<_> = line[line.len() / 2..].chars().collect();
 
-                let in_both = overlap
-                    .into_iter()
-                    .nth(0)
-                    .ok_or(AOCError::AOCError { msg: "no overlap" })?;
+            let common = first
+                .intersection(&second)
+                .next()
+                .ok_or(AOCError::AOCError {
+                    msg: "no common found",
+                })?;
 
-                Ok(priority(in_both))
-            })
-            .sum()
+            sum += priority(common)
+        }
+
+        Ok(sum)
     }
 
     fn part2(&self, input: &Self::In) -> Result<Self::Out, AOCError> {
-        let joined: Vec<_> = input.into_iter().map(|(f, s)| f | s).collect();
+        let chunks = input.chunks(3);
 
         let mut sum = 0;
 
-        for i in 0..input.len() / 3 {
-            let first = &joined[3 * i + 0];
-            let second = &joined[3 * i + 1];
-            let third = &joined[3 * i + 2];
+        for group in chunks {
+            let first: HashSet<_> = group[0].chars().collect();
+            let second: HashSet<_> = group[1].chars().collect();
+            let third: HashSet<_> = group[2].chars().collect();
 
-            let common_badges = &(first & second) & third;
+            let common_badges = &(&first & &second) & &third;
 
             let badge = common_badges.into_iter().next().ok_or(AOCError::AOCError {
                 msg: "no common badge",
