@@ -1,38 +1,41 @@
-use std::collections::HashSet;
-
 use lib::{AOCError, AOCReader, AdventOfCode};
 
 struct Day {}
 
-fn priority(c: &char) -> u32 {
-    let ascii = *c as u32;
-
-    if c.is_lowercase() {
-        ascii - 97 + 1
+fn priority(ascii: &u8) -> usize {
+    (if ascii.is_ascii_lowercase() {
+        ascii - b'a' + 1
     } else {
-        ascii - 65 + 27
-    }
+        ascii - b'A' + 27
+    }) as usize
 }
 
 impl AdventOfCode for Day {
     const DAY: usize = 3;
 
-    type In = Vec<String>;
+    type In = Vec<Vec<u8>>;
 
-    type Out = u32;
+    type Out = usize;
 
     fn parse(&self, inp: AOCReader) -> Result<Self::In, AOCError> {
-        inp.lines().collect()
+        inp.lines()
+            .map(|line| {
+                let line = line?;
+
+                Ok(line.bytes().collect())
+            })
+            .collect()
     }
 
     fn part1(&self, input: &Self::In) -> Result<Self::Out, AOCError> {
         let mut sum = 0;
-        for line in input {
-            let first: HashSet<_> = line[0..line.len() / 2].chars().collect();
-            let second: HashSet<_> = line[line.len() / 2..].chars().collect();
+        for rucksack in input {
+            let first = &rucksack[0..rucksack.len() / 2];
+            let second = &rucksack[rucksack.len() / 2..];
 
-            let common = first
-                .intersection(&second)
+            let common = second
+                .into_iter()
+                .filter(|el| first.contains(el))
                 .next()
                 .ok_or(AOCError::AOCError {
                     msg: "no common found",
@@ -50,15 +53,18 @@ impl AdventOfCode for Day {
         let mut sum = 0;
 
         for group in chunks {
-            let first: HashSet<_> = group[0].chars().collect();
-            let second: HashSet<_> = group[1].chars().collect();
-            let third: HashSet<_> = group[2].chars().collect();
+            let first = &group[0];
+            let second = &group[1];
+            let third = &group[2];
 
-            let common_badges = &(&first & &second) & &third;
-
-            let badge = common_badges.into_iter().next().ok_or(AOCError::AOCError {
-                msg: "no common badge",
-            })?;
+            let badge = third
+                .into_iter()
+                .filter(|el| first.contains(el))
+                .filter(|el| second.contains(el))
+                .next()
+                .ok_or(AOCError::AOCError {
+                    msg: "no common badge",
+                })?;
 
             sum += priority(&badge)
         }
