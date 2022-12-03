@@ -1,8 +1,26 @@
-use std::{collections::BinaryHeap, str::FromStr};
+use std::str::FromStr;
 
 use lib::{AOCError, AOCReader, AdventOfCode};
 
 struct Day {}
+
+struct Move {
+    hand: Hand,
+    response: Response,
+}
+
+impl FromStr for Move {
+    type Err = AOCError;
+    fn from_str(s: &str) -> Result<Self, Self::Err> {
+        let mut iter = s.chars();
+
+        let hand = iter.next().ok_or(AOCError::ParseErr())?.try_into()?;
+        iter.next();
+        let response = iter.next().ok_or(AOCError::ParseErr())?.try_into()?;
+
+        Ok(Move { hand, response })
+    }
+}
 
 #[derive(Debug, PartialEq, Clone, Copy)]
 enum Hand {
@@ -66,25 +84,25 @@ fn play(f: &Hand, s: &Hand) -> usize {
     }
 }
 
-impl FromStr for Hand {
-    type Err = AOCError;
-    fn from_str(s: &str) -> Result<Self, Self::Err> {
-        match s {
-            "A" => Ok(Hand::Rock),
-            "B" => Ok(Hand::Paper),
-            "C" => Ok(Hand::Scissors),
+impl TryFrom<char> for Hand {
+    type Error = AOCError;
+    fn try_from(value: char) -> Result<Self, Self::Error> {
+        match value {
+            'A' => Ok(Hand::Rock),
+            'B' => Ok(Hand::Paper),
+            'C' => Ok(Hand::Scissors),
             _ => Err(AOCError::ParseErr()),
         }
     }
 }
 
-impl FromStr for Response {
-    type Err = AOCError;
-    fn from_str(s: &str) -> Result<Self, Self::Err> {
-        match s {
-            "X" => Ok(Response::Loose),
-            "Y" => Ok(Response::Draw),
-            "Z" => Ok(Response::Win),
+impl TryFrom<char> for Response {
+    type Error = AOCError;
+    fn try_from(value: char) -> Result<Self, Self::Error> {
+        match value {
+            'X' => Ok(Response::Loose),
+            'Y' => Ok(Response::Draw),
+            'Z' => Ok(Response::Win),
             _ => Err(AOCError::ParseErr()),
         }
     }
@@ -93,38 +111,27 @@ impl FromStr for Response {
 impl AdventOfCode for Day {
     const DAY: usize = 2;
 
-    type In = Vec<(Hand, Response)>;
+    type In = Vec<Move>;
 
     type Out = usize;
 
     fn parse(&self, inp: AOCReader) -> Result<Self::In, AOCError> {
-        inp.lines()
-            .map(|line| -> Result<(Hand, Response), lib::AOCError> {
-                let line = line?;
-
-                let (f, s) = line.split_once(" ").ok_or(AOCError::ParseErr())?;
-
-                let first = f.parse()?;
-                let second = s.parse()?;
-
-                Ok((first, second))
-            })
-            .collect()
+        inp.parse_lines().collect()
     }
 
     fn part1(&self, input: &Self::In) -> Result<Self::Out, AOCError> {
         Ok(input
             .into_iter()
-            .map(|(f, s)| -> (Hand, Hand) { (*f, s.part1_hand()) })
-            .map(|(f, s)| -> usize { play(&f, &s) + s.score() })
+            .map(|mov| (&mov.hand, mov.response.part1_hand()))
+            .map(|(f, s)| play(&f, &s) + s.score())
             .sum())
     }
 
     fn part2(&self, input: &Self::In) -> Result<Self::Out, AOCError> {
         Ok(input
             .into_iter()
-            .map(|(f, s)| -> (Hand, Hand) { (*f, s.part2_hand(f)) })
-            .map(|(f, s)| -> usize { play(&f, &s) + s.score() })
+            .map(|mov| (&mov.hand, mov.response.part2_hand(&mov.hand)))
+            .map(|(f, s)| play(&f, &s) + s.score())
             .sum())
     }
 }
