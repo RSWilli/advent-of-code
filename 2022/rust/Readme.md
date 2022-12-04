@@ -41,3 +41,17 @@ cargo test -p day00
 |  23   |           |          |          |
 |  24   |           |          |          |
 |  25   |           |          |          |
+
+## Setup a new day
+
+create a .env from the .env.example containing your session cookie
+
+run the following:
+
+```bash
+# setup a folder for today:
+./scripts/setupday.sh
+
+# setup for day 21:
+./scripts/setupday.sh 21
+```
