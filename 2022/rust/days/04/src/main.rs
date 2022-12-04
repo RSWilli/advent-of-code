@@ -69,7 +69,7 @@ impl AdventOfCode for Day {
     fn part2(&self, input: &Self::In) -> Result<Self::Out, AOCError> {
         Ok(input
             .into_iter()
-            .filter(|ep| ep.elve1.overlaps(&ep.elve2) || ep.elve2.overlaps(&ep.elve1))
+            .filter(|ep| ep.elve1.overlaps(&ep.elve2))
             .count())
     }
 }
