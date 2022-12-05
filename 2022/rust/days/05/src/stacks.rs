@@ -5,8 +5,48 @@ use lib::{
     AOCError,
 };
 
+use crate::operations::Operation;
+
+#[derive(Clone)]
 pub(crate) struct Stacks {
     stacks: Vec<VecDeque<char>>,
+}
+
+impl Stacks {
+    /**
+     * a single move of crates
+     * amount is the amount of crates to pick up with one move operation
+     */
+    fn move_crates(&mut self, from: usize, to: usize, amount: usize) {
+        let stacks = &mut self.stacks;
+
+        let fromstack = &mut stacks[from];
+
+        if let Some(item) = fromstack.pop_back() {
+            let tostack = &mut stacks[to];
+            tostack.push_front(item)
+        } else {
+            panic!("stack is empty")
+        }
+    }
+
+    pub(crate) fn do_op_part1(&mut self, Operation { amount, from, to }: &Operation) {
+        for _ in 0..*amount {
+            self.move_crates(from - 1, to - 1, 1)
+        }
+    }
+
+    pub(crate) fn read_top(&self) -> String {
+        let mut res = "".to_owned();
+
+        for stack in &self.stacks {
+            if let Some(c) = stack.front() {
+                res.push(*c);
+            }
+        }
+
+        res
+    }
 }
 
 impl Debug for Stacks {
@@ -14,7 +54,12 @@ impl Debug for Stacks {
         let stacks = &self.stacks;
 
         for (i, stack) in stacks.into_iter().enumerate() {
-            println!("{} ({}): {:?}", i, stack.len(), stack)
+            println!(
+                "{} ({}): {:?}",
+                i,
+                stack.len(),
+                stack.into_iter().rev().collect::<Vec<_>>()
+            )
         }
 
         Ok(())

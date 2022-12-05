@@ -1,4 +1,4 @@
-use std::{collections::VecDeque, str::FromStr};
+use std::str::FromStr;
 
 use lib::{AOCError, AOCReader, AdventOfCode};
 use operations::Operation;
@@ -38,16 +38,20 @@ impl AdventOfCode for Day {
 
     type In = Crane;
 
-    type Out = usize;
+    type Out = String;
 
     fn parse(&self, inp: AOCReader) -> Result<Self::In, AOCError> {
         inp.parse_content()
     }
 
     fn part1(&self, input: &Self::In) -> Result<Self::Out, AOCError> {
-        print!("{:?}", input.stacks);
+        let mut stacks = input.stacks.clone();
 
-        Err(AOCError::AOCError { msg: "uninmpl" })
+        for op in &input.operations {
+            stacks.do_op_part1(op)
+        }
+
+        Ok(stacks.read_top())
     }
 
     fn part2(&self, input: &Self::In) -> Result<Self::Out, AOCError> {
@@ -65,6 +69,6 @@ mod tests {
 
     #[test]
     fn test1() -> Result<(), AOCError> {
-        lib::test(Day {}, lib::Part::Part1, 1, 10)
+        lib::test(Day {}, lib::Part::Part1, 1, "CMZ".into())
     }
 }
