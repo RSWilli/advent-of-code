@@ -12,7 +12,7 @@ struct AssignmentRange {
 impl FromStr for AssignmentRange {
     type Err = AOCError;
     fn from_str(s: &str) -> Result<Self, Self::Err> {
-        let (start, end) = s.split_once("-").ok_or(AOCError::ParseErr())?;
+        let (start, end) = s.split_once('-').ok_or(AOCError::ParseErr())?;
 
         let start = start.parse()?;
         let end = end.parse()?;
@@ -39,7 +39,7 @@ struct ElvePair {
 impl FromStr for ElvePair {
     type Err = AOCError;
     fn from_str(s: &str) -> Result<Self, Self::Err> {
-        let (elve1, elve2) = s.split_once(",").ok_or(AOCError::ParseErr())?;
+        let (elve1, elve2) = s.split_once(',').ok_or(AOCError::ParseErr())?;
 
         let elve1 = elve1.parse()?;
         let elve2 = elve2.parse()?;
@@ -61,14 +61,14 @@ impl AdventOfCode for Day {
 
     fn part1(&self, input: &Self::In) -> Result<Self::Out, AOCError> {
         Ok(input
-            .into_iter()
+            .iter()
             .filter(|ep| ep.elve1.contains(&ep.elve2) || ep.elve2.contains(&ep.elve1))
             .count())
     }
 
     fn part2(&self, input: &Self::In) -> Result<Self::Out, AOCError> {
         Ok(input
-            .into_iter()
+            .iter()
             .filter(|ep| ep.elve1.overlaps(&ep.elve2))
             .count())
     }

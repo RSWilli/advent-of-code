@@ -13,13 +13,13 @@ impl FromStr for Operation {
     fn from_str(s: &str) -> Result<Self, Self::Err> {
         let rest = s.strip_prefix("move ").ok_or(AOCError::ParseErr())?;
 
-        let (amount, rest) = rest.split_once(" ").ok_or(AOCError::ParseErr())?;
+        let (amount, rest) = rest.split_once(' ').ok_or(AOCError::ParseErr())?;
 
         let amount = amount.parse()?;
 
         let rest = rest.strip_prefix("from ").ok_or(AOCError::ParseErr())?;
 
-        let (from, rest) = rest.split_once(" ").ok_or(AOCError::ParseErr())?;
+        let (from, rest) = rest.split_once(' ').ok_or(AOCError::ParseErr())?;
 
         let from = from.parse()?;
 

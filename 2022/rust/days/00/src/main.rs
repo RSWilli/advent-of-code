@@ -14,7 +14,7 @@ impl AdventOfCode for Day {
     }
 
     fn part1(&self, input: &Self::In) -> Result<Self::Out, AOCError> {
-        Ok(input.into_iter().sum())
+        Ok(input.iter().sum())
     }
 
     fn part2(&self, input: &Self::In) -> Result<Self::Out, AOCError> {

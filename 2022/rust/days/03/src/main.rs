@@ -34,9 +34,8 @@ impl AdventOfCode for Day {
             let second = &rucksack[rucksack.len() / 2..];
 
             let common = second
-                .into_iter()
-                .filter(|el| first.contains(el))
-                .next()
+                .iter()
+                .find(|el| first.contains(el))
                 .ok_or(AOCError::AOCError {
                     msg: "no common found",
                 })?;
@@ -58,15 +57,14 @@ impl AdventOfCode for Day {
             let third = &group[2];
 
             let badge = third
-                .into_iter()
+                .iter()
                 .filter(|el| first.contains(el))
-                .filter(|el| second.contains(el))
-                .next()
+                .find(|el| second.contains(el))
                 .ok_or(AOCError::AOCError {
                     msg: "no common badge",
                 })?;
 
-            sum += priority(&badge)
+            sum += priority(badge)
         }
 
         Ok(sum)

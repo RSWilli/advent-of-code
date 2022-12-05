@@ -4,11 +4,8 @@ use lib::{AOCError, AOCReader, AdventOfCode};
 
 struct Day {}
 
-fn sum_calories(elves: &Vec<Vec<usize>>) -> Result<Vec<usize>, AOCError> {
-    elves
-        .into_iter()
-        .map(|s| s.into_iter().map(Ok).sum())
-        .collect()
+fn sum_calories(elves: &[Vec<usize>]) -> Result<Vec<usize>, AOCError> {
+    elves.iter().map(|s| s.iter().map(Ok).sum()).collect()
 }
 
 impl AdventOfCode for Day {
@@ -25,7 +22,7 @@ impl AdventOfCode for Day {
 
         elves
             .map(|s| {
-                s.split("\n")
+                s.split('\n')
                     .map(|s| -> Result<usize, AOCError> {
                         let cal = s.parse()?;
 

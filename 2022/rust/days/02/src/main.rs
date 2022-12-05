@@ -64,7 +64,7 @@ impl Response {
             (Response::Win, Hand::Rock) => Hand::Paper,
             (Response::Win, Hand::Paper) => Hand::Scissors,
             (Response::Win, Hand::Scissors) => Hand::Rock,
-            (Response::Draw, x) => x.clone(),
+            (Response::Draw, x) => *x,
         }
     }
 }
@@ -121,17 +121,17 @@ impl AdventOfCode for Day {
 
     fn part1(&self, input: &Self::In) -> Result<Self::Out, AOCError> {
         Ok(input
-            .into_iter()
+            .iter()
             .map(|mov| (&mov.hand, mov.response.part1_hand()))
-            .map(|(f, s)| play(&f, &s) + s.score())
+            .map(|(f, s)| play(f, &s) + s.score())
             .sum())
     }
 
     fn part2(&self, input: &Self::In) -> Result<Self::Out, AOCError> {
         Ok(input
-            .into_iter()
+            .iter()
             .map(|mov| (&mov.hand, mov.response.part2_hand(&mov.hand)))
-            .map(|(f, s)| play(&f, &s) + s.score())
+            .map(|(f, s)| play(f, &s) + s.score())
             .sum())
     }
 }

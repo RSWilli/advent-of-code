@@ -100,21 +100,22 @@ impl FromStr for Spatial<Point2D, char> {
 }
 
 impl Debug for Spatial<Point2D, char> {
-    fn fmt(&self, _f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         let min = self.min;
         let max = self.max;
 
         let width = (max.x - min.x + 1) as usize;
         let height = (max.y - min.y + 1) as usize;
 
-        println!(
+        writeln!(
+            f,
             "Spatial min: {}, max: {}; dimensions: {}x{}",
             min, max, width, height
-        );
+        )?;
 
         for row in self.field.chunks(width) {
-            let row = String::from_iter(row.into_iter());
-            println!("{:?}", row)
+            let row = String::from_iter(row.iter());
+            writeln!(f, "{:?}", row)?
         }
 
         Ok(())

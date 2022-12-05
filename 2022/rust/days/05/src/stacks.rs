@@ -70,13 +70,14 @@ impl Debug for Stacks {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         let stacks = &self.stacks;
 
-        for (i, stack) in stacks.into_iter().enumerate() {
-            println!(
+        for (i, stack) in stacks.iter().enumerate() {
+            writeln!(
+                f,
                 "{} ({}): {:?}",
                 i,
                 stack.len(),
-                stack.into_iter().rev().collect::<Vec<_>>()
-            )
+                stack.iter().rev().collect::<Vec<_>>()
+            )?
         }
 
         Ok(())
