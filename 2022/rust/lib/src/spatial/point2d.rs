@@ -19,10 +19,25 @@ impl Position for Point2D {
         if self.x < min.x || self.x > max.x || self.y < min.y || self.y > max.y {
             None
         } else {
+            let width = max.x + 1;
+
             let row = self.y - min.y;
             let col = self.x - min.x;
 
-            Some((row * col + col) as usize)
+            Some((row * width + col) as usize)
         }
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn test_to_index() {
+        let min = Point2D { x: 0, y: 0 };
+        let max = Point2D { x: 4, y: 4 };
+
+        assert_eq!(Point2D { x: 1, y: 1 }.to_index(min, max), Some(6))
     }
 }
