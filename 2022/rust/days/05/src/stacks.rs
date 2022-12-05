@@ -18,15 +18,16 @@ impl Stacks {
      * amount is the amount of crates to pick up with one move operation
      */
     fn move_crates(&mut self, from: usize, to: usize, amount: usize) {
-        let stacks = &mut self.stacks;
+        let mut picked_crates = Vec::with_capacity(amount);
 
-        let fromstack = &mut stacks[from];
+        for _ in 0..amount {
+            let picked = self.stacks[from].pop_front().expect("could not pop");
 
-        if let Some(item) = fromstack.pop_front() {
-            let tostack = &mut stacks[to];
-            tostack.push_front(item)
-        } else {
-            panic!("stack is empty")
+            picked_crates.push(picked)
+        }
+
+        for picked in picked_crates.iter().rev() {
+            self.stacks[to].push_front(*picked)
         }
     }
 
@@ -34,6 +35,10 @@ impl Stacks {
         for _ in 0..*amount {
             self.move_crates(from - 1, to - 1, 1)
         }
+    }
+
+    pub(crate) fn do_op_part2(&mut self, Operation { amount, from, to }: &Operation) {
+        self.move_crates(from - 1, to - 1, *amount)
     }
 
     pub(crate) fn read_top(&self) -> String {

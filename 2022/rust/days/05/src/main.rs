@@ -55,7 +55,13 @@ impl AdventOfCode for Day {
     }
 
     fn part2(&self, input: &Self::In) -> Result<Self::Out, AOCError> {
-        unimplemented!()
+        let mut stacks = input.stacks.clone();
+
+        for op in &input.operations {
+            stacks.do_op_part2(op)
+        }
+
+        Ok(stacks.read_top())
     }
 }
 
