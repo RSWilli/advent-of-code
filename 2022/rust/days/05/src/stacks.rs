@@ -17,11 +17,13 @@ impl Stacks {
      * a single move of crates
      * amount is the amount of crates to pick up with one move operation
      */
-    fn move_crates(&mut self, from: usize, to: usize, amount: usize) {
+    fn move_crates(&mut self, from: usize, to: usize, amount: usize) -> Result<(), AOCError> {
         let mut picked_crates = Vec::with_capacity(amount);
 
         for _ in 0..amount {
-            let picked = self.stacks[from].pop_front().expect("could not pop");
+            let picked = self.stacks[from].pop_front().ok_or(AOCError::AOCError {
+                msg: "could not pop front",
+            })?;
 
             picked_crates.push(picked)
         }
@@ -29,15 +31,25 @@ impl Stacks {
         for picked in picked_crates.iter().rev() {
             self.stacks[to].push_front(*picked)
         }
+
+        Ok(())
     }
 
-    pub(crate) fn do_op_part1(&mut self, Operation { amount, from, to }: &Operation) {
+    pub(crate) fn do_op_part1(
+        &mut self,
+        Operation { amount, from, to }: &Operation,
+    ) -> Result<(), AOCError> {
         for _ in 0..*amount {
-            self.move_crates(from - 1, to - 1, 1)
+            self.move_crates(from - 1, to - 1, 1)?
         }
+
+        Ok(())
     }
 
-    pub(crate) fn do_op_part2(&mut self, Operation { amount, from, to }: &Operation) {
+    pub(crate) fn do_op_part2(
+        &mut self,
+        Operation { amount, from, to }: &Operation,
+    ) -> Result<(), AOCError> {
         self.move_crates(from - 1, to - 1, *amount)
     }
 

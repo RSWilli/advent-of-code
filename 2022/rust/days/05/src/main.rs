@@ -48,7 +48,7 @@ impl AdventOfCode for Day {
         let mut stacks = input.stacks.clone();
 
         for op in &input.operations {
-            stacks.do_op_part1(op)
+            stacks.do_op_part1(op)?
         }
 
         Ok(stacks.read_top())
@@ -58,7 +58,7 @@ impl AdventOfCode for Day {
         let mut stacks = input.stacks.clone();
 
         for op in &input.operations {
-            stacks.do_op_part2(op)
+            stacks.do_op_part2(op)?
         }
 
         Ok(stacks.read_top())
