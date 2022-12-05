@@ -19,7 +19,7 @@ impl Position for Point2D {
         if self.x < min.x || self.x > max.x || self.y < min.y || self.y > max.y {
             None
         } else {
-            let width = max.x + 1;
+            let width = max.x - min.x + 1;
 
             let row = self.y - min.y;
             let col = self.x - min.x;

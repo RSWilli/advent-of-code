@@ -30,9 +30,10 @@ impl Position for Point3D {
             let col = self.x - min.x;
             let depth = self.z - min.z;
 
-            panic!("index not correctly implemented")
+            let width = max.x - min.x + 1;
+            let height = max.y - min.y + 1;
 
-            // Some((row * col * depth + col * depth + depth) as usize)
+            Some((row * width * height + col * height + depth) as usize)
         }
     }
 }
