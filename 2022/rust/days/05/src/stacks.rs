@@ -22,7 +22,7 @@ impl Stacks {
 
         let fromstack = &mut stacks[from];
 
-        if let Some(item) = fromstack.pop_back() {
+        if let Some(item) = fromstack.pop_front() {
             let tostack = &mut stacks[to];
             tostack.push_front(item)
         } else {
@@ -90,7 +90,7 @@ impl FromStr for Stacks {
                 let char = *c as char;
 
                 if c != &' ' {
-                    current_stack.push_back(char)
+                    current_stack.push_front(char)
                 }
             }
 
