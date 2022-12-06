@@ -4,7 +4,7 @@ struct Day {}
 
 fn all_unique(v: &[char]) -> bool {
     for (i, n) in v.iter().enumerate() {
-        for n2 in v.iter().skip(i + 1) {
+        for n2 in &v[0..i] {
             if n == n2 {
                 return false;
             }
