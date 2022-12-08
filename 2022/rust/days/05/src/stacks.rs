@@ -88,7 +88,7 @@ impl FromStr for Stacks {
     type Err = AOCError;
 
     fn from_str(s: &str) -> Result<Self, Self::Err> {
-        let mat: Spatial<_, _> = s.parse().or(Err(AOCError::ParseErr()))?;
+        let mat: Spatial<_, char> = s.parse().or(Err(AOCError::ParseErr()))?;
 
         let Point2D {
             x: width,

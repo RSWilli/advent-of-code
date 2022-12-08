@@ -8,6 +8,12 @@ pub struct Point2D {
     pub y: i32,
 }
 
+impl From<(i32, i32)> for Point2D {
+    fn from((x, y): (i32, i32)) -> Self {
+        Point2D { x, y }
+    }
+}
+
 impl Display for Point2D {
     fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
         write!(f, "({}, {})", self.x, self.y)
@@ -26,6 +32,17 @@ impl Position for Point2D {
 
             Some((row * width + col) as usize)
         }
+    }
+
+    fn neighbors(&self) -> Vec<Self> {
+        let x = self.x;
+        let y = self.y;
+        vec![
+            (x - 1, y).into(),
+            (x + 1, y).into(),
+            (x, y - 1).into(),
+            (x, y + 1).into(),
+        ]
     }
 }
 

@@ -36,4 +36,8 @@ impl Position for Point3D {
             Some((row * width * height + col * height + depth) as usize)
         }
     }
+
+    fn neighbors(&self) -> Vec<Self> {
+        unimplemented!()
+    }
 }
