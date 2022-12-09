@@ -1,4 +1,4 @@
-use std::fmt::{Display, Formatter};
+use std::fmt::{Debug, Display, Formatter};
 
 use super::position::Position;
 
@@ -8,6 +8,19 @@ pub struct Point2D {
     pub y: i32,
 }
 
+impl Point2D {
+    pub fn move_by(&self, dx: i32, dy: i32) -> Self {
+        Point2D {
+            x: self.x + dx,
+            y: self.y + dy,
+        }
+    }
+
+    pub fn manhattan_distance(&self, other: &Self) -> i32 {
+        (self.x - other.x).abs() + (self.y - other.y).abs()
+    }
+}
+
 impl From<(i32, i32)> for Point2D {
     fn from((x, y): (i32, i32)) -> Self {
         Point2D { x, y }
@@ -15,6 +28,12 @@ impl From<(i32, i32)> for Point2D {
 }
 
 impl Display for Point2D {
+    fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
+        write!(f, "({}, {})", self.x, self.y)
+    }
+}
+
+impl Debug for Point2D {
     fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
         write!(f, "({}, {})", self.x, self.y)
     }
