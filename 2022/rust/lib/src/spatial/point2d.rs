@@ -15,10 +15,6 @@ impl Point2D {
             y: self.y + dy,
         }
     }
-
-    pub fn manhattan_distance(&self, other: &Self) -> i32 {
-        (self.x - other.x).abs() + (self.y - other.y).abs()
-    }
 }
 
 impl From<(i32, i32)> for Point2D {
