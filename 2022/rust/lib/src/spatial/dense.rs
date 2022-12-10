@@ -1,21 +1,19 @@
 use std::{
-    error::Error,
-    fmt::Debug,
+    fmt::{Debug, Display},
     ops::{Index, IndexMut},
-    str::FromStr,
     vec,
 };
 
 use crate::math::gcd;
 
-use super::{point2d::Point2D, position::Position};
+use super::{get::Get, point2d::Point2D, position::Position, section::Section};
 
 pub struct Spatial<P: Position, T> {
     // the minimum index in the grid
     pub min: P,
     // the maximum index in the grid
     pub max: P,
-    field: Vec<T>,
+    pub(super) field: Vec<T>,
 }
 
 impl<P: Position, T> Spatial<P, T> {
@@ -31,8 +29,16 @@ impl<P: Position, T> Spatial<P, T> {
         }
     }
 
-    fn with_content(min: P, max: P, field: Vec<T>) -> Self {
-        Spatial { min, max, field }
+    pub fn with_content(min: P, max: P, field: Vec<T>) -> Self {
+        if let Some(size) = max.to_index(min, max) {
+            if field.len() != size + 1 {
+                panic!("field size does not match the size of the grid");
+            }
+
+            Spatial { min, max, field }
+        } else {
+            panic!("index out of bounds");
+        }
     }
 
     pub fn get(&self, pos: P) -> Option<&T> {
@@ -49,6 +55,10 @@ impl<P: Position, T> Spatial<P, T> {
         } else {
             None
         }
+    }
+
+    pub fn section(&self, min: P, max: P) -> Section<P, T, Self> {
+        Section::new(self, min, max)
     }
 }
 
@@ -97,6 +107,14 @@ impl<T> Spatial<Point2D, T> {
     }
 }
 
+impl<P: Position, T> Get<P> for Spatial<P, T> {
+    type Output = T;
+
+    fn get(&self, index: P) -> Option<&Self::Output> {
+        self.get(index)
+    }
+}
+
 impl<P: Position, T> Index<P> for Spatial<P, T> {
     type Output = T;
 
@@ -116,62 +134,6 @@ impl<P: Position, T> IndexMut<P> for Spatial<P, T> {
         } else {
             panic!("index out of bounds");
         }
-    }
-}
-
-impl FromStr for Spatial<Point2D, char> {
-    type Err = Box<dyn Error>;
-
-    fn from_str(s: &str) -> Result<Self, Self::Err> {
-        let lines: Vec<_> = s.lines().collect();
-
-        let height = lines.len();
-
-        let field: Vec<_> = lines
-            .into_iter()
-            .flat_map(|line| line.bytes().map(|b| b as char))
-            .collect();
-
-        let size = field.len();
-
-        let width = size / height;
-
-        let min = Point2D { x: 0, y: 0 };
-
-        let max = Point2D {
-            x: (width - 1) as i32,
-            y: (height - 1) as i32,
-        };
-
-        Ok(Spatial::with_content(min, max, field))
-    }
-}
-
-impl FromStr for Spatial<Point2D, usize> {
-    type Err = Box<dyn Error>;
-
-    fn from_str(s: &str) -> Result<Self, Self::Err> {
-        let lines: Vec<_> = s.lines().collect();
-
-        let height = lines.len();
-
-        let field: Vec<_> = lines
-            .into_iter()
-            .flat_map(|line| line.bytes().map(|b| (b - b'0') as usize))
-            .collect();
-
-        let size = field.len();
-
-        let width = size / height;
-
-        let min = Point2D { x: 0, y: 0 };
-
-        let max = Point2D {
-            x: (width - 1) as i32,
-            y: (height - 1) as i32,
-        };
-
-        Ok(Spatial::with_content(min, max, field))
     }
 }
 
@@ -200,36 +162,85 @@ impl<T: Debug> Debug for Spatial<Point2D, T> {
     }
 }
 
+impl<T: Display> Display for Spatial<Point2D, T> {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        let min = self.min;
+        let max = self.max;
+
+        let width = (max.x - min.x + 1) as usize;
+
+        for row in self.field.chunks(width) {
+            for item in row {
+                write!(f, "{}", item)?;
+            }
+            writeln!(f)?;
+        }
+
+        Ok(())
+    }
+}
+
+impl Spatial<Point2D, char> {
+    /**
+     * read splits the grid into 4x6 sections and reads the characters in each section
+     *
+     * e.g:
+     *
+     * ###  ####  ##  ###  #  # ###  #### ###  
+     * #  #    # #  # #  # # #  #  # #    #  #
+     * #  #   #  #    #  # ##   #  # ###  ###  
+     * ###   #   # ## ###  # #  ###  #    #  #
+     * #    #    #  # #    # #  #    #    #  #
+     * #    ####  ### #    #  # #    #### ###
+     *
+     * becomes
+     *  PZGPKPEB
+     */
+    pub fn read(&self) -> String {
+        let mut res = String::new();
+
+        // the charaters are 4x6 and spaced by 1
+        let width = 4;
+
+        let Point2D { x: minx, y: miny } = self.min;
+        let Point2D { x: maxx, y: maxy } = self.max;
+
+        if maxy - miny != 5 {
+            panic!("invalid grid height");
+        }
+
+        for x in (minx..=maxx).step_by(width + 1) {
+            let letter = self.section(
+                Point2D { x, y: miny },
+                Point2D {
+                    x: x + width as i32 - 1,
+                    y: maxy,
+                },
+            );
+
+            res.push(letter.read());
+        }
+
+        res
+    }
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
 
     #[test]
-    fn test_parse_indices() {
-        let inp = "123\n456\n789";
+    fn test_read() {
+        let str = "###  ####  ##  ###  #  # ###  #### ###  
+#  #    # #  # #  # # #  #  # #    #  # 
+#  #   #  #    #  # ##   #  # ###  ###  
+###   #   # ## ###  # #  ###  #    #  # 
+#    #    #  # #    # #  #    #    #  # 
+#    ####  ### #    #  # #    #### ###  ";
+        let grid: Spatial<Point2D, char> = str.parse().expect("could not parse grid");
 
-        let mat: Spatial<_, _> = inp.parse().expect("could not parse");
+        println!("{}", grid);
 
-        println!("{:?}", mat);
-
-        assert_eq!(mat.get(Point2D { x: 0, y: 0 }), Some(&'1'));
-        assert_eq!(mat.get(Point2D { x: 1, y: 0 }), Some(&'2'));
-        assert_eq!(mat.get(Point2D { x: 2, y: 0 }), Some(&'3'));
-        assert_eq!(mat.get(Point2D { x: 3, y: 0 }), None);
-
-        assert_eq!(mat.get(Point2D { x: 0, y: 1 }), Some(&'4'));
-        assert_eq!(mat.get(Point2D { x: 1, y: 1 }), Some(&'5'));
-        assert_eq!(mat.get(Point2D { x: 2, y: 1 }), Some(&'6'));
-        assert_eq!(mat.get(Point2D { x: 3, y: 1 }), None);
-
-        assert_eq!(mat.get(Point2D { x: 0, y: 2 }), Some(&'7'));
-        assert_eq!(mat.get(Point2D { x: 1, y: 2 }), Some(&'8'));
-        assert_eq!(mat.get(Point2D { x: 2, y: 2 }), Some(&'9'));
-        assert_eq!(mat.get(Point2D { x: 3, y: 2 }), None);
-
-        assert_eq!(mat.get(Point2D { x: 0, y: 3 }), None);
-        assert_eq!(mat.get(Point2D { x: 1, y: 3 }), None);
-        assert_eq!(mat.get(Point2D { x: 2, y: 3 }), None);
-        assert_eq!(mat.get(Point2D { x: 3, y: 3 }), None);
+        assert_eq!(grid.read(), "PZGPKPEB");
     }
 }

@@ -4,6 +4,7 @@ pub use error::AOCError;
 
 mod error;
 pub mod math;
+pub mod ocr;
 mod read;
 pub mod spatial;
 pub mod util;
@@ -24,6 +25,21 @@ pub trait AdventOfCode {
     fn parse(&self, inp: AOCReader) -> Result<Self::In, error::AOCError>;
     fn part1(&self, input: &Self::In) -> Result<Self::Out, AOCError>;
     fn part2(&self, input: &Self::In) -> Result<Self::Out, AOCError>;
+}
+
+#[derive(Debug, Eq, PartialEq)]
+pub enum Solution<P1, P2> {
+    Part1(P1),
+    Part2(P2),
+}
+
+impl<P1: Display, P2: Display> Display for Solution<P1, P2> {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        match self {
+            Solution::Part1(p1) => write!(f, "{}", p1),
+            Solution::Part2(p2) => write!(f, "{}", p2),
+        }
+    }
 }
 
 /**

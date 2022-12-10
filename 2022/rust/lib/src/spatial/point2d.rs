@@ -1,4 +1,7 @@
-use std::fmt::{Debug, Display, Formatter};
+use std::{
+    fmt::{Debug, Display, Formatter},
+    ops::{Add, Sub},
+};
 
 use super::position::Position;
 
@@ -32,6 +35,28 @@ impl Display for Point2D {
 impl Debug for Point2D {
     fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
         write!(f, "({}, {})", self.x, self.y)
+    }
+}
+
+impl Add for Point2D {
+    type Output = Self;
+
+    fn add(self, rhs: Self) -> Self::Output {
+        Point2D {
+            x: self.x + rhs.x,
+            y: self.y + rhs.y,
+        }
+    }
+}
+
+impl Sub for Point2D {
+    type Output = Self;
+
+    fn sub(self, rhs: Self) -> Self::Output {
+        Point2D {
+            x: self.x - rhs.x,
+            y: self.y - rhs.y,
+        }
     }
 }
 
