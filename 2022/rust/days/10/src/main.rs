@@ -2,7 +2,7 @@ use std::{collections::VecDeque, fmt::Debug, str::FromStr};
 
 use lib::{
     ocr::{DARK_PIXEL, LIGHT_PIXEL},
-    spatial::dense::Spatial,
+    spatial::dense::SpatialDense,
     AOCError, AOCReader, AdventOfCode, Solution,
 };
 
@@ -99,7 +99,7 @@ impl AdventOfCode for Day {
             beam_x = (beam_x + 1) % 40;
         }
 
-        let screen = Spatial::with_content((0, 0).into(), (39, 5).into(), screen);
+        let screen = SpatialDense::with_content((0, 0).into(), (39, 5).into(), screen);
 
         Ok(Solution::Part2(screen.read()))
     }

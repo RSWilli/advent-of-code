@@ -1,5 +1,5 @@
 use lib::{
-    spatial::{dense::Spatial, point2d::Point2D},
+    spatial::{dense::SpatialDense, point2d::Point2D, spatial_trait::Spatial},
     AOCError, AOCReader, AdventOfCode,
 };
 
@@ -22,7 +22,7 @@ fn count_visible(current: &usize, trees: &[&usize]) -> usize {
 impl AdventOfCode for Day {
     const DAY: usize = 8;
 
-    type In = Spatial<Point2D, usize>;
+    type In = SpatialDense<Point2D, usize>;
 
     type Out = usize;
 
@@ -47,11 +47,11 @@ impl AdventOfCode for Day {
                     msg: "no tree found",
                 })?;
 
-                let col_top = input.slice((x, input.min.y).into(), (x, y - 1).into());
-                let col_bottom = input.slice((x, y + 1).into(), (x, input.max.y).into());
+                let col_top = input.slice((x, input.min().y).into(), (x, y - 1).into());
+                let col_bottom = input.slice((x, y + 1).into(), (x, input.max().y).into());
 
-                let row_left = input.slice((input.min.x, y).into(), (x - 1, y).into());
-                let row_right = input.slice((x + 1, y).into(), (input.max.x, y).into());
+                let row_left = input.slice((input.min().x, y).into(), (x - 1, y).into());
+                let row_right = input.slice((x + 1, y).into(), (input.max().x, y).into());
 
                 if visible(current_tree, &row_left) == row_left.len()
                     || visible(current_tree, &row_right) == row_right.len()
@@ -81,11 +81,11 @@ impl AdventOfCode for Day {
                     msg: "no tree found",
                 })?;
 
-                let col_top = input.slice((x, y - 1).into(), (x, input.min.y).into());
-                let col_bottom = input.slice((x, y + 1).into(), (x, input.max.y).into());
+                let col_top = input.slice((x, y - 1).into(), (x, input.min().y).into());
+                let col_bottom = input.slice((x, y + 1).into(), (x, input.max().y).into());
 
-                let row_left = input.slice((x - 1, y).into(), (input.min.x, y).into());
-                let row_right = input.slice((x + 1, y).into(), (input.max.x, y).into());
+                let row_left = input.slice((x - 1, y).into(), (input.min().x, y).into());
+                let row_right = input.slice((x + 1, y).into(), (input.max().x, y).into());
 
                 max_score = max_score.max(
                     count_visible(current_tree, &col_top)

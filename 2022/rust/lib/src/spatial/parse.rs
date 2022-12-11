@@ -1,8 +1,8 @@
 use std::{error::Error, str::FromStr};
 
-use super::{dense::Spatial, point2d::Point2D};
+use super::{dense::SpatialDense, point2d::Point2D};
 
-impl FromStr for Spatial<Point2D, char> {
+impl FromStr for SpatialDense<Point2D, char> {
     type Err = Box<dyn Error>;
 
     fn from_str(s: &str) -> Result<Self, Self::Err> {
@@ -26,11 +26,11 @@ impl FromStr for Spatial<Point2D, char> {
             y: (height - 1) as i32,
         };
 
-        Ok(Spatial::with_content(min, max, field))
+        Ok(SpatialDense::with_content(min, max, field))
     }
 }
 
-impl FromStr for Spatial<Point2D, usize> {
+impl FromStr for SpatialDense<Point2D, usize> {
     type Err = Box<dyn Error>;
 
     fn from_str(s: &str) -> Result<Self, Self::Err> {
@@ -54,7 +54,7 @@ impl FromStr for Spatial<Point2D, usize> {
             y: (height - 1) as i32,
         };
 
-        Ok(Spatial::with_content(min, max, field))
+        Ok(SpatialDense::with_content(min, max, field))
     }
 }
 
@@ -66,7 +66,7 @@ mod tests {
     fn test_parse_indices() {
         let inp = "123\n456\n789";
 
-        let mat: Spatial<_, _> = inp.parse().expect("could not parse");
+        let mat: SpatialDense<_, _> = inp.parse().expect("could not parse");
 
         println!("{:?}", mat);
 

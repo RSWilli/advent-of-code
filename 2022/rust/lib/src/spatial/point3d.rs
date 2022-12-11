@@ -78,6 +78,10 @@ impl Position for Point3D {
             Point3D { x: x + 1, y, z },
         ]
     }
+
+    fn origin() -> Self {
+        Point3D { x: 0, y: 0, z: 0 }
+    }
 }
 
 mod tests {

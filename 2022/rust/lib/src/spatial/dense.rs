@@ -6,36 +6,28 @@ use std::{
 
 use crate::math::gcd;
 
-use super::{get::Get, point2d::Point2D, position::Position, section::Section};
+use super::{
+    point2d::Point2D,
+    position::Position,
+    spatial_trait::{Spatial, Spatial2D},
+};
 
-pub struct Spatial<P: Position, T> {
+pub struct SpatialDense<P: Position, T> {
     // the minimum index in the grid
-    pub min: P,
+    min: P,
     // the maximum index in the grid
-    pub max: P,
-    pub(super) field: Vec<T>,
+    max: P,
+    field: Vec<T>,
 }
 
-impl<P: Position, T> Spatial<P, T> {
-    pub fn new(min: P, max: P) -> Self {
-        if let Some(size) = max.to_index(min, max) {
-            Spatial {
-                min,
-                max,
-                field: Vec::with_capacity(size + 1),
-            }
-        } else {
-            panic!("index out of bounds");
-        }
-    }
-
+impl<P: Position, T> SpatialDense<P, T> {
     pub fn with_content(min: P, max: P, field: Vec<T>) -> Self {
         if let Some(size) = max.to_index(min, max) {
             if field.len() != size + 1 {
                 panic!("field size does not match the size of the grid");
             }
 
-            Spatial { min, max, field }
+            SpatialDense { min, max, field }
         } else {
             panic!("index out of bounds");
         }
@@ -48,21 +40,9 @@ impl<P: Position, T> Spatial<P, T> {
             None
         }
     }
-
-    pub fn get_mut(&mut self, pos: P) -> Option<&mut T> {
-        if let Some(index) = pos.to_index(self.min, self.max) {
-            self.field.get_mut(index)
-        } else {
-            None
-        }
-    }
-
-    pub fn section(&self, min: P, max: P) -> Section<P, T, Self> {
-        Section::new(self, min, max)
-    }
 }
 
-impl<T> Spatial<Point2D, T> {
+impl<T> SpatialDense<Point2D, T> {
     pub fn slice(&self, from: Point2D, to: Point2D) -> Vec<&T> {
         let mut dx = to.x - from.x;
         let mut dy = to.y - from.y;
@@ -107,37 +87,41 @@ impl<T> Spatial<Point2D, T> {
     }
 }
 
-impl<P: Position, T> Get<P> for Spatial<P, T> {
-    type Output = T;
+impl<P: Position, T> Spatial<P> for SpatialDense<P, T> {
+    type Item = T;
 
-    fn get(&self, index: P) -> Option<&Self::Output> {
+    fn get(&self, index: P) -> Option<&Self::Item> {
         self.get(index)
     }
-}
 
-impl<P: Position, T> Index<P> for Spatial<P, T> {
-    type Output = T;
+    fn min(&self) -> P {
+        self.min
+    }
 
-    fn index(&self, pos: P) -> &Self::Output {
-        if let Some(index) = pos.to_index(self.min, self.max) {
-            &self.field[index]
-        } else {
-            panic!("index out of bounds");
-        }
+    fn max(&self) -> P {
+        self.max
     }
 }
 
-impl<P: Position, T> IndexMut<P> for Spatial<P, T> {
-    fn index_mut(&mut self, pos: P) -> &mut Self::Output {
-        if let Some(index) = pos.to_index(self.min, self.max) {
-            &mut self.field[index]
-        } else {
-            panic!("index out of bounds");
-        }
+impl<T> Spatial2D for SpatialDense<Point2D, T> {
+    fn row(&self, y: i32) -> Vec<Self::Item> {
+        todo!()
+    }
+
+    fn col(&self, x: i32) -> Vec<Self::Item> {
+        todo!()
+    }
+
+    fn width(&self) -> usize {
+        (self.max.x - self.min.x + 1) as usize
+    }
+
+    fn height(&self) -> usize {
+        (self.max.y - self.min.y + 1) as usize
     }
 }
 
-impl<T: Debug> Debug for Spatial<Point2D, T> {
+impl<T: Debug> Debug for SpatialDense<Point2D, T> {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         let min = self.min;
         let max = self.max;
@@ -162,7 +146,7 @@ impl<T: Debug> Debug for Spatial<Point2D, T> {
     }
 }
 
-impl<T: Display> Display for Spatial<Point2D, T> {
+impl<T: Display> Display for SpatialDense<Point2D, T> {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         let min = self.min;
         let max = self.max;
@@ -180,7 +164,7 @@ impl<T: Display> Display for Spatial<Point2D, T> {
     }
 }
 
-impl Spatial<Point2D, char> {
+impl SpatialDense<Point2D, char> {
     /**
      * read splits the grid into 4x6 sections and reads the characters in each section
      *
@@ -237,7 +221,7 @@ mod tests {
 ###   #   # ## ###  # #  ###  #    #  # 
 #    #    #  # #    # #  #    #    #  # 
 #    ####  ### #    #  # #    #### ###  ";
-        let grid: Spatial<Point2D, char> = str.parse().expect("could not parse grid");
+        let grid: SpatialDense<Point2D, char> = str.parse().expect("could not parse grid");
 
         println!("{}", grid);
 

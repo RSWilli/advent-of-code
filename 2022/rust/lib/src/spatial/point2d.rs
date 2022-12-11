@@ -84,6 +84,10 @@ impl Position for Point2D {
             (x, y + 1).into(),
         ]
     }
+
+    fn origin() -> Self {
+        Point2D { x: 0, y: 0 }
+    }
 }
 
 #[cfg(test)]

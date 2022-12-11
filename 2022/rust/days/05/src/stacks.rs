@@ -1,7 +1,7 @@
 use std::{collections::VecDeque, fmt::Debug, str::FromStr};
 
 use lib::{
-    spatial::{dense::Spatial, point2d::Point2D},
+    spatial::{dense::SpatialDense, point2d::Point2D, spatial_trait::Spatial},
     AOCError,
 };
 
@@ -88,12 +88,12 @@ impl FromStr for Stacks {
     type Err = AOCError;
 
     fn from_str(s: &str) -> Result<Self, Self::Err> {
-        let mat: Spatial<_, char> = s.parse().or(Err(AOCError::ParseErr()))?;
+        let mat: SpatialDense<_, char> = s.parse().or(Err(AOCError::ParseErr()))?;
 
         let Point2D {
             x: width,
             y: height,
-        } = mat.max;
+        } = mat.max();
 
         let mut stacks: Vec<VecDeque<char>> = Vec::new();
 

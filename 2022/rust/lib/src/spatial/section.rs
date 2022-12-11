@@ -2,7 +2,7 @@ use std::fmt::{Debug, Display};
 
 use crate::ocr::{self};
 
-use super::{get::Get, point2d::Point2D, position::Position};
+use super::{point2d::Point2D, position::Position, spatial_trait::Spatial};
 
 /**
  * this represents a section of a Spatial
@@ -10,7 +10,7 @@ use super::{get::Get, point2d::Point2D, position::Position};
  * it borrows the underlying grid and can be used to get values from it
  * with a 0 position being the min position of the section
  */
-pub struct Section<'a, P: Position, T, Grid: Get<P, Output = T>> {
+pub struct Section<'a, P: Position, T, Grid: Spatial<P, Item = T>> {
     // the minimum index in the underlying grid
     min: P,
     // the maximum index in the underlying grid
@@ -18,7 +18,7 @@ pub struct Section<'a, P: Position, T, Grid: Get<P, Output = T>> {
     field: &'a Grid,
 }
 
-impl<'a, P: Position, T, Grid: Get<P, Output = T>> Section<'a, P, T, Grid> {
+impl<'a, P: Position, T, Grid: Spatial<P, Item = T>> Section<'a, P, T, Grid> {
     pub(super) fn new(field: &'a Grid, min: P, max: P) -> Self {
         Section { min, max, field }
     }
@@ -27,8 +27,8 @@ impl<'a, P: Position, T, Grid: Get<P, Output = T>> Section<'a, P, T, Grid> {
         Section::new(self, min + self.min, max + self.min)
     }
 }
-impl<'a, P: Position, T, Grid: Get<P, Output = T>> Get<P> for Section<'a, P, T, Grid> {
-    type Output = T;
+impl<'a, P: Position, T, Grid: Spatial<P, Item = T>> Spatial<P> for Section<'a, P, T, Grid> {
+    type Item = T;
 
     fn get(&self, pos: P) -> Option<&T> {
         let mapped_pos = pos + self.min;
@@ -38,9 +38,17 @@ impl<'a, P: Position, T, Grid: Get<P, Output = T>> Get<P> for Section<'a, P, T, 
             None
         }
     }
+
+    fn min(&self) -> P {
+        P::origin()
+    }
+
+    fn max(&self) -> P {
+        self.max - self.min
+    }
 }
 
-impl<'a, T: Display, Grid: Get<Point2D, Output = T>> Display for Section<'a, Point2D, T, Grid> {
+impl<'a, T: Display, Grid: Spatial<Point2D, Item = T>> Display for Section<'a, Point2D, T, Grid> {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         for y in self.min.y..=self.max.y {
             for x in self.min.x..=self.max.x {
@@ -58,7 +66,7 @@ impl<'a, T: Display, Grid: Get<Point2D, Output = T>> Display for Section<'a, Poi
     }
 }
 
-impl<'a, T: Debug, Grid: Get<Point2D, Output = T>> Debug for Section<'a, Point2D, T, Grid> {
+impl<'a, T: Debug, Grid: Spatial<Point2D, Item = T>> Debug for Section<'a, Point2D, T, Grid> {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         writeln!(f, "Section min: {:?}, max: {:?}", self.min, self.max)?;
         for y in self.min.y..=self.max.y {
@@ -77,7 +85,7 @@ impl<'a, T: Debug, Grid: Get<Point2D, Output = T>> Debug for Section<'a, Point2D
     }
 }
 
-impl<'a, Grid: Get<Point2D, Output = char>> Section<'a, Point2D, char, Grid> {
+impl<'a, Grid: Spatial<Point2D, Item = char>> Section<'a, Point2D, char, Grid> {
     pub fn read(&self) -> char {
         let s = self.to_string();
 
@@ -125,7 +133,7 @@ impl<'a, Grid: Get<Point2D, Output = char>> Section<'a, Point2D, char, Grid> {
 
 #[cfg(test)]
 mod tests {
-    use crate::spatial::{dense::Spatial, point2d::Point2D};
+    use crate::spatial::{dense::SpatialDense, point2d::Point2D};
 
     use super::*;
 
@@ -133,7 +141,7 @@ mod tests {
     fn test_section() {
         let inp = "123\n456\n789";
 
-        let mat: Spatial<_, _> = inp.parse().expect("could not parse");
+        let mat: SpatialDense<_, _> = inp.parse().expect("could not parse");
 
         println!("{:?}", mat);
 
@@ -157,7 +165,7 @@ mod tests {
     fn test_subsection() {
         let inp = "123\n456\n789";
 
-        let mat: Spatial<_, _> = inp.parse().expect("could not parse");
+        let mat: SpatialDense<_, _> = inp.parse().expect("could not parse");
 
         println!("{:?}", mat);
 
