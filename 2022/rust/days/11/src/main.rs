@@ -1,17 +1,27 @@
-use std::{collections::VecDeque, str::FromStr};
+use std::{
+    collections::{BinaryHeap, VecDeque},
+    fmt::Debug,
+    str::FromStr,
+};
 
 use lib::{AOCError, AOCReader, AdventOfCode};
 use operation::Operation;
 
 mod operation;
 
-#[derive(Debug, Clone)]
+#[derive(Clone)]
 struct Monkey {
     items: VecDeque<usize>,
     divisor: usize,
     op: Operation,
     if_true: usize,
     if_false: usize,
+}
+
+impl Debug for Monkey {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        write!(f, "Monkey items: {:?}", self.items)
+    }
 }
 
 impl FromStr for Monkey {
@@ -87,6 +97,18 @@ impl Monkey {
             (self.if_false, new)
         }
     }
+
+    fn throw_part2(&self, item: usize, ring: usize) -> (usize, usize) {
+        let new = self.op.eval(item);
+
+        let new = new % ring;
+
+        if new % self.divisor == 0 {
+            (self.if_true, new)
+        } else {
+            (self.if_false, new)
+        }
+    }
 }
 
 struct Day {}
@@ -103,26 +125,59 @@ impl AdventOfCode for Day {
     }
 
     fn part1(&self, input: &Self::In) -> Result<Self::Out, AOCError> {
-        println!("{:?}", input);
+        let mut monkeys: Vec<_> = input.clone();
 
-        // let mut monkeys: Vec<_> = input.clone();
-        // let len = monkeys.len();
+        let mut throws = vec![0; monkeys.len()];
 
-        // for round in 0..20 {
-        //     let active_monkey = &mut monkeys[round % len];
+        for _round in 0..20 {
+            for (monkey_id, monkey) in input.iter().enumerate() {
+                while let Some(item) = monkeys[monkey_id].items.pop_front() {
+                    let (target, item) = monkey.throw(item);
 
-        //     while let Some(item) = active_monkey.items.pop_front() {
-        //         let (monkey, item) = active_monkey.throw(item);
+                    monkeys[target].items.push_back(item);
 
-        //         monkeys[monkey].items.push_back(item);
-        //     }
-        // }
+                    throws[monkey_id] += 1;
+                }
+            }
+        }
 
-        Ok(0)
+        let mut sorted: BinaryHeap<_> = throws.iter().collect();
+
+        let max = sorted.pop().ok_or(AOCError::AOCError { msg: "no max" })?;
+        let second = sorted
+            .pop()
+            .ok_or(AOCError::AOCError { msg: "no second" })?;
+
+        Ok(max * second)
     }
 
     fn part2(&self, input: &Self::In) -> Result<Self::Out, AOCError> {
-        unimplemented!()
+        let mut monkeys: Vec<_> = input.clone();
+
+        let ring: usize = input.iter().map(|m| m.divisor).product();
+
+        let mut throws = vec![0; monkeys.len()];
+
+        for _round in 0..10000 {
+            for (monkey_id, monkey) in input.iter().enumerate() {
+                while let Some(item) = monkeys[monkey_id].items.pop_front() {
+                    let (target, item) = monkey.throw_part2(item, ring);
+
+                    monkeys[target].items.push_back(item);
+
+                    throws[monkey_id] += 1;
+                }
+            }
+        }
+
+        let mut sorted: BinaryHeap<_> = throws.iter().collect();
+
+        let max = sorted.pop().ok_or(AOCError::AOCError { msg: "no max" })?;
+        let second = sorted
+            .pop()
+            .ok_or(AOCError::AOCError { msg: "no second" })?;
+
+        Ok(max * second)
     }
 }
 
@@ -137,5 +192,9 @@ mod tests {
     #[test]
     fn test1() -> Result<(), AOCError> {
         lib::test(Day {}, lib::Part::Part1, 1, 10605)
+    }
+    #[test]
+    fn test2() -> Result<(), AOCError> {
+        lib::test(Day {}, lib::Part::Part2, 1, 2713310158)
     }
 }

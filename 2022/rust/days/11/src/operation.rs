@@ -3,7 +3,7 @@ use std::str::FromStr;
 use lib::AOCError;
 
 // the operation the monkey performs
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, Copy)]
 pub(crate) enum Operation {
     Add(Value, Value),
     Mul(Value, Value),
@@ -29,7 +29,7 @@ impl FromStr for Operation {
     }
 }
 
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, Copy)]
 pub(crate) enum Value {
     Old,
     Num(usize),
