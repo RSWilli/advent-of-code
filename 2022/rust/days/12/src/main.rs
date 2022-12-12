@@ -8,27 +8,6 @@ use pathfinding::prelude::dijkstra;
 struct Hill(SpatialDense<Point2D, char>);
 
 impl Hill {
-    fn climb_up_moves(&self, pos: Point2D) -> Vec<(Point2D, usize)> {
-        let current = (*self.0.get(pos).unwrap()) as u8;
-
-        pos.neighbors()
-            .iter()
-            .filter(|p| {
-                let target = self.0.get(**p);
-
-                let current = if current == b'S' { b'a' } else { current };
-
-                match target {
-                    Some(&'S') => false,
-                    Some(&'E') => current == b'z' || current == b'y',
-                    Some(val) => *val as u8 <= current + 1,
-                    None => false,
-                }
-            })
-            .map(|p| (*p, 1))
-            .collect()
-    }
-
     fn climb_down_moves(&self, pos: Point2D) -> Vec<(Point2D, usize)> {
         let current = (*self.0.get(pos).unwrap()) as u8;
 
@@ -40,7 +19,7 @@ impl Hill {
                 let current = if current == b'E' { b'z' } else { current };
 
                 match target {
-                    Some(&'S') => false,
+                    Some(&'S') => true,
                     Some(&'E') => false,
                     Some(val) => *val as u8 >= current - 1,
                     None => false,
@@ -70,7 +49,11 @@ impl AdventOfCode for Day {
     }
 
     fn part1(&self, input: &Self::In) -> Result<Self::Out, AOCError> {
-        let shortest_path = dijkstra(&input.0, |p| input.2.climb_up_moves(*p), |p| *p == input.1);
+        let shortest_path = dijkstra(
+            &input.1,
+            |p| input.2.climb_down_moves(*p),
+            |p| *p == input.0,
+        );
 
         if let Some((path, _)) = shortest_path {
             Ok(path.len() - 1)
@@ -104,8 +87,6 @@ fn main() -> Result<(), AOCError> {
 
 #[cfg(test)]
 mod tests {
-    use lib::get_test;
-
     use super::*;
 
     #[test]
@@ -116,24 +97,5 @@ mod tests {
     #[test]
     fn test2() -> Result<(), AOCError> {
         lib::test(Day {}, lib::Part::Part2, 1, 29)
-    }
-
-    #[test]
-    fn test_neighbors() -> Result<(), AOCError> {
-        let (s, e, hill) = get_test(Day {}, 1)?;
-
-        let neighbors = hill.climb_up_moves(s);
-        println!("{:?}", neighbors);
-        assert_eq!(neighbors.len(), 2);
-
-        let neighbors = hill.climb_up_moves(e);
-        println!("{:?}", neighbors);
-        assert_eq!(neighbors.len(), 0);
-
-        let neighbors = hill.climb_up_moves(Point2D { x: 2, y: 1 });
-        println!("{:?}", neighbors);
-        assert_eq!(neighbors.len(), 3);
-
-        Ok(())
     }
 }
