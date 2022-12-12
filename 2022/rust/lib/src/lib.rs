@@ -98,5 +98,13 @@ pub fn test<P, R: AOCReturn, T: AdventOfCode<In = P, Out = R>>(
     }
 }
 
+pub fn get_test<P, R: AOCReturn, T: AdventOfCode<In = P, Out = R>>(
+    aoc: T,
+    test: usize,
+) -> Result<P, AOCError> {
+    let input = read::read_test(T::DAY, test)?;
+    aoc.parse(input)
+}
+
 #[cfg(test)]
 mod tests {}

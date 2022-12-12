@@ -8,6 +8,8 @@ pub trait Position:
 {
     fn to_index(&self, min: Self, max: Self) -> Option<usize>;
 
+    fn from_index(index: usize, min: Self, max: Self) -> Option<Self>;
+
     fn neighbors(&self) -> Vec<Self>;
 
     // fn neighbors_with_diagonals(&self) -> Vec<Self>;

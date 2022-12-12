@@ -39,6 +39,13 @@ impl<'a, P: Position, T, Grid: Spatial<P, Item = T>> Spatial<P> for Section<'a, 
         }
     }
 
+    fn find(&self, item: &Self::Item) -> Option<P> {
+        let min_index = self.min.to_index(self.min, self.max)?;
+        let max_index = self.max.to_index(self.min, self.max)?;
+
+        unimplemented!()
+    }
+
     fn min(&self) -> P {
         P::origin()
     }

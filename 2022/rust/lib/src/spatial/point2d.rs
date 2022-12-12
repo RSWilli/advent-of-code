@@ -74,6 +74,22 @@ impl Position for Point2D {
         }
     }
 
+    fn from_index(index: usize, min: Self, max: Self) -> Option<Self> {
+        let width = max.x - min.x + 1;
+
+        let row = index / width as usize;
+        let col = index % width as usize;
+
+        if row > (max.y - min.y) as usize || col > (max.x - min.x) as usize {
+            None
+        } else {
+            Some(Point2D {
+                x: col as i32 + min.x,
+                y: row as i32 + min.y,
+            })
+        }
+    }
+
     fn neighbors(&self) -> Vec<Self> {
         let x = self.x;
         let y = self.y;
@@ -99,6 +115,62 @@ mod tests {
         let min = Point2D { x: 0, y: 0 };
         let max = Point2D { x: 4, y: 4 };
 
-        assert_eq!(Point2D { x: 1, y: 1 }.to_index(min, max), Some(6))
+        assert_eq!(Point2D { x: 0, y: 0 }.to_index(min, max), Some(0));
+        assert_eq!(Point2D { x: 1, y: 0 }.to_index(min, max), Some(1));
+        assert_eq!(Point2D { x: 2, y: 0 }.to_index(min, max), Some(2));
+        assert_eq!(Point2D { x: 3, y: 0 }.to_index(min, max), Some(3));
+        assert_eq!(Point2D { x: 4, y: 0 }.to_index(min, max), Some(4));
+        assert_eq!(Point2D { x: 0, y: 1 }.to_index(min, max), Some(5));
+        assert_eq!(Point2D { x: 1, y: 1 }.to_index(min, max), Some(6));
+        assert_eq!(Point2D { x: 2, y: 1 }.to_index(min, max), Some(7));
+        assert_eq!(Point2D { x: 3, y: 1 }.to_index(min, max), Some(8));
+        assert_eq!(Point2D { x: 4, y: 1 }.to_index(min, max), Some(9));
+        assert_eq!(Point2D { x: 0, y: 2 }.to_index(min, max), Some(10));
+        assert_eq!(Point2D { x: 1, y: 2 }.to_index(min, max), Some(11));
+        assert_eq!(Point2D { x: 2, y: 2 }.to_index(min, max), Some(12));
+        assert_eq!(Point2D { x: 3, y: 2 }.to_index(min, max), Some(13));
+        assert_eq!(Point2D { x: 4, y: 2 }.to_index(min, max), Some(14));
+        assert_eq!(Point2D { x: 0, y: 3 }.to_index(min, max), Some(15));
+        assert_eq!(Point2D { x: 1, y: 3 }.to_index(min, max), Some(16));
+        assert_eq!(Point2D { x: 2, y: 3 }.to_index(min, max), Some(17));
+        assert_eq!(Point2D { x: 3, y: 3 }.to_index(min, max), Some(18));
+        assert_eq!(Point2D { x: 4, y: 3 }.to_index(min, max), Some(19));
+        assert_eq!(Point2D { x: 0, y: 4 }.to_index(min, max), Some(20));
+        assert_eq!(Point2D { x: 1, y: 4 }.to_index(min, max), Some(21));
+        assert_eq!(Point2D { x: 2, y: 4 }.to_index(min, max), Some(22));
+        assert_eq!(Point2D { x: 3, y: 4 }.to_index(min, max), Some(23));
+        assert_eq!(Point2D { x: 4, y: 4 }.to_index(min, max), Some(24));
+    }
+
+    #[test]
+    fn test_from_index() {
+        // \ 0  1  2  3  4
+        // 0 0  1  2  3  4
+        // 1 5  6  7  8  9
+        // 2 10 11 12 13 14
+        // 3 15 16 17 18 19
+        // 4 20 21 22 23 24
+        let min = Point2D { x: 0, y: 0 };
+        let max = Point2D { x: 4, y: 4 };
+
+        assert_eq!(
+            Point2D::from_index(7, min, max),
+            Some(Point2D { x: 2, y: 1 })
+        )
+    }
+
+    #[test]
+    fn test_from_to_index() {
+        let min = Point2D { x: 0, y: 0 };
+        let max = Point2D { x: 4, y: 4 };
+
+        for y in min.y..=max.y {
+            for x in min.x..=max.x {
+                let p = Point2D { x, y };
+                let index = p.to_index(min, max).unwrap();
+                let p2 = Point2D::from_index(index, min, max).unwrap();
+                assert_eq!(p, p2);
+            }
+        }
     }
 }

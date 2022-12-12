@@ -64,6 +64,28 @@ impl Position for Point3D {
         }
     }
 
+    fn from_index(index: usize, min: Self, max: Self) -> Option<Self> {
+        let width = max.x - min.x + 1;
+        let height = max.y - min.y + 1;
+
+        let row = index / (width * height) as usize;
+        let col = (index % (width * height) as usize) / height as usize;
+        let depth = index % height as usize;
+
+        if row > (max.y - min.y) as usize
+            || col > (max.x - min.x) as usize
+            || depth > (max.z - min.z) as usize
+        {
+            None
+        } else {
+            Some(Point3D {
+                x: col as i32 + min.x,
+                y: row as i32 + min.y,
+                z: depth as i32 + min.z,
+            })
+        }
+    }
+
     fn neighbors(&self) -> Vec<Self> {
         let x = self.x;
         let y = self.y;

@@ -42,6 +42,26 @@ impl<P: Position, T> SpatialDense<P, T> {
     }
 }
 
+// impl<P: Position, T> IntoIterator for SpatialDense<P, T> {
+//     type Item = (P, T);
+//     type IntoIter = std::iter::Scan<
+//         std::iter::Enumerate<std::vec::IntoIter<T>>,
+//         (P, P),
+//         fn(&mut (P, P), (usize, T)) -> Option<(P, T)>,
+//     >;
+
+//     fn into_iter(self) -> Self::IntoIter {
+//         let min = self.min;
+//         let max = self.max;
+//         self.field
+//             .into_iter()
+//             .enumerate()
+//             .scan((min, max), |(min, max), (index, item)| {
+//                 P::from_index(index, *min, *max).map(|pos| (pos, item))
+//             })
+//     }
+// }
+
 impl<T> SpatialDense<Point2D, T> {
     pub fn slice(&self, from: Point2D, to: Point2D) -> Vec<&T> {
         let mut dx = to.x - from.x;
@@ -101,15 +121,43 @@ impl<P: Position, T> Spatial<P> for SpatialDense<P, T> {
     fn max(&self) -> P {
         self.max
     }
+
+    fn find(&self, item: &Self::Item) -> Option<P>
+    where
+        Self::Item: PartialEq,
+    {
+        if let Some(index) = self.field.iter().position(|x| x == item) {
+            P::from_index(index, self.min, self.max)
+        } else {
+            None
+        }
+    }
 }
 
 impl<T> Spatial2D for SpatialDense<Point2D, T> {
-    fn row(&self, y: i32) -> Vec<Self::Item> {
-        todo!()
+    fn row(&self, y: i32) -> Vec<&Self::Item> {
+        let min_index = Point2D { y, x: self.min.x }
+            .to_index(self.min, self.max)
+            .unwrap();
+        let max_index = Point2D { y, x: self.max.x }
+            .to_index(self.min, self.max)
+            .unwrap();
+
+        self.field[min_index..=max_index].iter().collect()
     }
 
-    fn col(&self, x: i32) -> Vec<Self::Item> {
-        todo!()
+    fn col(&self, x: i32) -> Vec<&Self::Item> {
+        let min_index = Point2D { x, y: self.min.y }
+            .to_index(self.min, self.max)
+            .unwrap();
+        let max_index = Point2D { x, y: self.max.y }
+            .to_index(self.min, self.max)
+            .unwrap();
+
+        self.field[min_index..=max_index]
+            .iter()
+            .step_by(self.width())
+            .collect()
     }
 
     fn width(&self) -> usize {
@@ -226,5 +274,22 @@ mod tests {
         println!("{}", grid);
 
         assert_eq!(grid.read(), "PZGPKPEB");
+    }
+
+    #[test]
+    fn test_find() {
+        let str = "123\n456\n789";
+        let grid: SpatialDense<Point2D, char> = str.parse().expect("could not parse grid");
+
+        assert_eq!(grid.find(&'1'), Some(Point2D { x: 0, y: 0 }));
+        assert_eq!(grid.find(&'2'), Some(Point2D { x: 1, y: 0 }));
+        assert_eq!(grid.find(&'3'), Some(Point2D { x: 2, y: 0 }));
+        assert_eq!(grid.find(&'4'), Some(Point2D { x: 0, y: 1 }));
+        assert_eq!(grid.find(&'5'), Some(Point2D { x: 1, y: 1 }));
+        assert_eq!(grid.find(&'6'), Some(Point2D { x: 2, y: 1 }));
+        assert_eq!(grid.find(&'7'), Some(Point2D { x: 0, y: 2 }));
+        assert_eq!(grid.find(&'8'), Some(Point2D { x: 1, y: 2 }));
+        assert_eq!(grid.find(&'9'), Some(Point2D { x: 2, y: 2 }));
+        assert_eq!(grid.find(&'0'), None);
     }
 }
