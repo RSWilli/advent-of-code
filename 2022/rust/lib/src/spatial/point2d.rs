@@ -104,6 +104,13 @@ impl Position for Point2D {
     fn origin() -> Self {
         Point2D { x: 0, y: 0 }
     }
+
+    fn distance(&self, other: &Self) -> usize {
+        let dx = (self.x - other.x).unsigned_abs() as usize;
+        let dy = (self.y - other.y).unsigned_abs() as usize;
+
+        dx + dy
+    }
 }
 
 #[cfg(test)]

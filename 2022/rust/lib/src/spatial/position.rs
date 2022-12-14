@@ -15,4 +15,6 @@ pub trait Position:
     // fn neighbors_with_diagonals(&self) -> Vec<Self>;
 
     fn origin() -> Self;
+
+    fn distance(&self, other: &Self) -> usize;
 }
