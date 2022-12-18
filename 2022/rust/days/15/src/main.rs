@@ -1,4 +1,4 @@
-use std::{collections::HashSet, str::FromStr};
+use std::{collections::HashSet, ops::RangeInclusive, str::FromStr};
 
 use lib::{
     spatial::{point2d::Point2D, position::Position},
@@ -61,24 +61,40 @@ impl AdventOfCode for Day {
     }
 
     fn part1(&self, input: &Self::In) -> Result<Self::Out, AOCError> {
-        let mut beacons: HashSet<Point2D> = HashSet::new();
-        let mut not_beacons: HashSet<i32> = HashSet::new();
+        let mut beacons: HashSet<i32> = HashSet::new();
+        let mut not_beacons: Vec<RangeInclusive<i32>> = Vec::new();
 
         for sensor in input {
             if sensor.closest_beacon.y == Y {
-                beacons.insert(sensor.closest_beacon);
+                beacons.insert(sensor.closest_beacon.x);
             }
             let dist = sensor.pos.distance(&sensor.closest_beacon);
             let dy = (sensor.pos.y - Y).abs();
 
             let diff = dist as i32 - dy;
 
-            for p in sensor.pos.x - diff..=sensor.pos.x + diff {
-                not_beacons.insert(p);
+            if diff > 0 {
+                not_beacons.push((sensor.pos.x - diff)..=(sensor.pos.x + diff));
             }
         }
 
-        Ok(not_beacons.len() - beacons.len())
+        not_beacons.sort_by_key(|r| *r.start());
+
+        let mut count = 0_usize;
+
+        let mut last_x = i32::MIN;
+
+        for range in not_beacons {
+            if range.start() > &last_x {
+                count += (range.end() - range.start() + 1) as usize;
+                last_x = *range.end();
+            } else if range.end() > &last_x {
+                count += (range.end() - last_x) as usize;
+                last_x = *range.end();
+            }
+        }
+
+        Ok(count - beacons.len())
     }
 
     fn part2(&self, input: &Self::In) -> Result<Self::Out, AOCError> {
