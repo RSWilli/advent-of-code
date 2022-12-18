@@ -1,4 +1,7 @@
-use std::{collections::HashSet, str::FromStr};
+use std::{
+    collections::{HashSet, VecDeque},
+    str::FromStr,
+};
 
 use lib::{spatial::point2d::Point2D, AOCError, AOCReader, AdventOfCode};
 
@@ -53,6 +56,44 @@ impl<'a> SandPit<'a> {
         }
 
         backtracked
+    }
+
+    // essentially a bfs, but count how many steps were taken
+    // and return it
+    fn sand_until_full(&self, start: Point2D) -> usize {
+        let mut todo: VecDeque<Point2D> = VecDeque::new();
+
+        todo.push_front(start);
+
+        let mut count = 0_usize;
+
+        let mut seen: HashSet<Point2D> = HashSet::new();
+
+        while let Some(current) = todo.pop_back() {
+            if !seen.insert(current) {
+                continue;
+            }
+
+            if self.min_y + 2 == current.y {
+                continue;
+            }
+
+            if !self.walls.contains(&current) {
+                count += 1;
+            }
+
+            if !seen.contains(&(current + DOWN)) {
+                todo.push_front(current + DOWN);
+            }
+            if !seen.contains(&(current + DOWN_LEFT)) {
+                todo.push_front(current + DOWN_LEFT);
+            }
+            if !seen.contains(&(current + DOWN_RIGHT)) {
+                todo.push_front(current + DOWN_RIGHT);
+            }
+        }
+
+        count
     }
 }
 
@@ -128,9 +169,9 @@ impl AdventOfCode for Day {
     }
 
     fn part2(&self, (input, goal): &Self::In) -> Result<Self::Out, AOCError> {
-        let bottom = goal + 2;
+        let pit = SandPit::new(input, *goal);
 
-        unimplemented!()
+        Ok(pit.sand_until_full(START_SAND))
     }
 }
 
