@@ -105,9 +105,9 @@ impl Position for Point2D {
         Point2D { x: 0, y: 0 }
     }
 
-    fn distance(&self, other: &Self) -> usize {
-        let dx = (self.x - other.x).unsigned_abs() as usize;
-        let dy = (self.y - other.y).unsigned_abs() as usize;
+    fn distance(&self, other: &Self) -> u32 {
+        let dx = (self.x - other.x).unsigned_abs();
+        let dy = (self.y - other.y).unsigned_abs();
 
         dx + dy
     }

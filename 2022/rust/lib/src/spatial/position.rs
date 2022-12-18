@@ -16,5 +16,5 @@ pub trait Position:
 
     fn origin() -> Self;
 
-    fn distance(&self, other: &Self) -> usize;
+    fn distance(&self, other: &Self) -> u32;
 }

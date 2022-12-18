@@ -1,4 +1,4 @@
-use std::str::FromStr;
+use std::{collections::HashSet, str::FromStr};
 
 use lib::{
     spatial::{point2d::Point2D, position::Position},
@@ -11,7 +11,6 @@ struct Day {}
 struct Sensor {
     pos: Point2D,
     closest_beacon: Point2D,
-    distance: usize,
 }
 
 impl FromStr for Sensor {
@@ -36,53 +35,50 @@ impl FromStr for Sensor {
             x: x_beacon,
             y: y_beacon,
         };
-        let distance = pos.distance(&closest_beacon);
 
         Ok(Sensor {
             pos,
             closest_beacon,
-            distance,
         })
     }
 }
 
-const Y: i32 = 2000000;
+#[cfg(test)]
+const Y: i32 = 10;
+
+#[cfg(not(test))]
+const Y: i32 = 2_000_000;
 
 impl AdventOfCode for Day {
     const DAY: usize = 15;
 
-    type In = (Vec<Sensor>, i32, i32, i32, i32);
+    type In = Vec<Sensor>;
 
     type Out = usize;
 
     fn parse(&self, inp: AOCReader) -> Result<Self::In, AOCError> {
-        let sensors = inp
-            .parse_lines()
-            .collect::<Result<Vec<Sensor>, AOCError>>()?;
-
-        let mut min_x = i32::MAX;
-        let mut max_x = i32::MIN;
-        let mut min_y = i32::MAX;
-        let mut max_y = i32::MIN;
-
-        for sensor in sensors.iter() {
-            min_x = min_x.min(sensor.pos.x).min(sensor.closest_beacon.x);
-            max_x = max_x.max(sensor.pos.x).max(sensor.closest_beacon.x);
-            min_y = min_y.min(sensor.pos.y).min(sensor.closest_beacon.y);
-            max_y = max_y.max(sensor.pos.y).max(sensor.closest_beacon.y);
-        }
-
-        Ok((sensors, min_x, max_x, min_y, max_y))
+        inp.parse_lines().collect::<Result<Vec<Sensor>, AOCError>>()
     }
 
-    fn part1(
-        &self,
-        (sensors, min_x, max_x, min_y, max_y): &Self::In,
-    ) -> Result<Self::Out, AOCError> {
-        println!("sensors: {}", sensors.len());
-        println!("min_x: {} max_x: {}", min_x, max_x);
+    fn part1(&self, input: &Self::In) -> Result<Self::Out, AOCError> {
+        let mut beacons: HashSet<Point2D> = HashSet::new();
+        let mut not_beacons: HashSet<i32> = HashSet::new();
 
-        unimplemented!()
+        for sensor in input {
+            if sensor.closest_beacon.y == Y {
+                beacons.insert(sensor.closest_beacon);
+            }
+            let dist = sensor.pos.distance(&sensor.closest_beacon);
+            let dy = (sensor.pos.y - Y).abs();
+
+            let diff = dist as i32 - dy;
+
+            for p in sensor.pos.x - diff..=sensor.pos.x + diff {
+                not_beacons.insert(p);
+            }
+        }
+
+        Ok(not_beacons.len() - beacons.len())
     }
 
     fn part2(&self, input: &Self::In) -> Result<Self::Out, AOCError> {

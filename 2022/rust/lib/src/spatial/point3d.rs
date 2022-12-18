@@ -105,10 +105,10 @@ impl Position for Point3D {
         Point3D { x: 0, y: 0, z: 0 }
     }
 
-    fn distance(&self, other: &Self) -> usize {
-        let x = (self.x - other.x).unsigned_abs() as usize;
-        let y = (self.y - other.y).unsigned_abs() as usize;
-        let z = (self.z - other.z).unsigned_abs() as usize;
+    fn distance(&self, other: &Self) -> u32 {
+        let x = (self.x - other.x).unsigned_abs();
+        let y = (self.y - other.y).unsigned_abs();
+        let z = (self.z - other.z).unsigned_abs();
 
         x + y + z
     }
