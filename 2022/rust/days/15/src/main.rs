@@ -43,6 +43,10 @@ impl FromStr for Sensor {
     }
 }
 
+fn tuning_freq(p: Point2D) -> i32 {
+    p.x * 4_000_000 + p.y
+}
+
 #[cfg(test)]
 const Y: i32 = 10;
 
@@ -64,6 +68,7 @@ impl AdventOfCode for Day {
         let mut beacons: HashSet<i32> = HashSet::new();
         let mut not_beacons: Vec<RangeInclusive<i32>> = Vec::new();
 
+        // collect all beacon visibilities
         for sensor in input {
             if sensor.closest_beacon.y == Y {
                 beacons.insert(sensor.closest_beacon.x);
@@ -78,12 +83,15 @@ impl AdventOfCode for Day {
             }
         }
 
+        // sort by start
         not_beacons.sort_by_key(|r| *r.start());
 
         let mut count = 0_usize;
 
         let mut last_x = i32::MIN;
 
+        // count the length of all ranges, keep track of the last x
+        // so we don't count the same x twice
         for range in not_beacons {
             if range.start() > &last_x {
                 count += (range.end() - range.start() + 1) as usize;
@@ -94,6 +102,7 @@ impl AdventOfCode for Day {
             }
         }
 
+        // subtract the actual beacons at the end
         Ok(count - beacons.len())
     }
 
@@ -113,5 +122,9 @@ mod tests {
     #[test]
     fn test1() -> Result<(), AOCError> {
         lib::test(Day {}, lib::Part::Part1, 1, 26)
+    }
+    #[test]
+    fn test2() -> Result<(), AOCError> {
+        lib::test(Day {}, lib::Part::Part2, 1, 56000011)
     }
 }
