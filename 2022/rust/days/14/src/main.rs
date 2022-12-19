@@ -60,40 +60,33 @@ impl<'a> SandPit<'a> {
 
     // essentially a bfs, but count how many steps were taken
     // and return it
-    fn sand_until_full(&self, start: Point2D) -> usize {
-        let mut todo: VecDeque<Point2D> = VecDeque::new();
+    fn sand_until_full(&mut self, current: Point2D) -> bool {
+        let Point2D { x: _, y } = current;
 
-        todo.push_front(start);
-
-        let mut count = 0_usize;
-
-        let mut seen: HashSet<Point2D> = HashSet::new();
-
-        while let Some(current) = todo.pop_back() {
-            if !seen.insert(current) {
-                continue;
-            }
-
-            if self.min_y + 2 == current.y {
-                continue;
-            }
-
-            if !self.walls.contains(&current) {
-                count += 1;
-            }
-
-            if !seen.contains(&(current + DOWN)) {
-                todo.push_front(current + DOWN);
-            }
-            if !seen.contains(&(current + DOWN_LEFT)) {
-                todo.push_front(current + DOWN_LEFT);
-            }
-            if !seen.contains(&(current + DOWN_RIGHT)) {
-                todo.push_front(current + DOWN_RIGHT);
-            }
+        if self.walls.contains(&current) {
+            return true;
         }
 
-        count
+        if self.sand.contains(&current) {
+            return true;
+        }
+
+        if y == self.min_y + 2 {
+            return true;
+        }
+
+        let backtracked = self.sand_until_full(current + DOWN)
+            && self.sand_until_full(current + DOWN_LEFT)
+            && self.sand_until_full(current + DOWN_RIGHT);
+
+        if backtracked {
+            // if we backtracked all 3 paths, that means we need to backtrack further
+            // which places a sand block at the current position
+            self.sand.insert(current);
+            self.sand_count += 1;
+        }
+
+        backtracked
     }
 }
 
@@ -169,9 +162,11 @@ impl AdventOfCode for Day {
     }
 
     fn part2(&self, (input, goal): &Self::In) -> Result<Self::Out, AOCError> {
-        let pit = SandPit::new(input, *goal);
+        let mut pit = SandPit::new(input, *goal);
 
-        Ok(pit.sand_until_full(START_SAND))
+        pit.sand_until_full(START_SAND);
+
+        Ok(pit.sand_count)
     }
 }
 
