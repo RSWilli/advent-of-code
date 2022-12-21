@@ -23,7 +23,7 @@ impl TryFrom<char> for Direction {
 }
 
 // play i pieces and return the height of the field
-fn play_for(input: &[Direction], amount: usize) -> Result<i32, AOCError> {
+fn play_for(input: &[Direction], amount: usize) -> Result<isize, AOCError> {
     let mut target_moves = amount;
     let pieces = Piece::piece_order();
 

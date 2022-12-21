@@ -7,12 +7,12 @@ use super::position::Position;
 
 #[derive(PartialEq, Eq, Hash, Clone, Copy)]
 pub struct Point2D {
-    pub x: i32,
-    pub y: i32,
+    pub x: isize,
+    pub y: isize,
 }
 
 impl Point2D {
-    pub fn move_by(&self, dx: i32, dy: i32) -> Self {
+    pub fn move_by(&self, dx: isize, dy: isize) -> Self {
         Point2D {
             x: self.x + dx,
             y: self.y + dy,
@@ -20,8 +20,8 @@ impl Point2D {
     }
 }
 
-impl From<(i32, i32)> for Point2D {
-    fn from((x, y): (i32, i32)) -> Self {
+impl From<(isize, isize)> for Point2D {
+    fn from((x, y): (isize, isize)) -> Self {
         Point2D { x, y }
     }
 }
@@ -77,15 +77,15 @@ impl Position for Point2D {
     fn from_index(index: usize, min: Self, max: Self) -> Option<Self> {
         let width = max.x - min.x + 1;
 
-        let row = index / width as usize;
-        let col = index % width as usize;
+        let row = (index as isize) / width;
+        let col = (index as isize) % width;
 
-        if row > (max.y - min.y) as usize || col > (max.x - min.x) as usize {
+        if row > (max.y - min.y) || col > (max.x - min.x) {
             None
         } else {
             Some(Point2D {
-                x: col as i32 + min.x,
-                y: row as i32 + min.y,
+                x: col as isize + min.x,
+                y: row as isize + min.y,
             })
         }
     }
@@ -105,7 +105,7 @@ impl Position for Point2D {
         Point2D { x: 0, y: 0 }
     }
 
-    fn distance(&self, other: &Self) -> u32 {
+    fn distance(&self, other: &Self) -> usize {
         let dx = (self.x - other.x).unsigned_abs();
         let dy = (self.y - other.y).unsigned_abs();
 

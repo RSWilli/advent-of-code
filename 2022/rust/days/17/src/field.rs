@@ -6,7 +6,7 @@ use crate::piece::Piece;
 
 pub(super) struct TetrisField {
     field: HashSet<Point2D>,
-    pub(super) height: i32,
+    pub(super) height: isize,
 }
 
 impl TetrisField {
@@ -29,7 +29,7 @@ impl TetrisField {
         }
     }
 
-    fn is_row_equal(&self, y1: i32, y2: i32) -> bool {
+    fn is_row_equal(&self, y1: isize, y2: isize) -> bool {
         (0..7).all(|x| {
             self.field.contains(&Point2D { x, y: y1 }) == self.field.contains(&Point2D { x, y: y2 })
         })
@@ -37,11 +37,11 @@ impl TetrisField {
 
     // return true if there is a cycle of length l
     // starting from the top
-    fn has_cycle_of_length(&self, l: i32) -> bool {
+    fn has_cycle_of_length(&self, l: isize) -> bool {
         ((self.height - l)..self.height).all(|y| self.is_row_equal(y, y - l))
     }
 
-    pub(super) fn find_cycle(&self) -> Option<i32> {
+    pub(super) fn find_cycle(&self) -> Option<isize> {
         (10..self.height).find(|&l| self.has_cycle_of_length(l))
     }
 }

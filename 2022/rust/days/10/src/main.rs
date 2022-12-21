@@ -11,7 +11,7 @@ struct Day {}
 #[derive(Debug, Clone)]
 enum Op {
     Noop,
-    AddX(i32),
+    AddX(isize),
 }
 
 impl FromStr for Op {
@@ -20,7 +20,7 @@ impl FromStr for Op {
     fn from_str(s: &str) -> Result<Self, Self::Err> {
         match s.split_once(' ') {
             Some((_, val)) => {
-                let val = val.parse::<i32>()?;
+                let val = val.parse::<isize>()?;
                 Ok(Op::AddX(val))
             }
             None => Ok(Op::Noop),
@@ -33,7 +33,7 @@ impl AdventOfCode for Day {
 
     type In = VecDeque<Op>;
 
-    type Out = Solution<i32, String>;
+    type Out = Solution<isize, String>;
 
     fn parse(&self, inp: AOCReader) -> Result<Self::In, AOCError> {
         inp.parse_lines().collect()

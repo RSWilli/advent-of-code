@@ -39,12 +39,12 @@ impl AdventOfCode for Day {
     }
 
     fn part2(&self, input: &Self::In) -> Result<Self::Out, AOCError> {
-        let mut min_x = i32::MAX;
-        let mut max_x = i32::MIN;
-        let mut min_y = i32::MAX;
-        let mut max_y = i32::MIN;
-        let mut min_z = i32::MAX;
-        let mut max_z = i32::MIN;
+        let mut min_x = isize::MAX;
+        let mut max_x = isize::MIN;
+        let mut min_y = isize::MAX;
+        let mut max_y = isize::MIN;
+        let mut min_z = isize::MAX;
+        let mut max_z = isize::MIN;
 
         for p in input {
             min_x = min_x.min(p.x);

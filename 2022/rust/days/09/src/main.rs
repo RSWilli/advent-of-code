@@ -59,7 +59,7 @@ impl Move {
         self.steps -= 1;
     }
 
-    fn get_coords(&self) -> (i32, i32) {
+    fn get_coords(&self) -> (isize, isize) {
         match self.direction {
             Direction::Up => (0, 1),
             Direction::Down => (0, -1),

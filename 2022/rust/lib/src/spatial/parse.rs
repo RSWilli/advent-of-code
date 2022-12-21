@@ -22,8 +22,8 @@ impl FromStr for SpatialDense<Point2D, char> {
         let min = Point2D { x: 0, y: 0 };
 
         let max = Point2D {
-            x: (width - 1) as i32,
-            y: (height - 1) as i32,
+            x: (width - 1) as isize,
+            y: (height - 1) as isize,
         };
 
         Ok(SpatialDense::with_content(min, max, field))
@@ -50,8 +50,8 @@ impl FromStr for SpatialDense<Point2D, usize> {
         let min = Point2D { x: 0, y: 0 };
 
         let max = Point2D {
-            x: (width - 1) as i32,
-            y: (height - 1) as i32,
+            x: (width - 1) as isize,
+            y: (height - 1) as isize,
         };
 
         Ok(SpatialDense::with_content(min, max, field))

@@ -15,12 +15,12 @@ const DOWN_RIGHT: Point2D = Point2D { x: 1, y: 1 };
 struct SandPit<'a> {
     walls: &'a HashSet<Point2D>,
     sand: HashSet<Point2D>,
-    min_y: i32,
+    min_y: isize,
     sand_count: usize,
 }
 
 impl<'a> SandPit<'a> {
-    fn new(walls: &'a HashSet<Point2D>, min_y: i32) -> Self {
+    fn new(walls: &'a HashSet<Point2D>, min_y: isize) -> Self {
         SandPit {
             walls,
             sand: HashSet::new(),
@@ -93,7 +93,7 @@ impl<'a> SandPit<'a> {
 impl AdventOfCode for Day {
     const DAY: usize = 14;
 
-    type In = (HashSet<Point2D>, i32);
+    type In = (HashSet<Point2D>, isize);
 
     type Out = usize;
 
@@ -110,8 +110,8 @@ impl AdventOfCode for Day {
                 .map(|s| {
                     let (x, y) = s.split_once(',').ok_or(AOCError::ParseErr())?;
 
-                    let x = x.parse::<i32>()?;
-                    let y = y.parse::<i32>()?;
+                    let x = x.parse::<isize>()?;
+                    let y = y.parse::<isize>()?;
 
                     Ok(Point2D { x, y })
                 })

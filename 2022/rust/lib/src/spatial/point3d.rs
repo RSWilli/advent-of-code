@@ -7,9 +7,9 @@ use super::position::Position;
 
 #[derive(PartialEq, Eq, Hash, Clone, Copy, Debug)]
 pub struct Point3D {
-    pub x: i32,
-    pub y: i32,
-    pub z: i32,
+    pub x: isize,
+    pub y: isize,
+    pub z: isize,
 }
 
 impl Display for Point3D {
@@ -79,9 +79,9 @@ impl Position for Point3D {
             None
         } else {
             Some(Point3D {
-                x: col as i32 + min.x,
-                y: row as i32 + min.y,
-                z: depth as i32 + min.z,
+                x: col as isize + min.x,
+                y: row as isize + min.y,
+                z: depth as isize + min.z,
             })
         }
     }
@@ -105,7 +105,7 @@ impl Position for Point3D {
         Point3D { x: 0, y: 0, z: 0 }
     }
 
-    fn distance(&self, other: &Self) -> u32 {
+    fn distance(&self, other: &Self) -> usize {
         let x = (self.x - other.x).unsigned_abs();
         let y = (self.y - other.y).unsigned_abs();
         let z = (self.z - other.z).unsigned_abs();

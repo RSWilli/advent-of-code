@@ -40,8 +40,8 @@ impl AdventOfCode for Day {
 
         for x in 1..width - 1 {
             for y in 1..height - 1 {
-                let x = x as i32;
-                let y = y as i32;
+                let x = x as isize;
+                let y = y as isize;
 
                 let current_tree = input.get((x, y).into()).ok_or(AOCError::AOCError {
                     msg: "no tree found",
@@ -74,8 +74,8 @@ impl AdventOfCode for Day {
 
         for x in 1..width - 1 {
             for y in 1..height - 1 {
-                let x = x as i32;
-                let y = y as i32;
+                let x = x as isize;
+                let y = y as isize;
 
                 let current_tree = input.get((x, y).into()).ok_or(AOCError::AOCError {
                     msg: "no tree found",

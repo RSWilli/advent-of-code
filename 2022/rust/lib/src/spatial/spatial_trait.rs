@@ -23,8 +23,8 @@ where
 }
 
 pub trait Spatial2D: Spatial<Point2D> {
-    fn row(&self, y: i32) -> Vec<&Self::Item>;
-    fn col(&self, x: i32) -> Vec<&Self::Item>;
+    fn row(&self, y: isize) -> Vec<&Self::Item>;
+    fn col(&self, x: isize) -> Vec<&Self::Item>;
 
     fn width(&self) -> usize;
 

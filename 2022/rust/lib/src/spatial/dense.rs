@@ -67,7 +67,7 @@ impl<T> SpatialDense<Point2D, T> {
         let mut dx = to.x - from.x;
         let mut dy = to.y - from.y;
 
-        let m = gcd(dx as i64, dy as i64) as i32;
+        let m = gcd(dx as i64, dy as i64) as isize;
 
         if m != 0 {
             dx /= m;
@@ -135,7 +135,7 @@ impl<P: Position, T> Spatial<P> for SpatialDense<P, T> {
 }
 
 impl<T> Spatial2D for SpatialDense<Point2D, T> {
-    fn row(&self, y: i32) -> Vec<&Self::Item> {
+    fn row(&self, y: isize) -> Vec<&Self::Item> {
         let min_index = Point2D { y, x: self.min.x }
             .to_index(self.min, self.max)
             .unwrap();
@@ -146,7 +146,7 @@ impl<T> Spatial2D for SpatialDense<Point2D, T> {
         self.field[min_index..=max_index].iter().collect()
     }
 
-    fn col(&self, x: i32) -> Vec<&Self::Item> {
+    fn col(&self, x: isize) -> Vec<&Self::Item> {
         let min_index = Point2D { x, y: self.min.y }
             .to_index(self.min, self.max)
             .unwrap();
@@ -245,7 +245,7 @@ impl SpatialDense<Point2D, char> {
             let letter = self.section(
                 Point2D { x, y: miny },
                 Point2D {
-                    x: x + width as i32 - 1,
+                    x: x + width as isize - 1,
                     y: maxy,
                 },
             );
