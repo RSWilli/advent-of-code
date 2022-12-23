@@ -2,6 +2,7 @@ use std::fmt::{Debug, Display};
 
 pub use error::AOCError;
 
+pub mod distance;
 mod error;
 pub mod math;
 pub mod ocr;

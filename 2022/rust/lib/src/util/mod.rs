@@ -4,11 +4,10 @@ pub fn count_elements<I: Hash + Eq, T: IntoIterator<Item = I>>(coll: T) -> HashM
     let mut hashmap = HashMap::new();
 
     for el in coll.into_iter() {
-        if let Some(c) = hashmap.get_mut(&el) {
-            *c += 1;
-        } else {
-            hashmap.insert(el, 1);
-        }
+        hashmap
+            .entry(el)
+            .and_modify(|counter| *counter += 1)
+            .or_insert(1);
     }
 
     hashmap
