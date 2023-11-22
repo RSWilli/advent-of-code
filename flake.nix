@@ -1,27 +1,52 @@
 {
-  description = "AOC devshell";
+  description = "Advent of code";
 
-  inputs = {
-    nixpkgs.url      = "github:NixOS/nixpkgs/nixos-unstable";
-    rust-overlay.url = "github:oxalica/rust-overlay";
-    flake-utils.url  = "github:numtide/flake-utils";
-  };
+  inputs.devshell.url = "github:numtide/devshell";
+  inputs.flake-utils.url = "github:numtide/flake-utils";
+  inputs.fenix.url = "github:nix-community/fenix";
 
-  outputs = { self, nixpkgs, rust-overlay, flake-utils, ... }:
-    flake-utils.lib.eachDefaultSystem (system:
-      let
-        overlays = [ (import rust-overlay) ];
-        pkgs = import nixpkgs {
-          inherit system overlays;
-        };
-      in
-      with pkgs;
-      {
-        devShells.default = mkShell {
-          buildInputs = [
-            rust-bin.stable.latest.default
-          ];
-        };
-      }
-    );
+  outputs = {
+    self,
+    flake-utils,
+    devshell,
+    nixpkgs,
+    fenix,
+  }:
+    flake-utils.lib.eachDefaultSystem (system: let
+      pkgs = import nixpkgs {
+        inherit system;
+
+        overlays = [
+          devshell.overlays.default
+          # fenix.overlays.default
+        ];
+      };
+    in {
+      formatter = pkgs.alejandra;
+      devShells.default = pkgs.devshell.mkShell {
+        devshell.name = "AOC devshell";
+        # devshell.startup.pre-commit = self.checks.${system}.pre-commit-check.shellHook;
+        devshell.packages = with pkgs; [
+          # Rust build inputs
+          pkg-config
+          openssl
+
+          # LSP's
+          rust-analyzer
+
+          # rust
+          (fenix.packages.${system}.stable.withComponents [
+            "cargo"
+            "clippy"
+            "rust-src"
+            "rustc"
+            "rustfmt"
+          ])
+
+          # Haskell
+          haskell.compiler.ghc98
+          cabal-install
+        ];
+      };
+    });
 }
