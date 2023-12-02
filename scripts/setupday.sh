@@ -1,10 +1,8 @@
-#!/bin/bash
+#!/usr/bin/env bash
 
 DATE=""
 
-# get the vars from .env
-# shellcheck source=/dev/null
-source .env
+# this script requires a session cookie from adventofcode.com to be set in the SESSION env var
 
 # get the current day of month from param or use today
 if [ -z "$1" ]; then
@@ -14,13 +12,20 @@ else
     DATE=$1
 fi
 
-PADDED_DATE=$(printf "%02d" $DATE)
+# get the current year from param or use today
+if [ -z "$2" ]; then
+    YEAR=$(date +%Y)
+else
+    YEAR=$2
+fi
+
+PADDED_DATE=$(printf "%02d" "$DATE")
 
 echo "Setting up day $DATE"
 
-touch "tests/day${PADDED_DATE}_1.txt"
+touch "./tests/day${PADDED_DATE}_1.txt"
 
-curl "https://adventofcode.com/2022/day/${DATE}/input" -H "Cookie: session=$SESSION" >"inputs/day${PADDED_DATE}.txt"
+curl "https://adventofcode.com/${YEAR}/day/${DATE}/input" -H "Cookie: session=$SESSION" >"inputs/day${PADDED_DATE}.txt"
 
 # exit if target dir exists
 if [ -d "days/${PADDED_DATE}" ]; then
