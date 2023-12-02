@@ -2,18 +2,9 @@ use lib::{AOCError, AOCReader, AdventOfCode};
 
 struct Day {}
 
-fn parsenum(c: &str) -> Result<u32, &str> {
+fn parsenum(c: &str, words: bool) -> Result<u32, &str> {
     match c {
-        "one" => Ok(1),
-        "two" => Ok(2),
-        "three" => Ok(3),
-        "four" => Ok(4),
-        "five" => Ok(5),
-        "six" => Ok(6),
-        "seven" => Ok(7),
-        "eight" => Ok(8),
-        "nine" => Ok(9),
-        "0" => Ok(0),
+        // "0" => Ok(0),
         "1" => Ok(1),
         "2" => Ok(2),
         "3" => Ok(3),
@@ -23,8 +14,45 @@ fn parsenum(c: &str) -> Result<u32, &str> {
         "7" => Ok(7),
         "8" => Ok(8),
         "9" => Ok(9),
+        "one" if words => Ok(1),
+        "two" if words => Ok(2),
+        "three" if words => Ok(3),
+        "four" if words => Ok(4),
+        "five" if words => Ok(5),
+        "six" if words => Ok(6),
+        "seven" if words => Ok(7),
+        "eight" if words => Ok(8),
+        "nine" if words => Ok(9),
         _ => Err("Invalid number"),
     }
+}
+
+fn find_first_num(s: &str, words: bool) -> u32 {
+    let max_len = if words { 5 } else { 1 };
+
+    for x in 0..=s.len() {
+        for y in x..=s.len().min(x + max_len) {
+            if let Ok(n) = parsenum(&s[x..y], words) {
+                return n;
+            }
+        }
+    }
+
+    unreachable!()
+}
+
+fn find_last_num(s: &str, words: bool) -> u32 {
+    let max_len = if words { 5 } else { 1 };
+
+    for x in (0..=s.len()).rev() {
+        for y in (x..=s.len().min(x + max_len)).rev() {
+            if let Ok(n) = parsenum(&s[x..y], words) {
+                return n;
+            }
+        }
+    }
+
+    unreachable!()
 }
 
 impl AdventOfCode for Day {
@@ -42,13 +70,10 @@ impl AdventOfCode for Day {
         Ok(input
             .iter()
             .map(|code| {
-                let nums: Vec<u32> = code
-                    .chars()
-                    .filter(|c| c.is_ascii_digit())
-                    .map(|c| char::to_digit(c, 10).unwrap())
-                    .collect();
+                let first = find_first_num(code, false);
+                let last = find_last_num(code, false);
 
-                10 * nums[0] + nums.last().unwrap()
+                10 * first + last
             })
             .sum())
     }
@@ -57,17 +82,10 @@ impl AdventOfCode for Day {
         Ok(input
             .iter()
             .map(|code| {
-                let mut nums: Vec<u32> = Vec::new();
+                let first = find_first_num(code, true);
+                let last = find_last_num(code, true);
 
-                for x in 0..=code.len() {
-                    for y in x..=code.len() {
-                        if let Ok(n) = parsenum(&code[x..y]) {
-                            nums.push(n);
-                        }
-                    }
-                }
-
-                10 * nums[0] + nums.last().unwrap()
+                10 * first + last
             })
             .sum())
     }
