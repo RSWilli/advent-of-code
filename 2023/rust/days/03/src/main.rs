@@ -93,10 +93,7 @@ enum Symbol {
 
 impl Symbol {
     fn is_gear(&self) -> bool {
-        match self {
-            Symbol::Gear => true,
-            _ => false,
-        }
+        matches!(self, Symbol::Gear)
     }
 }
 
