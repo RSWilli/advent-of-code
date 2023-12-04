@@ -7,11 +7,13 @@ use lib::{AOCError, AOCReader, AdventOfCode};
 use nom::{
     bytes::complete::tag,
     character::complete::{self, space1},
-    error::ErrorKind,
-    multi::separated_list1,
+    error::VerboseError,
+    multi::separated_list0,
     sequence::tuple,
     Finish, IResult,
 };
+
+type ParseResult<'a, U> = IResult<&'a str, U, VerboseError<&'a str>>;
 
 #[derive(Debug)]
 struct Card {
@@ -19,14 +21,14 @@ struct Card {
     chosen: HashSet<usize>,
 }
 
-fn parse_nums(s: &str) -> IResult<&str, HashSet<usize>, (&str, ErrorKind)> {
-    let (s, nums) = separated_list1(space1, complete::u32)(s)?;
+fn parse_nums(s: &str) -> ParseResult<HashSet<usize>> {
+    let (s, nums) = separated_list0(space1, complete::u32)(s)?;
 
     Ok((s, nums.into_iter().map(|x| x as usize).collect()))
 }
 
 // Card 6: 31 18 13 56 72 | 74 77 10 23 35 67 36 11
-fn parse_card(s: &str) -> IResult<&str, Card, (&str, ErrorKind)> {
+fn parse_card(s: &str) -> ParseResult<Card> {
     let (s, (_, _, _, _, _, winning, _, _, chosen)) = tuple((
         tag("Card"),
         space1,
@@ -47,9 +49,13 @@ impl FromStr for Card {
 
     fn from_str(s: &str) -> Result<Self, Self::Err> {
         match parse_card(s).finish() {
-            Ok((_, x)) => Ok(x),
+            Ok(("", x)) => Ok(x),
             Err(x) => {
-                println!("{:?}", x);
+                println!("{}", x);
+                Err(AOCError::ParseErr())
+            }
+            Ok((s, _)) => {
+                println!("{}", s);
                 Err(AOCError::ParseErr())
             }
         }
