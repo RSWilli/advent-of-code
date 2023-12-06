@@ -33,39 +33,29 @@ impl Range {
 }
 
 impl MappingRange {
-    fn intersect_and_map(&self, other: Range) -> Vec<Range> {
+    fn intersect_and_map(&self, other: Range) -> Option<Range> {
         let new_start = self.start.max(other.start);
         let new_end = self.end.min(other.end);
 
-        [
-            // old start until intersection, will not get mapped:
-            Range {
-                start: self.start,
-                end: new_start,
-            },
-            // intersecting:
-            Range {
-                start: new_start + self.diff,
-                end: new_end + self.diff,
-            },
-            // intersectiong until old end, will not get mapped:
-            Range {
-                start: new_end,
-                end: self.end,
-            },
-        ]
-        .iter()
-        .filter(|r| r.len() > 0)
-        .copied()
-        .collect()
+        let intersected = Range {
+            start: new_start + self.diff,
+            end: new_end + self.diff,
+        };
+
+        if intersected.len() > 0 {
+            Some(intersected)
+        } else {
+            None
+        }
     }
 }
 
 #[derive(Debug)]
 struct AlmanacMap {
-    source_name: String, // TODO can we use &str here?
-    dest_name: String,
+    // source_name: String, // TODO can we use &str here?
+    // dest_name: String,
     mappings: Vec<MappingRange>,
+    identities: Vec<MappingRange>,
 }
 
 impl AlmanacMap {
@@ -77,12 +67,25 @@ impl AlmanacMap {
             .unwrap_or(search)
     }
 
-    // find all ranges that intersect the given range
-    fn lookup_range(&self, range: Range) -> Vec<Range> {
-        self.mappings
-            .iter()
-            .flat_map(|r| r.intersect_and_map(range))
-            .collect()
+    // intersect and map a whole list of ranges
+    fn lookup_ranges(&self, ranges: &[Range]) -> Vec<Range> {
+        let mapped = ranges.iter().flat_map(|range| {
+            self.mappings
+                .iter()
+                .filter_map(|mr| mr.intersect_and_map(*range))
+        });
+        let ids = ranges.iter().flat_map(|range| {
+            self.identities
+                .iter()
+                .filter_map(|mr| mr.intersect_and_map(*range))
+        });
+
+        let mut res = Vec::new();
+
+        res.extend(mapped);
+        res.extend(ids);
+
+        res
     }
 }
 
@@ -96,7 +99,7 @@ struct Almanac {
 // 50 98 2
 // 52 50 48
 fn parse_almanac_map(s: &str) -> ParseResult<AlmanacMap> {
-    let (s, (source_name, _, dest_name, _)) = tuple((
+    let (s, (_source_name, _, _dest_name, _)) = tuple((
         take_until("-"),
         tag("-to-"),
         take_until(" "),
@@ -123,12 +126,47 @@ fn parse_almanac_map(s: &str) -> ParseResult<AlmanacMap> {
         });
     }
 
+    map.sort_by_key(|r| r.start);
+
+    let mut identities: Vec<_> = map
+        .iter()
+        .zip(map.iter().skip(1))
+        .map(|(a, b)| MappingRange {
+            diff: 0,
+            start: a.end,
+            end: b.start,
+        })
+        .collect();
+
+    // add an identity mapping in the front
+    if let Some(first) = map.first() {
+        if first.start > 0 {
+            identities.push(MappingRange {
+                diff: 0,
+                start: 0,
+                end: first.start,
+            });
+        }
+    }
+
+    // add an identity mapping in the back up to i64 max
+    if let Some(last) = map.last() {
+        identities.push(MappingRange {
+            diff: 0,
+            start: last.end,
+            end: i64::MAX,
+        });
+    }
+
+    identities.sort_by_key(|r| r.start);
+
     Ok((
         s,
         AlmanacMap {
-            source_name: source_name.to_owned(),
-            dest_name: dest_name.to_owned(),
+            // source_name: source_name.to_owned(),
+            // dest_name: dest_name.to_owned(),
             mappings: map,
+            identities,
         },
     ))
 }
@@ -194,7 +232,6 @@ impl AdventOfCode for Day {
     }
 
     fn part1(&self, input: &Self::In) -> Result<Self::Out, AOCError> {
-        println!("{:?}", input);
         Ok(input
             .seeds
             .iter()
@@ -204,7 +241,7 @@ impl AdventOfCode for Day {
     }
 
     fn part2(&self, input: &Self::In) -> Result<Self::Out, AOCError> {
-        Ok(input
+        let initial_ranges: Vec<_> = input
             .seeds
             .iter()
             .step_by(2)
@@ -213,19 +250,13 @@ impl AdventOfCode for Day {
                 start: *start,
                 end: *start + *end,
             })
-            // .inspect(|r| println!("new range: {:?}", r))
-            .flat_map(|range| {
-                input.maps.iter().fold(vec![range], |ranges, map| {
-                    println!("{:?}", ranges);
-                    println!("{:?}", map);
-                    ranges
-                        .iter()
-                        // .inspect(|r| println!("{:?}", r))
-                        .flat_map(|range| map.lookup_range(*range))
-                        // .inspect(|r| println!("{:?}", r))
-                        .collect()
-                })
-            })
+            .collect();
+
+        Ok(input
+            .maps
+            .iter()
+            .fold(initial_ranges, |ranges, map| map.lookup_ranges(&ranges))
+            .iter()
             .map(|r| r.start)
             .min()
             .unwrap_or(0))
