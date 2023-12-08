@@ -1,4 +1,4 @@
-use std::{collections::HashMap, str::FromStr};
+use std::str::FromStr;
 
 use lib::{AOCError, AOCReader, AdventOfCode};
 use nom::{
