@@ -7,3 +7,4 @@ edition = "2021"
 
 [dependencies]
 lib = { path = "../../lib" }
+nom = "7.1.3"

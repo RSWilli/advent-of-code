@@ -1,10 +1,6 @@
-use std::{collections::HashMap, str::FromStr};
+use std::collections::HashMap;
 
-use lib::{AOCError, AOCReader, AdventOfCode};
-use nom::{
-    branch, bytes::complete::tag, character::complete, error::ErrorKind, multi::separated_list0,
-    sequence::tuple, Finish, IResult,
-};
+use lib::{parse::*, AOCError, AdventOfCode};
 
 #[derive(Debug, PartialEq, Eq, Hash)]
 enum Cube {
@@ -35,8 +31,8 @@ impl Game {
     }
 }
 
-fn parse_cube(s: &str) -> IResult<&str, Cube, (&str, ErrorKind)> {
-    let (s, color) = branch::alt((tag("red"), tag("green"), tag("blue")))(s)?;
+fn parse_cube(s: &str) -> ParseResult<Cube> {
+    let (s, color) = alt((tag("red"), tag("green"), tag("blue")))(s)?;
 
     let cube = match color {
         "red" => Cube::Red,
@@ -48,14 +44,14 @@ fn parse_cube(s: &str) -> IResult<&str, Cube, (&str, ErrorKind)> {
     Ok((s, cube))
 }
 
-fn parse_cube_count(s: &str) -> IResult<&str, (u32, Cube), (&str, ErrorKind)> {
+fn parse_cube_count(s: &str) -> ParseResult<(u32, Cube)> {
     let (s, (count, _, cube)) = tuple((complete::u32, complete::space0, parse_cube))(s)?;
 
     Ok((s, (count, cube)))
 }
 
 // 5 green, 4 blue, 1 red
-fn parse_cube_set(s: &str) -> IResult<&str, HashMap<Cube, u32>, (&str, ErrorKind)> {
+fn parse_cube_set(s: &str) -> ParseResult<HashMap<Cube, u32>> {
     let (s, cube_list) = separated_list0(tag(", "), parse_cube_count)(s)?;
 
     let mut cubes = HashMap::new();
@@ -68,7 +64,7 @@ fn parse_cube_set(s: &str) -> IResult<&str, HashMap<Cube, u32>, (&str, ErrorKind
 }
 
 // Game 74: 5 green, 4 blue, 1 red; 4 red, 6 blue; 2 red; 2 blue, 1 red; 3 blue, 1 green, 3 red
-fn parse_game(s: &str) -> IResult<&str, Game, (&str, ErrorKind)> {
+fn parse_game(s: &str) -> ParseResult<Game> {
     let (s, (_, id, _, moves)) = tuple((
         tag("Game "),
         complete::u32,
@@ -77,17 +73,6 @@ fn parse_game(s: &str) -> IResult<&str, Game, (&str, ErrorKind)> {
     ))(s)?;
 
     Ok((s, Game { id, moves }))
-}
-
-impl FromStr for Game {
-    type Err = AOCError;
-
-    fn from_str(s: &str) -> Result<Self, Self::Err> {
-        match parse_game(s).finish() {
-            Ok((_, x)) => Ok(x),
-            Err(_) => Err(AOCError::ParseErr()),
-        }
-    }
 }
 
 struct Day {}
@@ -99,11 +84,11 @@ impl AdventOfCode for Day {
 
     type Out = u32;
 
-    fn parse(&self, inp: AOCReader) -> Result<Self::In, AOCError> {
-        inp.parse_lines().collect()
+    fn parse(s: &str) -> ParseResult<Self::In> {
+        parse_lines(parse_game)(s)
     }
 
-    fn part1(&self, input: &Self::In) -> Result<Self::Out, AOCError> {
+    fn part1(input: &Self::In) -> Result<Self::Out, AOCError> {
         // only 12 red cubes, 13 green cubes, and 14 blue cubes
         let limit_red = 12_u32;
         let limit_green = 13_u32;
@@ -124,7 +109,7 @@ impl AdventOfCode for Day {
         Ok(valid_games_id_sum)
     }
 
-    fn part2(&self, input: &Self::In) -> Result<Self::Out, AOCError> {
+    fn part2(input: &Self::In) -> Result<Self::Out, AOCError> {
         Ok(input.iter().map(|game| game.power()).sum())
     }
 }

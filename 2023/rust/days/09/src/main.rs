@@ -1,13 +1,4 @@
-use std::str::FromStr;
-
-use lib::{AOCError, AOCReader, AdventOfCode};
-use nom::{
-    character::complete::{self, space1},
-    error::VerboseError,
-    multi::{separated_list0}, Finish, IResult,
-};
-
-type ParseResult<'a, U> = IResult<&'a str, U, VerboseError<&'a str>>;
+use lib::{parse::*, AOCError, AdventOfCode};
 
 #[derive(Debug)]
 struct Sequence {
@@ -36,28 +27,9 @@ impl Sequence {
 }
 
 fn parse_sequence(s: &str) -> ParseResult<Sequence> {
-    let (s, nums) = separated_list0(space1, complete::i64)(s)?;
+    let (s, nums) = separated_list1(char(' '), i64)(s)?;
 
     Ok((s, Sequence { nums }))
-}
-
-impl FromStr for Sequence {
-    type Err = AOCError;
-
-    fn from_str(s: &str) -> Result<Self, Self::Err> {
-        match parse_sequence(s).finish() {
-            Ok(("", x)) => Ok(x),
-            Err(x) => {
-                println!("{}", x);
-                Err(AOCError::ParseErr())
-            }
-            Ok((s, x)) => {
-                println!("{:?}", x);
-                println!("unconsumed: {:?}", s);
-                Err(AOCError::ParseErr())
-            }
-        }
-    }
 }
 
 struct Day {}
@@ -69,15 +41,16 @@ impl AdventOfCode for Day {
 
     type Out = i64;
 
-    fn parse(&self, inp: AOCReader) -> Result<Self::In, AOCError> {
-        inp.parse_lines().collect()
+    fn parse(s: &str) -> ParseResult<Self::In> {
+        parse_lines(parse_sequence)(s)
     }
 
-    fn part1(&self, input: &Self::In) -> Result<Self::Out, AOCError> {
+    fn part1(input: &Self::In) -> Result<Self::Out, AOCError> {
+        println!("{:?}", input);
         Ok(input.iter().map(Sequence::extrapolate).map(|p| p.1).sum())
     }
 
-    fn part2(&self, input: &Self::In) -> Result<Self::Out, AOCError> {
+    fn part2(input: &Self::In) -> Result<Self::Out, AOCError> {
         Ok(input.iter().map(Sequence::extrapolate).map(|p| p.0).sum())
     }
 }

@@ -1,15 +1,5 @@
-use std::{collections::HashMap, str::FromStr};
-
-use lib::{math::lcm, AOCError, AOCReader, AdventOfCode};
-use nom::{
-    bytes::complete::tag,
-    character::complete::{self, char, one_of},
-    error::VerboseError,
-    multi::many0,
-    multi::{many_m_n, separated_list0},
-    sequence::tuple,
-    Finish, IResult,
-};
+use lib::{math::lcm, parse::*, AOCError, AdventOfCode};
+use std::collections::HashMap;
 
 #[derive(Debug, Hash, Clone, Copy)]
 enum Direction {
@@ -107,11 +97,10 @@ fn parse_element(s: &str) -> ParseResult<(Node, Element)> {
 }
 
 fn parse_map(s: &str) -> ParseResult<Map> {
-    let (s, (directions, _, elements, _)) = tuple((
+    let (s, (directions, _, elements)) = tuple((
         many0(parse_direction),
         tag("\n\n"),
         separated_list0(tag("\n"), parse_element),
-        tag("\n"),
     ))(s)?;
 
     Ok((
@@ -123,28 +112,7 @@ fn parse_map(s: &str) -> ParseResult<Map> {
     ))
 }
 
-impl FromStr for Map {
-    type Err = AOCError;
-
-    fn from_str(s: &str) -> Result<Self, Self::Err> {
-        match parse_map(s).finish() {
-            Ok(("", x)) => Ok(x),
-            Err(x) => {
-                println!("{}", x);
-                Err(AOCError::ParseErr())
-            }
-            Ok((s, x)) => {
-                println!("{:?}", x);
-                println!("unconsumed: {:?}", s);
-                Err(AOCError::ParseErr())
-            }
-        }
-    }
-}
-
 struct Day {}
-
-type ParseResult<'a, U> = IResult<&'a str, U, VerboseError<&'a str>>;
 
 impl AdventOfCode for Day {
     const DAY: usize = 8;
@@ -153,15 +121,15 @@ impl AdventOfCode for Day {
 
     type Out = usize;
 
-    fn parse(&self, inp: AOCReader) -> Result<Self::In, AOCError> {
-        inp.parse_content()
+    fn parse(s: &str) -> ParseResult<Self::In> {
+        parse_all(parse_map)(s)
     }
 
-    fn part1(&self, input: &Self::In) -> Result<Self::Out, AOCError> {
+    fn part1(input: &Self::In) -> Result<Self::Out, AOCError> {
         Ok(input.steps(('A', 'A', 'A'), |c| c == ('Z', 'Z', 'Z')))
     }
 
-    fn part2(&self, input: &Self::In) -> Result<Self::Out, AOCError> {
+    fn part2(input: &Self::In) -> Result<Self::Out, AOCError> {
         let starts = input.elements.keys().filter(|c| c.2 == 'A');
 
         let steps = starts.map(|start| input.steps(*start, |c| c.2 == 'Z'));

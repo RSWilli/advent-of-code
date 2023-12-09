@@ -1,18 +1,6 @@
-use std::str::FromStr;
-
-use lib::{AOCError, AOCReader, AdventOfCode};
-use nom::{
-    bytes::complete::tag,
-    character::complete::{self, space1},
-    error::VerboseError,
-    multi::{separated_list0, separated_list1},
-    sequence::tuple,
-    Finish, IResult,
-};
+use lib::{parse::*, AOCError, AdventOfCode};
 
 struct Day {}
-
-type ParseResult<'a, U> = IResult<&'a str, U, VerboseError<&'a str>>;
 
 #[derive(Debug, Clone, Copy)]
 struct Race {
@@ -28,7 +16,7 @@ struct Races {
 // Time:      7  15   30
 // Distance:  9  40  200
 fn parse_races(s: &str) -> ParseResult<Races> {
-    let (s, (_, _, times, _, _, _, distances, _)) = tuple((
+    let (s, (_, _, times, _, _, _, distances)) = tuple((
         tag("Time:"),
         space1,
         separated_list0(space1, complete::i64),
@@ -36,7 +24,6 @@ fn parse_races(s: &str) -> ParseResult<Races> {
         tag("Distance:"),
         space1,
         separated_list1(space1, complete::i64),
-        tag("\n"),
     ))(s)?;
 
     Ok((
@@ -54,25 +41,6 @@ fn parse_races(s: &str) -> ParseResult<Races> {
     ))
 }
 
-impl FromStr for Races {
-    type Err = AOCError;
-
-    fn from_str(s: &str) -> Result<Self, Self::Err> {
-        match parse_races(s).finish() {
-            Ok(("", x)) => Ok(x),
-            Err(x) => {
-                println!("{}", x);
-                Err(AOCError::ParseErr())
-            }
-            Ok((s, x)) => {
-                println!("{:?}", x);
-                println!("unconsumed: {:?}", s);
-                Err(AOCError::ParseErr())
-            }
-        }
-    }
-}
-
 impl AdventOfCode for Day {
     const DAY: usize = 6;
 
@@ -80,11 +48,11 @@ impl AdventOfCode for Day {
 
     type Out = i64;
 
-    fn parse(&self, inp: AOCReader) -> Result<Self::In, AOCError> {
-        inp.parse_content()
+    fn parse(s: &str) -> ParseResult<Self::In> {
+        parse_all(parse_races)(s)
     }
 
-    fn part1(&self, input: &Self::In) -> Result<Self::Out, AOCError> {
+    fn part1(input: &Self::In) -> Result<Self::Out, AOCError> {
         Ok(input
             .races
             .iter()
@@ -100,7 +68,7 @@ impl AdventOfCode for Day {
             .product())
     }
 
-    fn part2(&self, input: &Self::In) -> Result<Self::Out, AOCError> {
+    fn part2(input: &Self::In) -> Result<Self::Out, AOCError> {
         let mut total_time = 0;
         let mut total_distance = 0;
 

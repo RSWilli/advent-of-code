@@ -1,19 +1,6 @@
-use std::{
-    collections::{HashSet, VecDeque},
-    str::FromStr,
-};
+use std::collections::{HashSet, VecDeque};
 
-use lib::{AOCError, AOCReader, AdventOfCode};
-use nom::{
-    bytes::complete::tag,
-    character::complete::{self, space1},
-    error::VerboseError,
-    multi::separated_list0,
-    sequence::tuple,
-    Finish, IResult,
-};
-
-type ParseResult<'a, U> = IResult<&'a str, U, VerboseError<&'a str>>;
+use lib::{parse::*, AOCError, AdventOfCode};
 
 #[derive(Debug)]
 struct Card {
@@ -44,23 +31,6 @@ fn parse_card(s: &str) -> ParseResult<Card> {
     Ok((s, Card { winning, chosen }))
 }
 
-impl FromStr for Card {
-    type Err = AOCError;
-
-    fn from_str(s: &str) -> Result<Self, Self::Err> {
-        match parse_card(s).finish() {
-            Ok(("", x)) => Ok(x),
-            Err(x) => {
-                println!("{}", x);
-                Err(AOCError::ParseErr())
-            }
-            Ok((s, _)) => {
-                println!("{}", s);
-                Err(AOCError::ParseErr())
-            }
-        }
-    }
-}
 struct Day {}
 
 impl AdventOfCode for Day {
@@ -70,11 +40,11 @@ impl AdventOfCode for Day {
 
     type Out = usize;
 
-    fn parse(&self, inp: AOCReader) -> Result<Self::In, AOCError> {
-        inp.parse_lines().collect()
+    fn parse(s: &str) -> ParseResult<Self::In> {
+        parse_lines(parse_card)(s)
     }
 
-    fn part1(&self, input: &Self::In) -> Result<Self::Out, AOCError> {
+    fn part1(input: &Self::In) -> Result<Self::Out, AOCError> {
         Ok(input
             .iter()
             .map(|c| c.winning.intersection(&c.chosen).count())
@@ -88,7 +58,7 @@ impl AdventOfCode for Day {
             .sum())
     }
 
-    fn part2(&self, input: &Self::In) -> Result<Self::Out, AOCError> {
+    fn part2(input: &Self::In) -> Result<Self::Out, AOCError> {
         Ok(input
             .iter()
             .map(|c| c.winning.intersection(&c.chosen).count())

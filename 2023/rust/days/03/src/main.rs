@@ -1,6 +1,4 @@
-use std::{collections::HashMap, str::FromStr};
-
-use lib::{AOCError, AOCReader, AdventOfCode};
+use lib::{parse::*, AOCError, AdventOfCode};
 
 struct Day {}
 
@@ -183,11 +181,11 @@ impl AdventOfCode for Day {
 
     type Out = usize;
 
-    fn parse(&self, inp: AOCReader) -> Result<Self::In, AOCError> {
+    fn parse(s: &str) -> ParseResult<Self::In> {
         inp.parse_content()
     }
 
-    fn part1(&self, input: &Self::In) -> Result<Self::Out, AOCError> {
+    fn part1(input: &Self::In) -> Result<Self::Out, AOCError> {
         Ok(input
             .components
             .iter()
@@ -200,7 +198,7 @@ impl AdventOfCode for Day {
             .sum())
     }
 
-    fn part2(&self, input: &Self::In) -> Result<Self::Out, AOCError> {
+    fn part2(input: &Self::In) -> Result<Self::Out, AOCError> {
         let possible_gears = input.symbols.iter().filter(|&(_, s)| s.is_gear());
 
         let mut total_ratio = 0;

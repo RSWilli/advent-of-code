@@ -1,17 +1,4 @@
-use std::str::FromStr;
-
-use lib::{AOCError, AOCReader, AdventOfCode};
-use nom::{
-    bytes::complete::tag,
-    bytes::complete::take_until,
-    character::complete::{self, space1},
-    error::VerboseError,
-    multi::{separated_list0, separated_list1},
-    sequence::tuple,
-    Finish, IResult,
-};
-
-type ParseResult<'a, U> = IResult<&'a str, U, VerboseError<&'a str>>;
+use lib::{parse::*, AOCError, AdventOfCode};
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 struct MappingRange {
@@ -182,13 +169,12 @@ fn parse_almanac_map(s: &str) -> ParseResult<AlmanacMap> {
 // 37 52 2
 // 39 0 15
 fn parse_almanac(s: &str) -> ParseResult<Almanac> {
-    let (s, (_, _, seeds, _, mapping, _)) = tuple((
+    let (s, (_, _, seeds, _, mapping)) = tuple((
         tag("seeds:"),
         space1,
         separated_list0(tag(" "), complete::i64),
         tag("\n\n"),
         separated_list1(tag("\n\n"), parse_almanac_map),
-        tag("\n"),
     ))(s)?;
 
     Ok((
@@ -200,24 +186,6 @@ fn parse_almanac(s: &str) -> ParseResult<Almanac> {
     ))
 }
 
-impl FromStr for Almanac {
-    type Err = AOCError;
-
-    fn from_str(s: &str) -> Result<Self, Self::Err> {
-        match parse_almanac(s).finish() {
-            Ok(("", x)) => Ok(x),
-            Err(x) => {
-                println!("{}", x);
-                Err(AOCError::ParseErr())
-            }
-            Ok((s, x)) => {
-                println!("{:?}", x);
-                println!("unconsumed: {:?}", s);
-                Err(AOCError::ParseErr())
-            }
-        }
-    }
-}
 struct Day {}
 
 impl AdventOfCode for Day {
@@ -227,11 +195,11 @@ impl AdventOfCode for Day {
 
     type Out = i64;
 
-    fn parse(&self, inp: AOCReader) -> Result<Self::In, AOCError> {
-        inp.parse_content()
+    fn parse(s: &str) -> ParseResult<Self::In> {
+        parse_all(parse_almanac)(s)
     }
 
-    fn part1(&self, input: &Self::In) -> Result<Self::Out, AOCError> {
+    fn part1(input: &Self::In) -> Result<Self::Out, AOCError> {
         Ok(input
             .seeds
             .iter()
@@ -240,7 +208,7 @@ impl AdventOfCode for Day {
             .unwrap_or(0))
     }
 
-    fn part2(&self, input: &Self::In) -> Result<Self::Out, AOCError> {
+    fn part2(input: &Self::In) -> Result<Self::Out, AOCError> {
         let initial_ranges: Vec<_> = input
             .seeds
             .iter()

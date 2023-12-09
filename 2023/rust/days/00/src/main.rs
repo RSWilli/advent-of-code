@@ -1,23 +1,24 @@
-use lib::{AOCError, AOCReader, AdventOfCode};
+use lib::{parse::*, AOCError, AdventOfCode};
+use nom::character::complete;
 
 struct Day {}
 
 impl AdventOfCode for Day {
     const DAY: usize = 0;
 
-    type In = Vec<usize>;
+    type In = Vec<u64>;
 
-    type Out = usize;
+    type Out = u64;
 
-    fn parse(&self, inp: AOCReader) -> Result<Self::In, AOCError> {
-        inp.parse_lines().collect()
+    fn parse(s: &str) -> ParseResult<Self::In> {
+        parse_lines(complete::u64)(s)
     }
 
-    fn part1(&self, input: &Self::In) -> Result<Self::Out, AOCError> {
+    fn part1(input: &Self::In) -> Result<Self::Out, AOCError> {
         Ok(input.iter().sum())
     }
 
-    fn part2(&self, input: &Self::In) -> Result<Self::Out, AOCError> {
+    fn part2(input: &Self::In) -> Result<Self::Out, AOCError> {
         unimplemented!()
     }
 }

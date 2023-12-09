@@ -1,4 +1,4 @@
-use lib::{AOCError, AOCReader, AdventOfCode};
+use lib::{parse::*, AOCError, AdventOfCode};
 
 struct Day {}
 
@@ -62,11 +62,11 @@ impl AdventOfCode for Day {
 
     type Out = u32;
 
-    fn parse(&self, inp: AOCReader) -> Result<Self::In, AOCError> {
-        inp.lines().collect()
+    fn parse(s: &str) -> ParseResult<Self::In> {
+        parse_lines(alphanumeric1_owned)(s)
     }
 
-    fn part1(&self, input: &Self::In) -> Result<Self::Out, AOCError> {
+    fn part1(input: &Self::In) -> Result<Self::Out, AOCError> {
         Ok(input
             .iter()
             .map(|code| {
@@ -78,7 +78,7 @@ impl AdventOfCode for Day {
             .sum())
     }
 
-    fn part2(&self, input: &Self::In) -> Result<Self::Out, AOCError> {
+    fn part2(input: &Self::In) -> Result<Self::Out, AOCError> {
         Ok(input
             .iter()
             .map(|code| {

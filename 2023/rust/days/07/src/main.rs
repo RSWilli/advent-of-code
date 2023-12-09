@@ -1,16 +1,6 @@
-use std::str::FromStr;
-
-use lib::{AOCError, AOCReader, AdventOfCode};
-use nom::{
-    character::complete::{self, space1},
-    error::VerboseError,
-    sequence::tuple,
-    Finish, IResult,
-};
+use lib::{parse::*, AOCError, AdventOfCode};
 
 struct Day {}
-
-type ParseResult<'a, U> = IResult<&'a str, U, VerboseError<&'a str>>;
 
 #[derive(Debug, PartialEq, Eq, PartialOrd, Ord, Hash, Clone, Copy)]
 enum Card {
@@ -271,25 +261,6 @@ fn parse_hand(s: &str) -> ParseResult<Hand> {
     ))
 }
 
-impl FromStr for Hand {
-    type Err = AOCError;
-
-    fn from_str(s: &str) -> Result<Self, Self::Err> {
-        match parse_hand(s).finish() {
-            Ok(("", x)) => Ok(x),
-            Err(x) => {
-                println!("{}", x);
-                Err(AOCError::ParseErr())
-            }
-            Ok((s, x)) => {
-                println!("{:?}", x);
-                println!("unconsumed: {:?}", s);
-                Err(AOCError::ParseErr())
-            }
-        }
-    }
-}
-
 impl AdventOfCode for Day {
     const DAY: usize = 7;
 
@@ -297,11 +268,11 @@ impl AdventOfCode for Day {
 
     type Out = usize;
 
-    fn parse(&self, inp: AOCReader) -> Result<Self::In, AOCError> {
-        inp.parse_lines().collect()
+    fn parse(s: &str) -> ParseResult<Self::In> {
+        parse_lines(parse_hand)(s)
     }
 
-    fn part1(&self, input: &Self::In) -> Result<Self::Out, AOCError> {
+    fn part1(input: &Self::In) -> Result<Self::Out, AOCError> {
         let mut input = input.clone();
 
         input.sort();
@@ -313,7 +284,7 @@ impl AdventOfCode for Day {
             .sum())
     }
 
-    fn part2(&self, input: &Self::In) -> Result<Self::Out, AOCError> {
+    fn part2(input: &Self::In) -> Result<Self::Out, AOCError> {
         let mut input = input
             .iter()
             .map(|x| x.jacks_to_jokers())
