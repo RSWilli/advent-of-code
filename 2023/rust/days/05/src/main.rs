@@ -1,4 +1,4 @@
-use std::{str::FromStr, vec};
+use std::str::FromStr;
 
 use lib::{AOCError, AOCReader, AdventOfCode};
 use nom::{

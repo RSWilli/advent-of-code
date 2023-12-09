@@ -2,13 +2,9 @@ use std::str::FromStr;
 
 use lib::{AOCError, AOCReader, AdventOfCode};
 use nom::{
-    bytes::complete::{tag, take},
-    character::complete::{self, char, one_of, space1},
+    character::complete::{self, space1},
     error::VerboseError,
-    multi::many0,
-    multi::{many_m_n, separated_list0, separated_list1},
-    sequence::{delimited, tuple},
-    Err, Finish, IResult,
+    multi::{separated_list0}, Finish, IResult,
 };
 
 type ParseResult<'a, U> = IResult<&'a str, U, VerboseError<&'a str>>;

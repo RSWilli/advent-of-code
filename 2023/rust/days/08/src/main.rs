@@ -2,13 +2,13 @@ use std::{collections::HashMap, str::FromStr};
 
 use lib::{math::lcm, AOCError, AOCReader, AdventOfCode};
 use nom::{
-    bytes::complete::{tag, take},
+    bytes::complete::tag,
     character::complete::{self, char, one_of},
     error::VerboseError,
     multi::many0,
-    multi::{many_m_n, separated_list0, separated_list1},
-    sequence::{delimited, tuple},
-    Err, Finish, IResult,
+    multi::{many_m_n, separated_list0},
+    sequence::tuple,
+    Finish, IResult,
 };
 
 #[derive(Debug, Hash, Clone, Copy)]
