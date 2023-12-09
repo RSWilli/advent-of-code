@@ -46,7 +46,6 @@ impl AdventOfCode for Day {
     }
 
     fn part1(input: &Self::In) -> Result<Self::Out, AOCError> {
-        println!("{:?}", input);
         Ok(input.iter().map(Sequence::extrapolate).map(|p| p.1).sum())
     }
 
