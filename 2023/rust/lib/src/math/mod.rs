@@ -14,6 +14,10 @@ pub fn gcd(a: i64, b: i64) -> i64 {
     }
 }
 
+pub fn lcm(a: i64, b: i64) -> i64 {
+    (a * b) / gcd(a, b)
+}
+
 // solve quadratic equations in the form of
 // x² + px + q
 pub fn pq(p: f64, q: f64) -> Option<(f64, f64)> {
