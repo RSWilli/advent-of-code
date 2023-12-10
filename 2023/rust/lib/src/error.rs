@@ -14,4 +14,6 @@ pub enum AOCError {
     ParseErr(),
     #[error("Solving failed: {msg:?}")]
     AOCError { msg: &'static str },
+    #[error("No Solution")]
+    NoSolution(),
 }
