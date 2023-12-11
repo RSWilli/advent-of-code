@@ -98,14 +98,14 @@ enum Pipe {
 }
 
 impl Pipe {
-    fn neighbours_at(&self, pos: &Position) -> Vec<Position> {
+    fn neighbours_at(&self, pos: &Position) -> (Position, Position) {
         match self {
-            Pipe::NS => vec![pos.north(), pos.south()],
-            Pipe::EW => vec![pos.east(), pos.west()],
-            Pipe::NE => vec![pos.north(), pos.east()],
-            Pipe::NW => vec![pos.north(), pos.west()],
-            Pipe::SW => vec![pos.south(), pos.west()],
-            Pipe::SE => vec![pos.south(), pos.east()],
+            Pipe::NS => (pos.north(), pos.south()),
+            Pipe::EW => (pos.east(), pos.west()),
+            Pipe::NE => (pos.north(), pos.east()),
+            Pipe::NW => (pos.north(), pos.west()),
+            Pipe::SW => (pos.south(), pos.west()),
+            Pipe::SE => (pos.south(), pos.east()),
             Pipe::None => unreachable!(),
             Pipe::Start => unreachable!(), // we can go nowhere from the start, since we don't know the direction of the pipe
         }
@@ -186,39 +186,71 @@ impl AdventOfCode for Day {
     }
 
     fn part1(input: &Self::In) -> Result<Self::Out, AOCError> {
+        let mut current = input.start;
         let mut visited = vec![vec![false; input.pipes[0].len()]; input.pipes.len()];
-        let mut queue = vec![input.start];
+
         let mut steps = 0;
 
-        while !queue.is_empty() {
-            let mut next_q = vec![];
-
-            for pos in queue.iter() {
-                if visited[pos.y][pos.x] {
-                    continue;
-                }
-
-                visited[pos.y][pos.x] = true;
-
-                let current = input.lookup(pos);
-
-                for neigh in current.neighbours_at(pos) {
-                    if !visited[neigh.y][neigh.x] && input.lookup(&neigh) != Pipe::None {
-                        next_q.push(neigh);
-                    }
-                }
-            }
-
+        loop {
+            visited[current.y][current.x] = true;
             steps += 1;
 
-            queue = next_q;
+            let current_pipe = input.lookup(&current);
+
+            let (n1, n2) = current_pipe.neighbours_at(&current);
+
+            if !visited[n1.y][n1.x] {
+                current = n1;
+            } else if !visited[n2.y][n2.x] {
+                current = n2;
+            } else {
+                break;
+            }
         }
 
-        Ok(steps - 1)
+        Ok(steps / 2)
     }
 
     fn part2(input: &Self::In) -> Result<Self::Out, AOCError> {
-        unimplemented!()
+        let mut current = input.start;
+        let mut visited = vec![vec![false; input.pipes[0].len()]; input.pipes.len()];
+
+        loop {
+            visited[current.y][current.x] = true;
+
+            let current_pipe = input.lookup(&current);
+
+            let (n1, n2) = current_pipe.neighbours_at(&current);
+
+            if !visited[n1.y][n1.x] {
+                current = n1;
+            } else if !visited[n2.y][n2.x] {
+                current = n2;
+            } else {
+                break;
+            }
+        }
+
+        let mut count_inside = 0;
+
+        for (y, row) in visited.iter().enumerate() {
+            let mut inside = false;
+            for (x, &part_of_loop) in row.iter().enumerate() {
+                let pos = Position { x, y };
+                let pipe = input.lookup(&pos);
+
+                if part_of_loop {
+                    inside = !inside && pipe.connected_to_south()
+                        || inside && !pipe.connected_to_south();
+                }
+
+                if !part_of_loop && inside {
+                    count_inside += 1;
+                }
+            }
+        }
+
+        Ok(count_inside)
     }
 }
 
@@ -238,5 +270,15 @@ mod tests {
     #[test]
     fn test2() -> Result<(), AOCError> {
         lib::test(Day {}, lib::Part::Part1, 2, 8)
+    }
+
+    #[test]
+    fn test3() -> Result<(), AOCError> {
+        lib::test(Day {}, lib::Part::Part2, 1, 1)
+    }
+
+    #[test]
+    fn test4() -> Result<(), AOCError> {
+        lib::test(Day {}, lib::Part::Part2, 3, 4)
     }
 }
