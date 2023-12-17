@@ -8,6 +8,7 @@ mod error;
 pub mod math;
 pub mod parse;
 pub mod read;
+pub mod two_dimensional;
 pub mod util;
 
 // alias the return type so more traits can be easily added later

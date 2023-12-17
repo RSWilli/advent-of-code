@@ -19,24 +19,24 @@ use crate::AOCError;
 
 pub type ParseResult<'a, U> = IResult<&'a str, U, VerboseError<&'a str>>;
 
-pub fn parse_all<'a, T, F>(parser: F) -> impl FnMut(&'a str) -> ParseResult<'a, T>
+pub fn parse_all<'a, T, F>(mut parser: F) -> impl FnMut(&'a str) -> ParseResult<'a, T>
 where
-    F: nom::Parser<&'a str, T, VerboseError<&'a str>> + Copy,
+    F: nom::Parser<&'a str, T, VerboseError<&'a str>>,
 {
     move |input| {
-        let (s, (r, _, _)) = tuple((parser, tag("\n"), eof))(input)?;
+        let (s, (r, _, _)) = tuple((|s| parser.parse(s), tag("\n"), eof))(input)?;
 
         Ok((s, r))
     }
 }
 
-pub fn parse_lines<'a, T, F>(parser: F) -> impl FnMut(&'a str) -> ParseResult<'a, Vec<T>>
+pub fn parse_lines<'a, T, F>(mut parser: F) -> impl FnMut(&'a str) -> ParseResult<'a, Vec<T>>
 where
-    F: nom::Parser<&'a str, T, VerboseError<&'a str>> + Copy,
+    F: nom::Parser<&'a str, T, VerboseError<&'a str>>,
 {
     move |input| {
         let (s, (r, _, _)) = tuple((
-            separated_list0(tag("\n"), parser),
+            separated_list0(tag("\n"), |s| parser.parse(s)),
             tag("\n"),
             context("eof", eof),
         ))(input)?;
