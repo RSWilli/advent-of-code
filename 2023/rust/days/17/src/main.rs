@@ -108,7 +108,7 @@ impl State {
     }
 
     fn heuristic(&self, target: &Position) -> usize {
-        self.position.manhattan_distance(target) / 2
+        self.position.manhattan_distance(target)
     }
 }
 
