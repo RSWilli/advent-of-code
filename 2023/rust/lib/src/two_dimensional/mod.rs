@@ -1,8 +1,10 @@
 use crate::parse::*;
 use nom::error::VerboseError;
 mod direction;
+mod polygon;
 mod position;
 pub use direction::*;
+pub use polygon::*;
 pub use position::*;
 
 #[derive(Debug, Clone, PartialEq, Eq)]

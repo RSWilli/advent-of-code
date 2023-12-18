@@ -29,6 +29,16 @@ impl Position {
         }
     }
 
+    pub fn walk(&mut self, dir: &Direction, steps: usize) {
+        match dir {
+            Direction::North => self.y -= steps as isize,
+            Direction::East => self.x += steps as isize,
+            Direction::South => self.y += steps as isize,
+            Direction::West => self.x -= steps as isize,
+            _ => (),
+        }
+    }
+
     pub fn neighbors(&self) -> Vec<Position> {
         vec![
             self.step(&Direction::North),
