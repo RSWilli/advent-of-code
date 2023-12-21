@@ -5,7 +5,7 @@ pub use nom::{
     character::complete::{
         self, alpha0, alphanumeric0, anychar, char, i64, none_of, one_of, space1, u64,
     },
-    combinator::eof,
+    combinator::{eof, map},
     error::VerboseError,
     multi::{many0, many1, many_m_n, separated_list0, separated_list1},
     sequence::{delimited, tuple},

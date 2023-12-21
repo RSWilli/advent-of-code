@@ -1,3 +1,5 @@
+use std::fmt::Display;
+
 use crate::parse::*;
 use nom::error::VerboseError;
 mod direction;
@@ -60,6 +62,20 @@ impl<T> Grid<T> {
         }
     }
 
+    pub fn entries(&self) -> impl Iterator<Item = (Position, &T)> {
+        self.data.iter().enumerate().flat_map(|(y, row)| {
+            row.iter().enumerate().map(move |(x, item)| {
+                (
+                    Position {
+                        x: x as isize,
+                        y: y as isize,
+                    },
+                    item,
+                )
+            })
+        })
+    }
+
     // pub fn column_iter(&self) -> impl Iterator<Item = &T> {
     //     (0..self.width).flat_map(|x| self.data.iter().map(move |row| &row[x]))
     // }
@@ -70,6 +86,20 @@ impl<T> std::ops::Index<Position> for Grid<T> {
 
     fn index(&self, index: Position) -> &Self::Output {
         &self.data[index.y as usize][index.x as usize]
+    }
+}
+
+// pretty printing:
+impl<T: Display> Display for Grid<T> {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        for row in &self.data {
+            for item in row {
+                write!(f, "{}", item)?;
+            }
+            writeln!(f)?;
+        }
+
+        Ok(())
     }
 }
 

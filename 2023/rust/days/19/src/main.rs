@@ -1,5 +1,4 @@
 use lib::{parse::*, AOCError, AdventOfCode};
-use nom::combinator::map;
 use std::{cmp::Ordering, collections::HashMap};
 
 #[derive(Debug, Clone)]
