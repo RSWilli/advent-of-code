@@ -8,6 +8,7 @@ mod error;
 pub mod math;
 pub mod parse;
 pub mod read;
+pub mod three_dimensional;
 pub mod two_dimensional;
 pub mod util;
 
