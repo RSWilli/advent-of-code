@@ -27,16 +27,43 @@ touch "./tests/day${PADDED_DATE}_1.txt"
 
 curl "https://adventofcode.com/${YEAR}/day/${DATE}/input" -H "Cookie: session=$SESSION" >"inputs/day${PADDED_DATE}.txt"
 
-# exit if target dir exists
-if [ -d "days/${PADDED_DATE}" ]; then
-    echo "folder for $DATE already exists"
-    exit 1
+# detect language used, because file structure is different
+# check if the current path contains "rust" or "go"
+
+if [[ $PWD == *"rust"* ]]; then
+    echo "Rust project detected"
+
+    # exit if target dir exists
+    if [ -d "days/${PADDED_DATE}" ]; then
+        echo "folder for $DATE already exists"
+        exit 1
+    fi
+
+    cp -r "days/00" "days/${PADDED_DATE}"
+
+    # replace the day number "day00" in Cargo.toml
+    sed -i "s/day00/day${PADDED_DATE}/g" "days/${PADDED_DATE}/Cargo.toml"
+
+    # and in main.rs change the vars
+    sed -i "s/= 0;/= ${DATE};/g" "days/${PADDED_DATE}/src/main.rs"
+
+    exit 0
 fi
 
-cp -r "days/00" "days/${PADDED_DATE}"
+if [[ $PWD == *"go"* ]]; then
+    echo "Go project detected"
+    # go subproject does not have the days folder, folders are only the padded day number
 
-# replace the day number "day00" in Cargo.toml
-sed -i "s/day00/day${PADDED_DATE}/g" "days/${PADDED_DATE}/Cargo.toml"
+    # exit if target dir exists
+    if [ -d "${PADDED_DATE}" ]; then
+        echo "folder for $DATE already exists"
+        exit 1
+    fi
 
-# and in main.rs change the vars
-sed -i "s/= 0;/= ${DATE};/g" "days/${PADDED_DATE}/src/main.rs"
+    cp -r "00" "${PADDED_DATE}"
+
+    # replace the day number "00" in the go files
+    sed -i "s/00/${PADDED_DATE}/g" "${PADDED_DATE}"/*.go
+
+    exit 0
+fi

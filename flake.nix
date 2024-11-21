@@ -1,32 +1,27 @@
 {
   description = "Advent of code";
 
-  inputs.devshell.url = "github:numtide/devshell";
-  inputs.flake-utils.url = "github:numtide/flake-utils";
-  inputs.fenix.url = "github:nix-community/fenix";
+  inputs.fenix = {
+    url = "github:nix-community/fenix";
+    inputs.nixpkgs.follows = "nixpkgs";
+  };
 
   outputs = {
     self,
-    flake-utils,
-    devshell,
     nixpkgs,
     fenix,
-  }:
-    flake-utils.lib.eachDefaultSystem (system: let
+    ...
+  }: let
+    system = "x86_64-linux";
+  in {
+    devShells."${system}".default = let
       pkgs = import nixpkgs {
         inherit system;
-
-        overlays = [
-          devshell.overlays.default
-          # fenix.overlays.default
-        ];
       };
+
       setupday = pkgs.writeShellScriptBin "setupday" (builtins.readFile ./scripts/setupday.sh);
-    in {
-      formatter = pkgs.alejandra;
-      devShells.default = pkgs.devshell.mkShell ({config, ...}: {
-        name = "AOC devshell";
-        # devshell.startup.pre-commit = self.checks.${system}.pre-commit-check.shellHook;
+    in
+      pkgs.mkShell {
         packages = with pkgs; [
           # Rust build inputs
           pkg-config
@@ -50,14 +45,20 @@
           # Haskell
           haskell.compiler.ghc98
           cabal-install
+
+          # go
+          go
+          go-tools
+
+          setupday
         ];
-        commands = [
-          {
-            name = "setupday";
-            help = "Setup a new day";
-            package = setupday;
-          }
-        ];
-      });
-    });
+
+        GO111MODULE = "on";
+
+        # needed for running delve
+        # https://github.com/go-delve/delve/issues/3085
+        # https://nixos.wiki/wiki/C#Hardening_flags
+        hardeningDisable = ["all"];
+      };
+  };
 }
