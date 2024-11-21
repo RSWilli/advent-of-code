@@ -7,6 +7,10 @@ pub struct Position {
 }
 
 impl Position {
+    pub fn new(x: isize, y: isize) -> Self {
+        Self { x, y }
+    }
+
     pub fn step(&self, dir: &Direction) -> Position {
         match dir {
             Direction::North => Position {
@@ -35,7 +39,6 @@ impl Position {
             Direction::East => self.x += steps as isize,
             Direction::South => self.y += steps as isize,
             Direction::West => self.x -= steps as isize,
-            _ => (),
         }
     }
 

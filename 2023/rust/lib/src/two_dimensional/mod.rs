@@ -47,14 +47,6 @@ impl<T> Grid<T> {
         Some(&mut self.data[y][x])
     }
 
-    pub fn row_iter(&self) -> impl Iterator<Item = &T> {
-        self.data.iter().flatten()
-    }
-
-    pub fn row_iter_mut(&mut self) -> impl Iterator<Item = &mut T> {
-        self.data.iter_mut().flatten()
-    }
-
     pub fn bottom_right(&self) -> Position {
         Position {
             x: self.width as isize - 1,
@@ -75,16 +67,20 @@ impl<T> Grid<T> {
             })
         })
     }
-
-    // pub fn column_iter(&self) -> impl Iterator<Item = &T> {
-    //     (0..self.width).flat_map(|x| self.data.iter().map(move |row| &row[x]))
-    // }
 }
 
 impl<T> std::ops::Index<Position> for Grid<T> {
     type Output = T;
 
     fn index(&self, index: Position) -> &Self::Output {
+        &self.data[index.y as usize][index.x as usize]
+    }
+}
+
+impl<T> std::ops::Index<&Position> for Grid<T> {
+    type Output = T;
+
+    fn index(&self, index: &Position) -> &Self::Output {
         &self.data[index.y as usize][index.x as usize]
     }
 }
