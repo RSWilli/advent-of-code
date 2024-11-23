@@ -2,6 +2,7 @@ package aocinput
 
 import (
 	"bufio"
+	"bytes"
 	"fmt"
 	"iter"
 	"os"
@@ -73,8 +74,33 @@ func (r Reader) ReadFileLines() (iter.Seq2[int, []byte], error) {
 	return r.ReadFileSplit(bufio.ScanLines)
 }
 
-func (r Reader) ReadFileCommaSeparated() (iter.Seq2[int, []byte], error) {
-	panic("TODO")
+func GetSeparatedBySplitFunc(seperator []byte) bufio.SplitFunc {
+	n := len(seperator)
+	if n == 0 {
+		return bufio.ScanRunes
+	}
+
+	return func(data []byte, atEOF bool) (advance int, token []byte, err error) {
+		if atEOF && len(data) == 0 {
+			return 0, nil, nil
+		}
+
+		if i := bytes.Index(data, seperator); i >= 0 {
+			return i + n, data[0:i], nil
+		}
+
+		// If we're at EOF, we have a final, non-separated segment. Return it.
+		if atEOF {
+			return len(data), data, nil
+		}
+
+		// Request more data.
+		return 0, nil, nil
+	}
+}
+
+func (r Reader) ReadFileSeparatedBy(sep []byte) (iter.Seq2[int, []byte], error) {
+	return r.ReadFileSplit(GetSeparatedBySplitFunc(sep))
 }
 
 type AOCFunc func(Reader) (string, error)
