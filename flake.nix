@@ -59,6 +59,10 @@
         # https://github.com/go-delve/delve/issues/3085
         # https://nixos.wiki/wiki/C#Hardening_flags
         hardeningDisable = ["all"];
+
+        shellHook = ''
+          export WORKSPACE_DIR="$(git rev-parse --show-toplevel)"
+        '';
       };
   };
 }

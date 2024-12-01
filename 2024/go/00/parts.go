@@ -2,7 +2,6 @@ package day00
 
 import (
 	aocinput "aoc2024/lib/input"
-	"fmt"
 	"iter"
 )
 
@@ -18,12 +17,12 @@ func Part1(r aocinput.Reader) (string, error) {
 	}
 
 	for _, line := range lines {
-		println(string(line))
+		_ = line
 	}
 
-	return "foobar", nil
+	return "", nil
 }
 
 func Part2(r aocinput.Reader) (string, error) {
-	return "", fmt.Errorf("unimplemented")
+	return "", nil
 }

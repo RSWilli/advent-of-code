@@ -7,7 +7,6 @@ import (
 	"iter"
 	"os"
 	"path/filepath"
-	"runtime"
 )
 
 type Reader struct {
@@ -17,19 +16,19 @@ type Reader struct {
 }
 
 func (r Reader) fileName() string {
-	if r.Test {
-		// this fixes the lookup of the files because working dir is different
-		// this expects that the folder structure doesn't change
-		_, file, _, ok := runtime.Caller(0)
+	dir := os.Getenv("WORKSPACE_DIR")
 
-		if !ok {
-			panic("could not figure out caller location")
-		}
-
-		return filepath.Join(file, "..", "..", "..", fmt.Sprintf("./tests/day%02d_%d.txt", r.Day, r.Testnr))
+	if dir == "" {
+		panic("expected WORKSPACE_DIR env var not found, please set to project root")
 	}
 
-	return fmt.Sprintf("./inputs/day%02d.txt", r.Day)
+	dir = filepath.Join(dir, "2024", "go")
+
+	if r.Test {
+		return filepath.Join(dir, "tests", fmt.Sprintf("day%02d_%d.txt", r.Day, r.Testnr))
+	}
+
+	return filepath.Join(dir, "inputs", fmt.Sprintf("day%02d.txt", r.Day))
 }
 
 func (r Reader) OpenInput() (*os.File, error) {

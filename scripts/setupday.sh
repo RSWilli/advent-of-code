@@ -64,6 +64,7 @@ if [[ $PWD == *"go"* ]]; then
 
     # replace the day number "00" in the go files
     sed -i "s/00/${PADDED_DATE}/g" "${PADDED_DATE}"/*.go
+    sed -i "s/Day: 0/Day: ${DATE}/g" "${PADDED_DATE}"/*.go
 
     exit 0
 fi

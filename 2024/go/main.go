@@ -2,6 +2,7 @@ package main
 
 import (
 	day00 "aoc2024/00"
+	day01 "aoc2024/01"
 	aocinput "aoc2024/lib/input"
 	"flag"
 )
@@ -22,6 +23,8 @@ func main() {
 	switch *day {
 	case 0:
 		r.RunDay(day00.Part1, day00.Part2)
+	case 1:
+		r.RunDay(day01.Part1, day01.Part2)
 	default:
 		panic("unknown day")
 	}
