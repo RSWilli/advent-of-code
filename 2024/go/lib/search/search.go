@@ -32,7 +32,7 @@ func BFS[Node comparable](start Node, next func(Node) []Node, found func(Node) b
 	return maps.Keys(done), false
 }
 
-type Edge[Node any] struct {
+type EdgeTo[Node any] struct {
 	Node Node
 	Cost int
 }
@@ -40,16 +40,16 @@ type Edge[Node any] struct {
 type pathSegment[Node any] struct {
 	from         Node
 	costEstimate int
-	edge         Edge[Node]
+	edge         EdgeTo[Node]
 }
 
-func Astar[Node comparable](start Node, next func(Node) []Edge[Node], h func(a Node) int, found func(Node) bool) (iter.Seq[Edge[Node]], bool) {
+func Astar[Node comparable](start Node, next func(Node) []EdgeTo[Node], h func(a Node) int, found func(Node) bool) (iter.Seq[EdgeTo[Node]], bool) {
 	todo := aocds.NewHeap(func(a, b pathSegment[Node]) bool {
 		return a.costEstimate < b.costEstimate
 	})
 
 	todo.Push(pathSegment[Node]{
-		edge: Edge[Node]{
+		edge: EdgeTo[Node]{
 			Node: start,
 			Cost: 0,
 		},
@@ -79,15 +79,15 @@ func Astar[Node comparable](start Node, next func(Node) []Edge[Node], h func(a N
 		}
 	}
 
-	return func(yield func(Edge[Node]) bool) {}, false
+	return func(yield func(EdgeTo[Node]) bool) {}, false
 }
 
-func Dijkstra[Node comparable](start Node, next func(Node) []Edge[Node], found func(Node) bool) (iter.Seq[Edge[Node]], bool) {
+func Dijkstra[Node comparable](start Node, next func(Node) []EdgeTo[Node], found func(Node) bool) (iter.Seq[EdgeTo[Node]], bool) {
 	return Astar(start, next, func(Node) int { return 0 }, found)
 }
 
-func makePath[Node comparable](last Node, segments map[Node]pathSegment[Node]) iter.Seq[Edge[Node]] {
-	return func(yield func(Edge[Node]) bool) {
+func makePath[Node comparable](last Node, segments map[Node]pathSegment[Node]) iter.Seq[EdgeTo[Node]] {
+	return func(yield func(EdgeTo[Node]) bool) {
 		current := last
 
 		for {
