@@ -2,6 +2,7 @@ package aocparse
 
 import (
 	"bytes"
+	"iter"
 	"slices"
 )
 
@@ -38,4 +39,33 @@ func Float(b []byte) float64 {
 	}
 
 	return whole + fraction
+}
+
+func Split(whole []byte, sep byte) iter.Seq2[int, []byte] {
+	return func(yield func(int, []byte) bool) {
+		i := 0
+
+		rest := whole
+
+		for {
+			idx := bytes.IndexByte(rest, ' ')
+
+			var segment []byte
+
+			if idx == -1 {
+				yield(i, rest)
+
+				break
+			} else {
+				segment = rest[:idx]
+				rest = rest[min(len(rest), idx+1):]
+
+				if !yield(i, segment) {
+					break
+				}
+			}
+
+			i++
+		}
+	}
 }

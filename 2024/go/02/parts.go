@@ -4,30 +4,26 @@ import (
 	aocinput "aoc2024/lib/input"
 	aocmath "aoc2024/lib/math"
 	aocparse "aoc2024/lib/parse"
-	"bytes"
 	"fmt"
 	"iter"
 )
 
-func parse(r aocinput.Reader) (iter.Seq2[int, []int], error) {
+func parse(r aocinput.Reader) (iter.Seq[[]int], error) {
 	lines, err := r.ReadFileLines()
 
 	if err != nil {
 		return nil, err
 	}
 
-	return func(yield func(int, []int) bool) {
-		for i, l := range lines {
+	return func(yield func([]int) bool) {
+		for _, l := range lines {
+			sequence := make([]int, 0, 20)
 
-			digits := bytes.Split(l, []byte(" "))
-
-			sequence := make([]int, 0, len(digits))
-
-			for _, num := range digits {
+			for _, num := range aocparse.Split(l, ' ') {
 				sequence = append(sequence, aocparse.Decimal(num))
 			}
 
-			if !yield(i, sequence) {
+			if !yield(sequence) {
 				break
 			}
 		}
@@ -71,7 +67,7 @@ func Part1(r aocinput.Reader) (string, error) {
 
 	safeLines := 0
 
-	for _, line := range lines {
+	for line := range lines {
 		if isSafeLevels(line) {
 			safeLines++
 		}
@@ -90,7 +86,7 @@ func Part2(r aocinput.Reader) (string, error) {
 	safeLines := 0
 
 lines:
-	for _, line := range lines {
+	for line := range lines {
 		if isSafeLevels(line) {
 			safeLines++
 			continue
