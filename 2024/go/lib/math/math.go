@@ -8,6 +8,19 @@ func Abs(x int) int {
 	return x
 }
 
+func Sign(x int) int {
+	switch {
+	case x < 0:
+		return -1
+	case x == 0:
+		return 0
+	case x > 0:
+		return 1
+	}
+
+	return x
+}
+
 func Gcd(a, b int) int {
 	for b != 0 {
 		a, b = b, a%b
