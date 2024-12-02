@@ -97,9 +97,7 @@ lines:
 		}
 
 		for i := range line {
-			dampened := make([]int, 0, len(line))
-			dampened = append(dampened, line[0:i]...)
-			dampened = append(dampened, line[i+1:]...)
+			dampened := append(line[0:i:i], line[i+1:]...)
 
 			if isSafeLevels(dampened) {
 				safeLines++
