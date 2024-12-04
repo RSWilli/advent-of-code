@@ -5,6 +5,7 @@ import (
 	day01 "aoc2024/01"
 	day02 "aoc2024/02"
 	day03 "aoc2024/03"
+	day04 "aoc2024/04"
 	aocinput "aoc2024/lib/input"
 	"flag"
 )
@@ -31,6 +32,8 @@ func main() {
 		r.RunDay(day02.Part1, day02.Part2)
 	case 3:
 		r.RunDay(day03.Part1, day03.Part2)
+	case 4:
+		r.RunDay(day04.Part1, day04.Part2)
 	default:
 		panic("unknown day")
 	}

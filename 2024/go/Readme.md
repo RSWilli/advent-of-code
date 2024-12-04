@@ -35,3 +35,4 @@ Part 1 and 2 include the file opening and parsing.
 |   1   | 310426 ns | 299210 ns  |
 |   2   | 475071 ns | 1168939 ns |
 |   3   | 887531 ns | 887785 ns  |
+|   4   | 786766 ns | 283831 ns  |
