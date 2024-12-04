@@ -1,6 +1,7 @@
 package aocinput
 
 import (
+	aocparse "aoc2024/lib/parse"
 	"bufio"
 	"bytes"
 	"fmt"
@@ -41,6 +42,18 @@ func (r Reader) OpenInput() (*os.File, error) {
 	}
 
 	return f, nil
+}
+func (r Reader) GetParser() (*aocparse.Reader, error) {
+	f, err := r.OpenInput()
+
+	if err != nil {
+		f.Close()
+
+		return nil, err
+	}
+
+	return aocparse.NewReader(f), nil
+
 }
 
 func (r Reader) ReadFileSplit(split bufio.SplitFunc) (iter.Seq2[int, []byte], error) {

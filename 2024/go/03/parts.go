@@ -2,84 +2,77 @@ package day03
 
 import (
 	aocinput "aoc2024/lib/input"
-	aocparse "aoc2024/lib/parse"
-	"bytes"
 	"fmt"
 	"iter"
-	"regexp"
 )
 
-var cmdReg = regexp.MustCompile(`mul\(\d+,\d+\)|do\(\)|don't\(\)`)
-
 type command struct {
-	enabled bool
-	a       int
-	b       int
+	a int
+	b int
 }
 
-func parse(r aocinput.Reader) (iter.Seq[command], error) {
-	tokens, err := r.ReadFileSplit(func(data []byte, atEOF bool) (advance int, token []byte, err error) {
-		if atEOF && len(data) == 0 {
-			return 0, nil, nil
-		}
-
-		first := cmdReg.FindIndex(data)
-
-		if first == nil {
-			// Request more data.
-			return 0, nil, nil
-		}
-
-		start := first[0]
-		end := first[1]
-
-		return end, data[start:end], nil
-	})
+func parse(r aocinput.Reader, conditional bool) (iter.Seq[command], error) {
+	parser, err := r.GetParser()
 
 	if err != nil {
 		return nil, err
 	}
 
 	return func(yield func(command) bool) {
-
 		enabled := true
-		for _, cmd := range tokens {
-			cmd = bytes.TrimSuffix(cmd, []byte(")"))
 
-			mulcmd, ok := bytes.CutPrefix(cmd, []byte("mul("))
-
-			if ok {
-				nums := bytes.Split(mulcmd, []byte(","))
-
-				if !yield(command{
-					enabled: enabled,
-					a:       aocparse.Decimal(nums[0]),
-					b:       aocparse.Decimal(nums[1]),
-				}) {
-					break
-				}
-
-				continue
-			}
-
-			if bytes.HasPrefix(cmd, []byte("do(")) {
+		for !parser.AtEOF() {
+			if conditional && parser.SkipPrefix([]byte("do()")) {
 				enabled = true
+
 				continue
 			}
 
-			if bytes.HasPrefix(cmd, []byte("don't(")) {
+			if conditional && parser.SkipPrefix([]byte("don't()")) {
 				enabled = false
+
 				continue
 			}
 
-			panic("unexpected cmd: " + string(cmd))
+			if !enabled || !parser.SkipPrefix([]byte("mul(")) {
+				parser.Advance()
 
+				continue
+			}
+
+			a, ok := parser.GetDecimal()
+
+			if !ok {
+				continue
+			}
+
+			if !parser.Skip(',') {
+				continue
+			}
+
+			b, ok := parser.GetDecimal()
+
+			if !ok {
+				continue
+			}
+
+			if !parser.Skip(')') {
+				continue
+			}
+
+			if !yield(command{
+				a: a,
+				b: b,
+			}) {
+				break
+			}
 		}
+
 	}, nil
 }
 
 func Part1(r aocinput.Reader) (string, error) {
-	cmds, err := parse(r)
+	cmds, err := parse(r, false)
 
 	if err != nil {
 		return "", err
@@ -95,7 +88,7 @@ func Part1(r aocinput.Reader) (string, error) {
 }
 
 func Part2(r aocinput.Reader) (string, error) {
-	cmds, err := parse(r)
+	cmds, err := parse(r, true)
 
 	if err != nil {
 		return "", err
@@ -104,9 +97,7 @@ func Part2(r aocinput.Reader) (string, error) {
 	sum := 0
 
 	for cmd := range cmds {
-		if cmd.enabled {
-			sum += cmd.a * cmd.b
-		}
+		sum += cmd.a * cmd.b
 	}
 
 	return fmt.Sprintf("%d", sum), nil
