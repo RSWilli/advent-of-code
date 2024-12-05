@@ -28,7 +28,7 @@ func parse(r aocinput.Reader) (printQueue, error) {
 		orderingRules: make(map[orderingRule]struct{}),
 	}
 
-	for !parser.AtEOF() {
+	for {
 		a, ok := parser.GetDecimal()
 
 		if !ok {
@@ -46,7 +46,7 @@ func parse(r aocinput.Reader) (printQueue, error) {
 		}
 
 		if !parser.Skip('\n') {
-			return printQueue{}, fmt.Errorf("wrong input format, expected newline")
+			return printQueue{}, fmt.Errorf("wrong input format, expected newline, got %s", string(parser.Preview(10)))
 		}
 
 		q.orderingRules[orderingRule{
@@ -56,16 +56,17 @@ func parse(r aocinput.Reader) (printQueue, error) {
 	}
 
 	if !parser.Skip('\n') {
-		return printQueue{}, fmt.Errorf("wrong input format, expected newline")
+		return printQueue{}, fmt.Errorf("wrong input format, expected newline, got %s", string(parser.Preview(10)))
 	}
 
-	for !parser.AtEOF() {
+lists:
+	for {
 		var nums []int
 		for {
 			n, ok := parser.GetDecimal()
 
 			if !ok {
-				break
+				break lists
 			}
 
 			nums = append(nums, n)
@@ -80,6 +81,10 @@ func parse(r aocinput.Reader) (printQueue, error) {
 		if !parser.Skip('\n') {
 			return printQueue{}, fmt.Errorf("wrong input format, expected newline")
 		}
+	}
+
+	if !parser.AtEOF() {
+		return printQueue{}, fmt.Errorf("wrong input format, expected EOF, got %s", string(parser.Preview(10)))
 	}
 
 	return q, nil

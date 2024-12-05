@@ -3,7 +3,6 @@ package aocparse
 import (
 	"bufio"
 	"bytes"
-	"errors"
 	"io"
 )
 
@@ -57,12 +56,9 @@ func (rd *Reader) GetDigit() (byte, bool) {
 }
 
 func (rd *Reader) AtEOF() bool {
-	b, err := rd.r.ReadByte()
-	defer rd.r.UnreadByte()
+	d, _ := rd.r.Peek(1)
 
-	_ = b
-
-	return errors.Is(err, io.EOF)
+	return len(d) == 0
 }
 
 func (rd *Reader) Skip(b byte) bool {

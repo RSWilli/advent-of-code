@@ -36,4 +36,4 @@ Part 1 and 2 include the file opening and parsing.
 |   2   | 475071 ns  | 1168939 ns |
 |   3   | 646889 ns  | 633944 ns  |
 |   4   | 786766 ns  | 283831 ns  |
-|   5   | 1142243 ns | 1514721 ns |
+|   5   | 1121845 ns | 1386599 ns |
