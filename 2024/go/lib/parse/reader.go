@@ -57,8 +57,10 @@ func (rd *Reader) GetDigit() (byte, bool) {
 }
 
 func (rd *Reader) AtEOF() bool {
-	_, err := rd.r.ReadByte()
+	b, err := rd.r.ReadByte()
 	defer rd.r.UnreadByte()
+
+	_ = b
 
 	return errors.Is(err, io.EOF)
 }
@@ -66,7 +68,11 @@ func (rd *Reader) AtEOF() bool {
 func (rd *Reader) Skip(b byte) bool {
 	d, err := rd.r.ReadByte()
 
-	if err != nil || d != b {
+	if err != nil {
+		return false
+	}
+
+	if d != b {
 		err = rd.r.UnreadByte()
 
 		if err != nil {
@@ -86,7 +92,7 @@ func (rd *Reader) GetASCIIRange(min, max byte) (byte, bool) {
 		return 0, false
 	}
 
-	if min < b && b < max {
+	if min <= b && b <= max {
 		return b, true
 	}
 
@@ -97,6 +103,11 @@ func (rd *Reader) GetASCIIRange(min, max byte) (byte, bool) {
 	}
 
 	return 0, false
+}
+
+func (rd *Reader) Preview(n int) []byte {
+	d, _ := rd.r.Peek(n)
+	return d
 }
 
 func (rd *Reader) SkipPrefix(prefix []byte) bool {
