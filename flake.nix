@@ -49,6 +49,7 @@
           # go
           go
           go-tools
+          graphviz # for pprof
 
           setupday
         ];

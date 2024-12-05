@@ -8,6 +8,7 @@ import (
 	"iter"
 	"os"
 	"path/filepath"
+	"time"
 )
 
 type Reader struct {
@@ -119,20 +120,22 @@ type AOCFunc func(Reader) (string, error)
 
 func (r Reader) RunDay(p1, p2 AOCFunc) {
 	fmt.Println("----- Part 1 -----")
+	start1 := time.Now()
 	out1, err := p1(r)
 
 	if err != nil {
 		panic(fmt.Sprintf("got error from part1: %v", err))
 	}
 
-	fmt.Printf("Part 1 Result: %s\n", out1)
+	fmt.Printf("Part 1 Result: %s (%s)\n", out1, time.Since(start1).String())
 
 	fmt.Println("----- Part 2 -----")
+	start2 := time.Now()
 	out2, err := p2(r)
 
 	if err != nil {
-		panic(fmt.Sprintf("got error from part2: %v", err))
+		panic(fmt.Sprintf("got error from part2: %v\n", out1))
 	}
 
-	fmt.Printf("Part 2 Result: %s\n", out2)
+	fmt.Printf("Part 2 Result: %s (%s)\n", out2, time.Since(start2).String())
 }

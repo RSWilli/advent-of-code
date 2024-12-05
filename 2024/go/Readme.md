@@ -23,17 +23,17 @@ go test ./...
 ## Benchmark
 
 ```bash
-go test -bench=.
+go test -bench=. ./...
 ```
 
 ### Results
 
 Part 1 and 2 include the file opening and parsing.
 
-|  Day  |   Part 1   |   Part 2   |
-| :---: | :--------: | :--------: |
-|   1   | 310426 ns  | 299210 ns  |
-|   2   | 475071 ns  | 1168939 ns |
-|   3   | 646889 ns  | 633944 ns  |
-|   4   | 786766 ns  | 283831 ns  |
-|   5   | 1121845 ns | 1386599 ns |
+|  Day  |  Part 1   |   Part 2   |
+| :---: | :-------: | :--------: |
+|   1   | 310426 ns | 299210 ns  |
+|   2   | 475071 ns | 1168939 ns |
+|   3   | 646889 ns | 633944 ns  |
+|   4   | 786766 ns | 283831 ns  |
+|   5   | 830960 ns | 1234410 ns |
