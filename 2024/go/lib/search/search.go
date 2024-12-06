@@ -7,7 +7,7 @@ import (
 )
 
 func BFS[Node comparable](start Node, next func(Node) []Node, found func(Node) bool) (iter.Seq[Node], bool) {
-	done := make(map[Node]struct{})
+	seen := make(map[Node]struct{})
 
 	todo := make([]Node, 0, 20)
 	todo = append(todo, start)
@@ -16,20 +16,20 @@ func BFS[Node comparable](start Node, next func(Node) []Node, found func(Node) b
 		current := todo[0]
 		todo = todo[1:]
 
-		done[current] = struct{}{}
-
 		if found(current) {
-			return maps.Keys(done), true
+			return maps.Keys(seen), true
 		}
 
 		for _, neigh := range next(current) {
-			if _, ok := done[neigh]; !ok {
+			if _, ok := seen[neigh]; !ok {
 				todo = append(todo, neigh)
+
+				seen[neigh] = struct{}{}
 			}
 		}
 	}
 
-	return maps.Keys(done), false
+	return maps.Keys(seen), false
 }
 
 type EdgeTo[Node any] struct {
@@ -100,4 +100,35 @@ func makePath[Node comparable](last Node, segments map[Node]pathSegment[Node]) i
 			current = pathsegment.from
 		}
 	}
+}
+
+func BFSCountPaths[Node comparable](start Node, next func(Node) []Node, found func(Node) bool) int {
+	seen := make(map[Node]struct{})
+	seen[start] = struct{}{}
+
+	todo := make([]Node, 0, 20)
+	todo = append(todo, start)
+
+	paths := 0
+
+	for len(todo) > 0 {
+		current := todo[0]
+		todo = todo[1:]
+
+		if found(current) {
+			paths++
+		}
+
+		neighbors := next(current)
+
+		for _, neigh := range neighbors {
+			if _, ok := seen[neigh]; !ok {
+				todo = append(todo, neigh)
+
+				seen[neigh] = struct{}{}
+			}
+		}
+	}
+
+	return paths
 }
