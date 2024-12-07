@@ -41,6 +41,32 @@ func (rd *Reader) GetDecimal() (int, bool) {
 	return num, true
 }
 
+// func (rd *Reader) GetBigDecimal() (*big.Int, bool) {
+// 	found := false
+
+// 	ten := big.NewInt(10)
+// 	num := big.NewInt(0)
+
+// 	for {
+// 		d, ok := rd.GetDigit()
+
+// 		if !ok {
+// 			break
+// 		}
+
+// 		found = true
+
+// 		num.Mul(num, ten)
+// 		num.Add(num, big.NewInt(int64(DecimalDigit(d))))
+// 	}
+
+// 	if !found {
+// 		return nil, false
+// 	}
+
+// 	return num, true
+// }
+
 func (rd *Reader) Advance() (byte, bool) {
 	b, err := rd.r.ReadByte()
 
