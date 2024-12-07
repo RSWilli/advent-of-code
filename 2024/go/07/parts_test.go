@@ -3,7 +3,6 @@ package day07_test
 import (
 	day07 "aoc2024/07"
 	aocinput "aoc2024/lib/input"
-	"math/big"
 	"testing"
 )
 
@@ -15,10 +14,10 @@ func Test(t *testing.T) {
 }
 
 func TestConcat(t *testing.T) {
-	if day07.Concat(big.NewInt(12), big.NewInt(345)).Cmp(big.NewInt(12345)) != 0 {
+	if day07.Concat(12, 345) != 12345 {
 		panic("wrong")
 	}
-	if day07.Concat(big.NewInt(12), big.NewInt(1)).Cmp(big.NewInt(121)) != 0 {
+	if day07.Concat(12, 1) != 121 {
 		panic("wrong")
 	}
 }

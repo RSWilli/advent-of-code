@@ -3,8 +3,6 @@ package day07
 import (
 	aocinput "aoc2024/lib/input"
 	"fmt"
-	"math/big"
-	"math/bits"
 	"slices"
 )
 
@@ -60,18 +58,14 @@ func parse(r aocinput.Reader) ([]equation, error) {
 
 }
 
-func Concat(a, b *big.Int) *big.Int {
-	f := big.NewInt(1)
+func Concat(a, b uint) uint {
+	var f uint = 1
 
-	ten := big.NewInt(10)
-
-	for f.Cmp(b) <= 0 {
-		f.Mul(f, ten)
+	for f <= b {
+		f *= 10
 	}
 
-	f.Mul(a, f)
-
-	return f.Add(f, b)
+	return a*f + b
 }
 
 func Part1(r aocinput.Reader) (string, error) {
@@ -85,30 +79,22 @@ func Part1(r aocinput.Reader) (string, error) {
 
 	for _, equation := range equations {
 		possibleResults := []uint{
-			equation.nums[0] + equation.nums[1],
-			equation.nums[0] * equation.nums[1],
+			equation.nums[0],
 		}
 
 		result := equation.result
 
-		if len(equation.nums) > 2 {
-			for _, a := range equation.nums[2:] {
-				var lastresults []uint
-				for _, r := range possibleResults {
-
-					if r+a <= result {
-						lastresults = append(lastresults, r+a)
-					}
-
-					hi, lo := bits.Mul(r, a)
-
-					if hi == 0 && lo <= result {
-						lastresults = append(lastresults, r*a)
-					}
+		for _, a := range equation.nums[1:] {
+			lastresults := make([]uint, 0, len(possibleResults)*2)
+			for _, r := range possibleResults {
+				if result <= r {
+					continue
 				}
 
-				possibleResults = lastresults
+				lastresults = append(lastresults, r+a, r*a)
 			}
+
+			possibleResults = lastresults
 		}
 
 		if slices.Contains(possibleResults, result) {
@@ -126,55 +112,33 @@ func Part2(r aocinput.Reader) (string, error) {
 		return "", err
 	}
 
-	sum := big.NewInt(0)
+	var sum uint = 0
 
 	for _, equation := range equations {
-		possibleResults := []*big.Int{
-			big.NewInt(int64(equation.nums[0] + equation.nums[1])),
-			big.NewInt(int64(equation.nums[0] * equation.nums[1])),
-			Concat(big.NewInt(int64(equation.nums[0])), big.NewInt(int64(equation.nums[1]))),
+		possibleResults := []uint{
+			equation.nums[0],
 		}
 
-		result := big.NewInt(int64(equation.result))
+		result := equation.result
 
-		if len(equation.nums) > 2 {
-			for _, smallA := range equation.nums[2:] {
-				var lastresults []*big.Int
+		for _, a := range equation.nums[1:] {
+			lastresults := make([]uint, 0, len(possibleResults)*3)
 
-				a := big.NewInt(int64(smallA))
-
-				for _, r := range possibleResults {
-
-					addres := big.NewInt(0)
-					mulres := big.NewInt(0)
-					concatres := Concat(r, a)
-
-					addres.Add(r, a)
-					mulres.Mul(r, a)
-
-					if addres.Cmp(result) < 1 {
-						lastresults = append(lastresults, addres)
-					}
-
-					if mulres.Cmp(result) < 1 {
-						lastresults = append(lastresults, mulres)
-					}
-
-					if concatres.Cmp(result) < 1 {
-						lastresults = append(lastresults, concatres)
-					}
+			for _, r := range possibleResults {
+				if result <= r {
+					continue
 				}
 
-				possibleResults = lastresults
+				lastresults = append(lastresults, r+a, r*a, Concat(r, a))
 			}
+
+			possibleResults = lastresults
 		}
 
-		if slices.ContainsFunc(possibleResults, func(a *big.Int) bool {
-			return a.Cmp(result) == 0
-		}) {
-			sum.Add(sum, result)
+		if slices.Contains(possibleResults, result) {
+			sum += result
 		}
 	}
 
-	return sum.String(), nil
+	return fmt.Sprintf("%d", sum), nil
 }
