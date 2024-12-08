@@ -1,6 +1,9 @@
 package twodimensional
 
-import "fmt"
+import (
+	aocmath "aoc2024/lib/math"
+	"fmt"
+)
 
 type Position struct {
 	X int
@@ -41,6 +44,20 @@ func (p Position) InBounds(xmin, xmax, ymin, ymax int) bool {
 		ymin <= p.Y && p.Y <= ymax
 }
 
+func (p Position) Add(v Vector) Position {
+	return Position{
+		X: p.X + v.X,
+		Y: p.Y + v.Y,
+	}
+}
+
+func (p Position) Distance(to Position) Vector {
+	return Vector{
+		X: to.X - p.X,
+		Y: to.Y - p.Y,
+	}
+}
+
 func (p Position) Walk(d Direction) Position {
 	switch d {
 	case DirectionDown:
@@ -73,4 +90,32 @@ func (f Field) Set(p Position, b byte) {
 	row := f[p.Y]
 
 	row[p.X] = b
+}
+
+type Vector struct {
+	X int
+	Y int
+}
+
+func (v Vector) Negate() Vector {
+	return Vector{
+		X: -v.X,
+		Y: -v.Y,
+	}
+}
+
+func (p Vector) Add(v Vector) Vector {
+	return Vector{
+		X: p.X + v.X,
+		Y: p.Y + v.Y,
+	}
+}
+
+func (v Vector) Normalize() Vector {
+	gcd := aocmath.Gcd(v.X, v.Y)
+
+	return Vector{
+		X: v.X / gcd,
+		Y: v.Y / gcd,
+	}
 }
