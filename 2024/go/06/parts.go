@@ -5,6 +5,8 @@ import (
 	"aoc2024/lib/twodimensional"
 	"bytes"
 	"fmt"
+	"sync"
+	"sync/atomic"
 )
 
 func parse(r aocinput.Reader) (twodimensional.Position, twodimensional.Field, error) {
@@ -109,26 +111,32 @@ func Part2(r aocinput.Reader) (string, error) {
 		dir: twodimensional.DirectionUp,
 	}
 
-	loopedPaths := 0
+	var loopedPaths atomic.Int64
+
+	var wg sync.WaitGroup
 
 	for boxPosition := range visited {
 		if boxPosition == start {
 			continue
 		}
 
-		twod.Set(boxPosition, '#')
+		wg.Add(1)
 
-		if findloop(startState, twod) {
-			loopedPaths++
-		}
+		go func() {
+			if findloop(startState, twod, boxPosition) {
+				loopedPaths.Add(1)
+			}
 
-		twod.Set(boxPosition, '.')
+			wg.Done()
+		}()
 	}
 
-	return fmt.Sprintf("%d", loopedPaths), nil
+	wg.Wait()
+
+	return fmt.Sprintf("%d", loopedPaths.Load()), nil
 }
 
-func findloop(startState positionState, twod twodimensional.Field) bool {
+func findloop(startState positionState, twod twodimensional.Field, box twodimensional.Position) bool {
 	currentState := startState
 
 	width := len(twod[0])
@@ -143,7 +151,7 @@ func findloop(startState positionState, twod twodimensional.Field) bool {
 			return false
 		}
 
-		if twod.Lookup(newGuardPosition) == '#' {
+		if newGuardPosition == box || twod.Lookup(newGuardPosition) == '#' {
 			currentState.dir = currentState.dir.TurnRight()
 		} else {
 			currentState.p = newGuardPosition
