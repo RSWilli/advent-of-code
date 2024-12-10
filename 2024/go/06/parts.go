@@ -9,14 +9,14 @@ import (
 	"sync/atomic"
 )
 
-func parse(r aocinput.Reader) (twodimensional.Position, twodimensional.Field, error) {
+func parse(r aocinput.Reader) (twodimensional.Position, twodimensional.Field[byte], error) {
 	lines, err := r.ReadFileLines()
 
 	if err != nil {
 		return twodimensional.Position{}, nil, err
 	}
 
-	var twod twodimensional.Field
+	var twod twodimensional.Field[byte]
 
 	var guard twodimensional.Position
 
@@ -136,7 +136,7 @@ func Part2(r aocinput.Reader) (string, error) {
 	return fmt.Sprintf("%d", loopedPaths.Load()), nil
 }
 
-func findloop(startState positionState, twod twodimensional.Field, box twodimensional.Position) bool {
+func findloop(startState positionState, twod twodimensional.Field[byte], box twodimensional.Position) bool {
 	currentState := startState
 
 	width := len(twod[0])

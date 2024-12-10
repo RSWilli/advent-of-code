@@ -58,6 +58,15 @@ func (p Position) Distance(to Position) Vector {
 	}
 }
 
+func (p Position) Neighbors() []Position {
+	return []Position{
+		{X: p.X - 1, Y: p.Y},
+		{X: p.X + 1, Y: p.Y},
+		{X: p.X, Y: p.Y - 1},
+		{X: p.X, Y: p.Y + 1},
+	}
+}
+
 func (p Position) Walk(d Direction) Position {
 	switch d {
 	case DirectionDown:
@@ -73,20 +82,20 @@ func (p Position) Walk(d Direction) Position {
 	}
 }
 
-type Field [][]byte
+type Field[T any] [][]T
 
-func (f Field) Has(p Position) bool {
+func (f Field[T]) Has(p Position) bool {
 	width := len(f[0])
 	height := len(f)
 
 	return p.InBounds(0, width-1, 0, height-1)
 }
 
-func (f Field) Lookup(p Position) byte {
+func (f Field[T]) Lookup(p Position) T {
 	return f[p.Y][p.X]
 }
 
-func (f Field) Set(p Position, b byte) {
+func (f Field[T]) Set(p Position, b T) {
 	row := f[p.Y]
 
 	row[p.X] = b
