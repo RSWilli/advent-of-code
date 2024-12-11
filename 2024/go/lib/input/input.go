@@ -5,6 +5,7 @@ import (
 	"bufio"
 	"bytes"
 	"fmt"
+	"io"
 	"iter"
 	"os"
 	"path/filepath"
@@ -110,6 +111,24 @@ func GetSeparatedBySplitFunc(seperator []byte) bufio.SplitFunc {
 		// Request more data.
 		return 0, nil, nil
 	}
+}
+
+func (r Reader) ReadAll() ([]byte, error) {
+	f, err := r.OpenInput()
+
+	if err != nil {
+		return nil, err
+	}
+
+	defer f.Close()
+
+	res, err := io.ReadAll(f)
+
+	if err != nil {
+		return nil, err
+	}
+
+	return res, nil
 }
 
 func (r Reader) ReadFileSeparatedBy(sep []byte) (iter.Seq2[int, []byte], error) {
