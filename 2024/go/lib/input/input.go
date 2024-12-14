@@ -153,7 +153,7 @@ func (r Reader) RunDay(p1, p2 AOCFunc) {
 	out2, err := p2(r)
 
 	if err != nil {
-		panic(fmt.Sprintf("got error from part2: %v\n", out1))
+		panic(fmt.Sprintf("got error from part2: %v\n", err))
 	}
 
 	fmt.Printf("Part 2 Result: %s (%s)\n", out2, time.Since(start2).String())
