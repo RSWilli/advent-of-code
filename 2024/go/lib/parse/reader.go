@@ -16,6 +16,36 @@ func NewReader(rd io.Reader) *Reader {
 	}
 }
 
+func (rd *Reader) GetSignedDecimal() (int, bool) {
+	n, err := rd.r.Peek(1)
+
+	if err != nil {
+		return 0, false
+	}
+
+	if len(n) == 0 {
+		return 0, false
+	}
+
+	switch n[0] {
+	case '+':
+		return rd.GetDecimal()
+	case '-':
+		rd.Advance()
+
+		n, ok := rd.GetDecimal()
+
+		if !ok {
+			return 0, false
+		}
+
+		return -n, true
+
+	default:
+		return rd.GetDecimal()
+	}
+}
+
 func (rd *Reader) GetDecimal() (int, bool) {
 	found := false
 

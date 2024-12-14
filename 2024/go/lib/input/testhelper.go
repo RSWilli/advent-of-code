@@ -6,10 +6,11 @@ import (
 )
 
 type Test struct {
-	Day      int
-	Test     int
-	Part     AOCFunc
-	Expected string
+	Day          int
+	Test         int
+	Part         AOCFunc
+	Expected     string
+	UseRealInput bool
 }
 
 func (t Test) String() string {
@@ -22,7 +23,7 @@ func RunTests(t *testing.T, tests []Test) {
 		t.Run(test.String(), func(t *testing.T) {
 			r := Reader{
 				Day:    test.Day,
-				Test:   true,
+				Test:   !test.UseRealInput,
 				Testnr: test.Test,
 			}
 
