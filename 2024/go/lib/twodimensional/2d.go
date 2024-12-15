@@ -67,6 +67,20 @@ func (p Position) Neighbors() []Position {
 	}
 }
 
+func (p Position) NeighborsDiag() []Position {
+	return []Position{
+		{X: p.X - 1, Y: p.Y},
+		{X: p.X + 1, Y: p.Y},
+		{X: p.X, Y: p.Y - 1},
+		{X: p.X, Y: p.Y + 1},
+
+		{X: p.X - 1, Y: p.Y - 1},
+		{X: p.X + 1, Y: p.Y - 1},
+		{X: p.X - 1, Y: p.Y + 1},
+		{X: p.X + 1, Y: p.Y + 1},
+	}
+}
+
 func (p Position) Walk(d Direction) Position {
 	switch d {
 	case DirectionDown:
