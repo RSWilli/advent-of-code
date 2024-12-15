@@ -164,6 +164,38 @@ func (rd *Reader) Preview(n int) []byte {
 	return d
 }
 
+func (rd *Reader) ReadAny(bytes ...byte) (byte, bool) {
+	d, err := rd.r.ReadByte()
+
+	if err != nil {
+		return 0, false
+	}
+
+	for _, b := range bytes {
+		if d == b {
+			return b, true
+		}
+	}
+
+	err = rd.r.UnreadByte()
+
+	if err != nil {
+		panic(err)
+	}
+
+	return 0, false
+}
+
+func (rd *Reader) ReadUntil(delim byte) ([]byte, bool) {
+	d, err := rd.r.ReadBytes(delim)
+
+	if err != nil {
+		return nil, false
+	}
+
+	return d, true
+}
+
 func (rd *Reader) SkipPrefix(prefix []byte) bool {
 
 	data, err := rd.r.Peek(len(prefix))
