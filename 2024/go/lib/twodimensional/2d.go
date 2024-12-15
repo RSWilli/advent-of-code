@@ -82,7 +82,7 @@ func (p Position) Walk(d Direction) Position {
 	}
 }
 
-type Field[T any] [][]T
+type Field[T comparable] [][]T
 
 func (f Field[T]) Has(p Position) bool {
 	width := len(f[0])
@@ -99,6 +99,27 @@ func (f Field[T]) Set(p Position, b T) {
 	row := f[p.Y]
 
 	row[p.X] = b
+}
+
+func (f Field[T]) Find(b T) (Position, bool) {
+	for y, line := range f {
+		for x, c := range line {
+			if b == c {
+				return Position{X: x, Y: y}, true
+			}
+		}
+	}
+
+	return Position{}, false
+}
+
+func PrintField(f Field[byte]) {
+	for _, line := range f {
+		for _, c := range line {
+			fmt.Print(string(c))
+		}
+		fmt.Println()
+	}
 }
 
 type Vector struct {

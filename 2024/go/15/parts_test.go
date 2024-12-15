@@ -10,7 +10,7 @@ func Test(t *testing.T) {
 	aocinput.RunTests(t, []aocinput.Test{
 		{Day: 15, Test: 1, Part: day15.Part1, Expected: "2028"},
 		{Day: 15, Test: 2, Part: day15.Part1, Expected: "10092"},
-		{Day: 15, Test: 1, Part: day15.Part2, Expected: ""},
+		{Day: 15, Test: 2, Part: day15.Part2, Expected: "9021"},
 	})
 }
 
