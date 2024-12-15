@@ -9,6 +9,7 @@ import (
 func Test(t *testing.T) {
 	aocinput.RunTests(t, []aocinput.Test{
 		{Day: 9, Test: 1, Part: day09.Part1, Expected: "1928"},
+		{Day: 9, Test: 1, UseRealInput: true, Part: day09.Part1, Expected: "1928"},
 		{Day: 9, Test: 1, Part: day09.Part2, Expected: ""},
 	})
 }

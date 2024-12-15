@@ -1,6 +1,7 @@
 package day09
 
 import (
+	aocds "aoc2024/lib/ds"
 	aocinput "aoc2024/lib/input"
 	aocparse "aoc2024/lib/parse"
 	"fmt"
@@ -56,7 +57,7 @@ func (de DiskEntry) String() string {
 	return strings.Repeat(string(c), de.Length)
 }
 
-func parse(r aocinput.Reader) ([]DiskEntry, error) {
+func parse(r aocinput.Reader) (*aocds.LinkedList[DiskEntry], error) {
 	p, err := r.GetParser()
 
 	if err != nil {
@@ -65,7 +66,7 @@ func parse(r aocinput.Reader) ([]DiskEntry, error) {
 
 	var id int
 	currentType := EntryTypeFile
-	var diskentries []DiskEntry
+	diskentries := aocds.NewLinkedList[DiskEntry]()
 
 	for !p.AtEOF() {
 		if p.Skip('\n') {
@@ -79,7 +80,7 @@ func parse(r aocinput.Reader) ([]DiskEntry, error) {
 		}
 
 		if currentType == EntryTypeFile {
-			diskentries = append(diskentries, DiskEntry{
+			diskentries.Append(DiskEntry{
 				Type:   currentType,
 				FileID: id,
 				Length: aocparse.DecimalDigit(d),
@@ -88,7 +89,7 @@ func parse(r aocinput.Reader) ([]DiskEntry, error) {
 			currentType = EntryTypeFree
 			id++
 		} else {
-			diskentries = append(diskentries, DiskEntry{
+			diskentries.Append(DiskEntry{
 				Type:   currentType,
 				FileID: 0,
 				Length: aocparse.DecimalDigit(d),
@@ -101,12 +102,12 @@ func parse(r aocinput.Reader) ([]DiskEntry, error) {
 	return diskentries, nil
 }
 
-func calcCheckSum(disk []DiskEntry) int {
+func calcCheckSum(disk *aocds.LinkedList[DiskEntry]) int {
 	offset := 0
 
 	checksum := 0
 
-	for _, e := range disk {
+	for _, e := range disk.Entries() {
 		for i := range e.Length {
 			checksum += (offset + i) * e.FileID
 		}
@@ -126,50 +127,48 @@ func Part1(r aocinput.Reader) (string, error) {
 		return "", err
 	}
 
-	// i is the index of the current entry from the front
-	i := 0
+	currentEmpty := diskentries.Start
+	currentLastFile := diskentries.End
 
-	for i < len(diskentries) {
-		currentEmpty := diskentries[i]
-		currentLastFile := diskentries[len(diskentries)-1]
+	for currentEmpty != currentLastFile {
+		// fmt.Println(diskentries)
 
-		if currentEmpty.Type == EntryTypeFile {
-			i++
+		if currentEmpty.Item.Type == EntryTypeFile {
+			currentEmpty = currentEmpty.Next()
 			continue
 		}
 
-		if currentLastFile.Type == EntryTypeFree {
-			diskentries = diskentries[0 : len(diskentries)-1]
+		if currentLastFile.Item.Type == EntryTypeFree {
+			next := currentLastFile.Prev()
+
+			currentLastFile.Remove() // we don't need this anymore
+
+			currentLastFile = next
 			continue
 		}
 
-		inserted, restFile := currentLastFile.Split(currentEmpty.Length)
-		overwritten, restEmpty := currentEmpty.Split(currentLastFile.Length)
+		inserted, restFile := currentLastFile.Item.Split(currentEmpty.Item.Length)
+		overwritten, restEmpty := currentEmpty.Item.Split(currentLastFile.Item.Length)
 
-		tmp := append(diskentries[0:i:i], inserted)
+		currentEmpty.Item = inserted
 
 		if restEmpty != emtpyDiskEntry {
 			// the file was shorter than the gap, so we have some gap left to fill next time
-			tmp = append(tmp, restEmpty)
+			currentEmpty.InsertAfter(restEmpty)
 		}
 
 		_ = overwritten
 
-		if len(diskentries) > i+1 {
-			tmp = append(tmp, diskentries[i+1:]...)
-		}
-
-		diskentries = tmp
-
 		if restFile != emtpyDiskEntry {
 			// the gap was shorter than the file, so we have some file left to insert next time
 
-			diskentries[len(diskentries)-1] = restFile
+			currentLastFile.Item = restFile
 		} else {
-			diskentries = diskentries[0 : len(diskentries)-1]
-		}
+			next := currentLastFile.Prev()
+			currentLastFile.Remove()
 
-		i++
+			currentLastFile = next
+		}
 	}
 
 	// fmt.Println(diskentries)
