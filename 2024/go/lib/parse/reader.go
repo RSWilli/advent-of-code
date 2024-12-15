@@ -29,6 +29,8 @@ func (rd *Reader) GetSignedDecimal() (int, bool) {
 
 	switch n[0] {
 	case '+':
+		rd.Advance()
+
 		return rd.GetDecimal()
 	case '-':
 		rd.Advance()
