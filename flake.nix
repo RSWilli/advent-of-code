@@ -1,13 +1,14 @@
 {
   description = "Advent of code";
 
+  inputs.nixpkgs.url = "github:nixos/nixpkgs/nixos-unstable";
+
   inputs.fenix = {
     url = "github:nix-community/fenix";
     inputs.nixpkgs.follows = "nixpkgs";
   };
 
   outputs = {
-    self,
     nixpkgs,
     fenix,
     ...

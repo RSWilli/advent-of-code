@@ -11,3 +11,5 @@
 2023: [https://adventofcode.com/2023](https://adventofcode.com/2023)
 
 2024: [https://adventofcode.com/2024](https://adventofcode.com/2024)
+
+2025: [https://adventofcode.com/2025](https://adventofcode.com/2025)
