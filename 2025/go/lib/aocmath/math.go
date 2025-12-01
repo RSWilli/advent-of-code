@@ -9,6 +9,17 @@ func Abs(x int) int {
 	return x
 }
 
+// Mod returns the modulo of the number in the given ring
+func Mod(a, b int) int {
+	mod := a % b
+
+	if mod < 0 {
+		return mod + b
+	}
+
+	return mod
+}
+
 func Sign(x int) int {
 	switch {
 	case x < 0:

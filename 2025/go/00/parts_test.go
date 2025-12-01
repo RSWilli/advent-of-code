@@ -6,9 +6,12 @@ import (
 )
 
 func TestPart1(t *testing.T) {
-	day00.Part1("foo")
+	if res := day00.Part2(""); res != "6" {
+		panic("wrong: " + res)
+	}
 }
-
 func TestPart2(t *testing.T) {
-	day00.Part2("foo")
+	if res := day00.Part2(""); res != "6" {
+		panic("wrong: " + res)
+	}
 }
