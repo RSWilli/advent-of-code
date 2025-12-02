@@ -2,6 +2,7 @@ package day00
 
 import (
 	"aoc2025/lib/aocapi"
+	"fmt"
 )
 
 func GetInput() string {
@@ -15,6 +16,7 @@ func GetInput() string {
 }
 
 func Part1(in string) string {
+	fmt.Println(in)
 	panic("unimplemented")
 }
 
