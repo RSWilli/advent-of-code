@@ -2,6 +2,7 @@ package twodimensional
 
 import (
 	"aoc2025/lib/aocmath"
+	"bytes"
 	"fmt"
 )
 
@@ -97,6 +98,11 @@ func (p Position) Walk(d Direction) Position {
 }
 
 type Field[T comparable] [][]T
+
+func NewFieldFromLines(in string) Field[byte] {
+	inB := []byte(in)
+	return Field[byte](bytes.Split(bytes.Trim(inB, "\n"), []byte("\n")))
+}
 
 func (f Field[T]) Has(p Position) bool {
 	width := len(f[0])
