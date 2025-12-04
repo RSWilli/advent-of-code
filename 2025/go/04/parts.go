@@ -7,7 +7,7 @@ import (
 )
 
 func GetInput() string {
-	i, err := aocapi.GetToday()
+	i, err := aocapi.GetInput(2025, 4)
 
 	if err != nil {
 		panic(err)
