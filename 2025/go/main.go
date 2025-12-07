@@ -8,6 +8,7 @@ import (
 	day04 "aoc2025/04"
 	day05 "aoc2025/05"
 	day06 "aoc2025/06"
+	day07 "aoc2025/07"
 	"aoc2025/lib/aocruntime"
 	"flag"
 )
@@ -33,6 +34,8 @@ func main() {
 		aocruntime.RunDay(day05.GetInput, day05.Part1, day05.Part2)
 	case 6:
 		aocruntime.RunDay(day06.GetInput, day06.Part1, day06.Part2)
+	case 7:
+		aocruntime.RunDay(day07.GetInput, day07.Part1, day07.Part2)
 	default:
 		panic("Unknown day")
 	}
