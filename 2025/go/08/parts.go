@@ -5,10 +5,7 @@ import (
 	"aoc2025/lib/aocparse"
 	aocds "aoc2025/lib/ds"
 	"aoc2025/lib/threedimensional"
-	"cmp"
 	"fmt"
-	"maps"
-	"slices"
 	"strings"
 )
 
@@ -73,77 +70,36 @@ func Part1(in string) string {
 		}
 	}
 
-	allCircuits := make(map[*Circuit]struct{})
-	boxToCircuit := make(map[Box]*Circuit)
+	uf := aocds.NewUnionFind(junctionBoxes)
 
 	for range len(junctionBoxes) / 2 {
 		conn := h.Pop()
 
-		fromCircuit, okFrom := boxToCircuit[conn.From]
-		toCircuit, okTo := boxToCircuit[conn.To]
-
-		if okFrom && okTo && fromCircuit == toCircuit {
-			continue
-		}
-
-		fmt.Println("connecting:", conn.String())
-
-		var targetCircuit *Circuit
-		if !okFrom && !okTo {
-			targetCircuit = &Circuit{
-				Members: make(map[Box]struct{}),
-			}
-
-			allCircuits[targetCircuit] = struct{}{}
-		} else if okFrom && !okTo {
-			targetCircuit = fromCircuit
-		} else if !okFrom && okTo {
-			targetCircuit = toCircuit
-		} else if okFrom && okTo {
-			delete(allCircuits, toCircuit)
-
-			maps.Copy(fromCircuit.Members, toCircuit.Members)
-
-			targetCircuit = fromCircuit
-		}
-
-		targetCircuit.Members[conn.From] = struct{}{}
-		targetCircuit.Members[conn.To] = struct{}{}
-
-		boxToCircuit[conn.From] = targetCircuit
-		boxToCircuit[conn.To] = targetCircuit
-
-		for c := range allCircuits {
-			fmt.Println("Circuit:")
-
-			for b := range c.Members {
-				fmt.Printf("%s, ", b.String())
-			}
-			fmt.Println()
-		}
+		uf.Union(conn.From, conn.To)
 	}
 
-	fmt.Println(allCircuits)
+	// fmt.Println(allCircuits)
 
-	circuitSizes := make([]int, 0, len(allCircuits))
+	// circuitSizes := make([]int, 0, len(allCircuits))
 
-	for c := range allCircuits {
-		circuitSizes = append(circuitSizes, len(c.Members))
-	}
+	// for c := range allCircuits {
+	// 	circuitSizes = append(circuitSizes, len(c.Members))
+	// }
 
-	slices.SortFunc(circuitSizes, func(a, b int) int {
-		return cmp.Compare(b, a)
-	})
+	// slices.SortFunc(circuitSizes, func(a, b int) int {
+	// 	return cmp.Compare(b, a)
+	// })
 
-	fmt.Println(circuitSizes)
+	// fmt.Println(circuitSizes)
 
-	product := 1
+	// product := 1
 
-	for _, c := range circuitSizes[0:2] {
-		product *= c
-	}
+	// for _, c := range circuitSizes[0:2] {
+	// 	product *= c
+	// }
 
-	return fmt.Sprintf("%d", product)
+	// return fmt.Sprintf("%d", product)
+	panic("unimplemented")
 }
 
 func Part2(in string) string {
