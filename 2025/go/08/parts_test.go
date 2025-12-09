@@ -42,18 +42,14 @@ var test = `
 // }
 
 func TestPart1(t *testing.T) {
-	t.Skip()
-
 	expect := "40"
-	if res := day08.Part1(test); res != expect {
+	if res := day08.Part1Test(test); res != expect {
 		t.Fatalf("expected %s got %s", expect, res)
 	}
 }
 
 func TestPart2(t *testing.T) {
-	t.Skip()
-
-	expect := "4174379265"
+	expect := "25272"
 	if res := day08.Part2(test); res != expect {
 		t.Fatalf("expected %s got %s", expect, res)
 	}

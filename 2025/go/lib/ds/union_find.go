@@ -6,16 +6,18 @@ import (
 )
 
 type UnionFind[T comparable] struct {
-	sets []map[T]struct{}
+	currentId int
+	sets      map[int]map[T]struct{}
 }
 
 func NewUnionFind[T comparable](elements []T) *UnionFind[T] {
 	uf := &UnionFind[T]{
-		sets: make([]map[T]struct{}, 0, len(elements)),
+		sets: make(map[int]map[T]struct{}),
 	}
 
 	for _, el := range elements {
-		uf.sets = append(uf.sets, map[T]struct{}{el: {}})
+		uf.sets[uf.currentId] = map[T]struct{}{el: {}}
+		uf.currentId++
 	}
 
 	return uf
@@ -32,18 +34,26 @@ func (uf *UnionFind[T]) Find(u T) (map[T]struct{}, int, bool) {
 }
 
 func (uf *UnionFind[T]) Union(u, v T) {
-	sU, _, okU := uf.Find(u)
+	sU, iU, okU := uf.Find(u)
 	sV, iV, okV := uf.Find(v)
 
 	if !okU || !okV {
 		panic("set not found")
 	}
 
+	if iV == iU {
+		return
+	}
+
 	maps.Copy(sU, sV)
 
-	uf.sets = slices.Delete(uf.sets, iV, iV+1)
+	delete(uf.sets, iV)
+}
+
+func (uf *UnionFind[T]) UniqueSets() int {
+	return len(uf.sets)
 }
 
 func (uf *UnionFind[T]) Sets() []map[T]struct{} {
-	return uf.sets
+	return slices.Collect(maps.Values(uf.sets))
 }

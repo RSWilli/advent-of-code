@@ -5,7 +5,9 @@ import (
 	"aoc2025/lib/aocparse"
 	aocds "aoc2025/lib/ds"
 	"aoc2025/lib/threedimensional"
+	"cmp"
 	"fmt"
+	"slices"
 	"strings"
 )
 
@@ -38,7 +40,7 @@ type Circuit struct {
 	Members map[Box]struct{}
 }
 
-func Part1(in string) string {
+func parse(in string) ([]Box, *aocds.Heap[Connection]) {
 	lines := strings.Split(strings.Trim(in, "\n"), "\n")
 
 	junctionBoxes := make([]Box, 0, len(lines))
@@ -58,8 +60,8 @@ func Part1(in string) string {
 	})
 
 	for i, box1 := range junctionBoxes {
-		for j, box2 := range junctionBoxes {
-			if i == j {
+		for j, box2 := range junctionBoxes[i:] {
+			if j == 0 {
 				continue
 			}
 
@@ -70,38 +72,69 @@ func Part1(in string) string {
 		}
 	}
 
+	return junctionBoxes, h
+}
+
+func connectAmount(in string, amount int) string {
+	junctionBoxes, h := parse(in)
+
 	uf := aocds.NewUnionFind(junctionBoxes)
 
-	for range len(junctionBoxes) / 2 {
+	for range amount {
 		conn := h.Pop()
 
 		uf.Union(conn.From, conn.To)
 	}
 
-	// fmt.Println(allCircuits)
+	// find top 3:
 
-	// circuitSizes := make([]int, 0, len(allCircuits))
+	allCircuits := uf.Sets()
 
-	// for c := range allCircuits {
-	// 	circuitSizes = append(circuitSizes, len(c.Members))
-	// }
+	circuitSizes := make([]int, 0, len(allCircuits))
 
-	// slices.SortFunc(circuitSizes, func(a, b int) int {
-	// 	return cmp.Compare(b, a)
-	// })
+	for _, c := range allCircuits {
+		circuitSizes = append(circuitSizes, len(c))
+	}
 
-	// fmt.Println(circuitSizes)
+	slices.SortFunc(circuitSizes, func(a, b int) int {
+		return cmp.Compare(b, a)
+	})
 
-	// product := 1
+	product := 1
 
-	// for _, c := range circuitSizes[0:2] {
-	// 	product *= c
-	// }
+	for _, c := range circuitSizes[0:3] {
+		product *= c
+	}
 
-	// return fmt.Sprintf("%d", product)
-	panic("unimplemented")
+	return fmt.Sprintf("%d", product)
+}
+
+func Part1Test(in string) string {
+	return connectAmount(in, 10)
+}
+
+func Part1(in string) string {
+	return connectAmount(in, 1000)
 }
 
 func Part2(in string) string {
-	panic("unimplemented")
+	junctionBoxes, h := parse(in)
+
+	uf := aocds.NewUnionFind(junctionBoxes)
+
+	lastDistance := 0
+
+	for {
+		conn := h.Pop()
+
+		uf.Union(conn.From, conn.To)
+
+		if uf.UniqueSets() == 1 {
+			lastDistance = conn.From.X * conn.To.X
+
+			break
+		}
+	}
+
+	return fmt.Sprintf("%d", lastDistance)
 }
