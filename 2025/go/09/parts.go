@@ -46,6 +46,19 @@ func Part1(in string) string {
 	return fmt.Sprintf("%d", biggestArea)
 }
 
+type Edge struct {
+	P1 twodimensional.Position
+	P2 twodimensional.Position
+}
+
+func (e *Edge) IsHorizontal() bool {
+	return e.P1.Y == e.P2.Y
+}
+
+func (e *Edge) IsVertical() bool {
+	return e.P1.X == e.P2.X
+}
+
 func Part2(in string) string {
 	lines := strings.Split(strings.Trim(in, "\n"), "\n")
 
@@ -60,10 +73,17 @@ func Part2(in string) string {
 		})
 	}
 
+	// var horizontalEdges aocds.BTree[int, []Edge]
+
 	biggestArea := 0
 
 	for _, p1 := range points {
 		for _, p2 := range points {
+			area := (aocmath.Abs(p1.X-p2.X) + 1) * (aocmath.Abs(p1.Y-p2.Y) + 1)
+
+			if area < biggestArea {
+				continue // save on calculating, this will get dropped anyways
+			}
 
 			polygon := []twodimensional.Position{
 				{X: min(p1.X, p2.Y), Y: min(p1.Y, p2.Y)},
@@ -75,8 +95,6 @@ func Part2(in string) string {
 			if !polygonContains(points, polygon) {
 				continue
 			}
-
-			area := (aocmath.Abs(p1.X-p2.X) + 1) * (aocmath.Abs(p1.Y-p2.Y) + 1)
 
 			biggestArea = max(biggestArea, area)
 		}

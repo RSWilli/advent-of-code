@@ -1,7 +1,7 @@
 package day09_test
 
 import (
-	day00 "aoc2025/00"
+	day09 "aoc2025/09"
 	"testing"
 )
 
@@ -31,14 +31,14 @@ var test = `
 
 func TestPart1(t *testing.T) {
 	expect := "50"
-	if res := day00.Part1(test); res != expect {
+	if res := day09.Part1(test); res != expect {
 		t.Fatalf("expected %s got %s", expect, res)
 	}
 }
 
 func TestPart2(t *testing.T) {
 	expect := "24"
-	if res := day00.Part2(test); res != expect {
+	if res := day09.Part2(test); res != expect {
 		t.Fatalf("expected %s got %s", expect, res)
 	}
 }
