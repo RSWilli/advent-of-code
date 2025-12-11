@@ -3,11 +3,11 @@ package aocsearch
 import (
 	aocds "aoc2025/lib/ds"
 	"iter"
-	"maps"
 )
 
 func BFS[Node comparable](start Node, next func(Node) []Node, found func(Node) bool) (iter.Seq[Node], bool) {
-	seen := make(map[Node]struct{})
+	// seen maps the next Node to the one that discovered it
+	seen := make(map[Node]Node)
 
 	todo := make([]Node, 0, 20)
 	todo = append(todo, start)
@@ -17,19 +17,43 @@ func BFS[Node comparable](start Node, next func(Node) []Node, found func(Node) b
 		todo = todo[1:]
 
 		if found(current) {
-			return maps.Keys(seen), true
+			return retraceSteps(start, current, seen), true
 		}
 
 		for _, neigh := range next(current) {
 			if _, ok := seen[neigh]; !ok {
 				todo = append(todo, neigh)
 
-				seen[neigh] = struct{}{}
+				seen[neigh] = current
 			}
 		}
 	}
 
-	return maps.Keys(seen), false
+	return func(yield func(Node) bool) {}, false
+}
+
+func retraceSteps[Node comparable](start, last Node, segments map[Node]Node) iter.Seq[Node] {
+	return func(yield func(Node) bool) {
+		current := last
+
+		for {
+			previous, ok := segments[current]
+
+			if !ok {
+				return
+			}
+
+			if !yield(previous) {
+				break
+			}
+
+			if previous == start {
+				return
+			}
+
+			current = previous
+		}
+	}
 }
 
 type EdgeTo[Node any] struct {
@@ -91,13 +115,17 @@ func makePath[Node comparable](last Node, segments map[Node]pathSegment[Node]) i
 		current := last
 
 		for {
-			pathsegment := segments[current]
+			previous := segments[current]
 
-			if !yield(pathsegment.edge) {
+			if previous.from == current {
+				return // first segment links to itself
+			}
+
+			if !yield(previous.edge) {
 				break
 			}
 
-			current = pathsegment.from
+			current = previous.from
 		}
 	}
 }
