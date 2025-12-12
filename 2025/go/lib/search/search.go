@@ -56,6 +56,21 @@ func retraceSteps[Node comparable](start, last Node, segments map[Node]Node) ite
 	}
 }
 
+// DFSCountPaths will run into circles
+func DFSCountPaths[Node comparable](start Node, next func(Node) []Node, found func(Node) bool) int {
+	if found(start) {
+		return 1
+	}
+
+	paths := 0
+
+	for _, n := range next(start) {
+		paths += DFSCountPaths(n, next, found)
+	}
+
+	return paths
+}
+
 type EdgeTo[Node any] struct {
 	Node Node
 	Cost int

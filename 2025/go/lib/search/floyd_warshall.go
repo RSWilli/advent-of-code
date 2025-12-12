@@ -8,7 +8,7 @@ type Edge struct {
 // FloydWarshall implements the all pairs shortest path algorithm
 //
 // the input map will be modified. Nodes are expected to be numbered 0-[nodes]. Unset edges are treated as infinity.
-func FloydWarshall[N comparable](nodes int, edges map[Edge]int) {
+func FloydWarshall(nodes int, edges map[Edge]int) {
 	for k := range nodes {
 		for i := range nodes {
 			for j := range nodes {
