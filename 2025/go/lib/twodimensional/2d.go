@@ -99,16 +99,35 @@ func (p Position) Walk(d Direction) Position {
 
 type Field[T comparable] [][]T
 
+func NewField[T comparable](width, height int, fill T) Field[T] {
+	rows := make([][]T, height)
+
+	for i := range rows {
+		rows[i] = make([]T, width)
+
+		for j := range rows[i] {
+			rows[i][j] = fill
+		}
+	}
+
+	return rows
+}
+
 func NewFieldFromLines(in string) Field[byte] {
 	inB := []byte(in)
 	return Field[byte](bytes.Split(bytes.Trim(inB, "\n"), []byte("\n")))
 }
 
-func (f Field[T]) Has(p Position) bool {
-	width := len(f[0])
-	height := len(f)
+func (f Field[T]) Width() int {
+	return len(f[0])
+}
 
-	return p.InBounds(0, width-1, 0, height-1)
+func (f Field[T]) Height() int {
+	return len(f)
+}
+
+func (f Field[T]) Has(p Position) bool {
+	return p.InBounds(0, f.Width()-1, 0, f.Height()-1)
 }
 
 func (f Field[T]) Lookup(p Position) T {
